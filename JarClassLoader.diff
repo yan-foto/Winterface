@@ -1,0 +1,11 @@
+diff --git a/src/freenet/support/JarClassLoader.java b/src/freenet/support/JarClassLoader.java
+@@ -155,6 +155,9 @@
+ 			name = name.substring(1);
+ 		}
+ 		try {
++			if(tempJarFile.getJarEntry(name)==null) {
++				return null;
++			}
+ 			return new URL("jar:" + new File(tempJarFile.getName()).toURI().toURL() + "!/" + name);
+ 		} catch (MalformedURLException e) {
+ 		}

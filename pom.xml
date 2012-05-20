@@ -6,50 +6,71 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Winterface</name>
 	<description>Freenet Web Interface</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jetty.version>8.1.3.v20120416</jetty.version>
+		<wicket.version>1.5.6</wicket.version>
+	</properties>
 	<dependencies>
-	<dependency>
+		<dependency>
 			<groupId>org.freenetproject</groupId>
 			<artifactId>fred</artifactId>
 			<version>0.7.5.1405</version>
 			<scope>provided</scope>
 		</dependency>
-	<dependency>
+		<dependency>
 			<groupId>org.freenetproject</groupId>
 			<artifactId>freenet-ext</artifactId>
 			<version>26</version>
 			<scope>provided</scope>
-	</dependency>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
 	<dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.6.4</version>
-	</dependency>
-	<dependency>
-		<groupId>org.eclipse.jetty.aggregate</groupId>
-		<artifactId>jetty-server</artifactId>
-		<version>8.1.3.v20120416</version>
-	</dependency>
-	<dependency>
-		<groupId>org.eclipse.jetty.aggregate</groupId>
-		<artifactId>jetty-servlet</artifactId>
-		<version>8.1.3.v20120416</version>
-	</dependency>
-	<dependency>
-    	<groupId>org.apache.wicket</groupId>
-    	<artifactId>wicket-core</artifactId>
-    	<version>1.5.6</version>
+		<groupId>org.apache.wicket</groupId>
+		<artifactId>wicket-core</artifactId>
+		<version>${wicket.version}</version>
 	</dependency>
 	</dependencies>
-  	<repositories>
-		<repository>
-			<id>pterodactylus</id>
-			<url>http://maven.pterodactylus.net/</url>
-		</repository>
-	</repositories>
-		<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 	<build>
+		<resources>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/webapp</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -57,17 +78,6 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Plugin-Main-Class>net.pterodactylus.sone.main.SonePlugin</Plugin-Main-Class>
-						</manifestEntries>
-					</archive>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -83,7 +93,8 @@
 					</archiverConfig>
 					<archive>
 						<manifestEntries>
-							<Plugin-Main-Class>freenet.winterface.WinterfacePlugin</Plugin-Main-Class>
+							<Plugin-Main-Class>freenet.winterface.main.WinterfacePlugin</Plugin-Main-Class>
+							<Main-Class>freenet.winterface.main.WinterfacePlugin</Main-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -96,6 +107,34 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>${jetty.version}</version>
+				<configuration>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>8080</port>
+							<maxIdleTime>3600000</maxIdleTime>
+						</connector>
+						<!-- <connector implementation="org.eclipse.jetty.server.ssl.SslSocketConnector"> -->
+						<!-- <port>8443</port> -->
+						<!-- <maxIdleTime>3600000</maxIdleTime> -->
+						<!-- <keystore>${project.build.directory}/test-classes/keystore</keystore> -->
+						<!-- <password>wicket</password> -->
+						<!-- <keyPassword>wicket</keyPassword> -->
+						<!-- </connector> -->
+					</connectors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.8</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -113,4 +152,10 @@
 			</plugin>
 		</plugins>
 	</reporting>
+	<repositories>
+		<repository>
+			<id>pterodactylus</id>
+			<url>http://maven.pterodactylus.net/</url>
+		</repository>
+	</repositories>
 </project>
