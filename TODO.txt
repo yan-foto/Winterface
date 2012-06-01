@@ -1,0 +1,7 @@
+========== This Week
+1) Add Ajax functionality to bookmarks panel
+2) Finish dashboard
+	i) add connections overview
+	ii) add statistics overview
+	iii) (?)
+

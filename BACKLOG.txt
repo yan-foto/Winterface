@@ -1,0 +1,11 @@
+================ MUST =====================
+- Review navigation menu
+	i) submenus are only shown if menu item is available
+
+================ SHOULD ===================
+- Adapt footer from FProxy
+
+================ COULD ====================
+- Implement a way to overwrite existing templates (HTML/CSS/JS/...)
+
+================ WONT =====================

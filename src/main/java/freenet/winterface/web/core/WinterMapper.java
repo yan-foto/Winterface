@@ -1,0 +1,198 @@
+package freenet.winterface.web.core;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+import org.apache.wicket.Page;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.component.IRequestablePage;
+import org.apache.wicket.request.mapper.AbstractBookmarkableMapper;
+import org.apache.wicket.request.mapper.info.PageComponentInfo;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
+
+/**
+ * Responsible to map arbitrary {@link URL}s to desired {@link Page}s.
+ * <p>
+ * You can use a desired mapping using e.g.
+ * {@link WinterMapper#registerMapping(String, Class)} to map all {@link URL}s
+ * starting with given {@link String} to a desired {@link Page}.
+ * <p>
+ * 
+ * @author pausb
+ * @see AbstractBookmarkableMapper
+ * 
+ */
+public class WinterMapper extends AbstractBookmarkableMapper {
+
+	/**
+	 * Log4j Logger
+	 */
+	private static final Logger logger = Logger.getLogger(WinterMapper.class);
+
+	/**
+	 * File to read static mappings from
+	 */
+	private static final String MAPPINGS_FILE = "mappings.properties";
+
+	/**
+	 * Fallback {@link IRequestMapper}. In case there is no defined mapping for
+	 * given {@link URL}, the fallback mapper is activated
+	 */
+	private static IRequestMapper _delegate;
+
+	/**
+	 * Contains mappings
+	 */
+	private static HashMap<String, Class<? extends IRequestablePage>> mappings = new HashMap<String, Class<? extends IRequestablePage>>();
+
+	/**
+	 * Singleton instance
+	 */
+	private static WinterMapper instance;
+
+	/**
+	 * Constructs.
+	 * <p>
+	 * This is set {@code private} to make {@link WinterMapper} a singleton.
+	 * </p>
+	 * 
+	 * @param delegate
+	 *            fallback {@link IRequestMapper}
+	 */
+	private WinterMapper() {
+		if (_delegate == null) {
+			throw new IllegalStateException("Fallback mapper cannot be null (use setDelegate() method)");
+		}
+		loadMappings();
+	}
+
+	public synchronized static WinterMapper getInstance() {
+		if (instance == null) {
+			instance = new WinterMapper();
+		}
+		return instance;
+	}
+
+	/**
+	 * Register a new mapping which maps all {@link URL} starting with given
+	 * {@link String} to desired {@link Page}
+	 * 
+	 * @param startsWith
+	 *            {@link URL} start
+	 * @param pageClass
+	 *            {@link Page} to forward to
+	 */
+	public static void registerMapping(String startsWith, Class<? extends IRequestablePage> pageClass) {
+		mappings.put(startsWith, pageClass);
+	}
+
+	@Override
+	public int getCompatibilityScore(Request request) {
+		return _delegate.getCompatibilityScore(request);
+	}
+
+	@Override
+	public IRequestHandler mapRequest(Request request) {
+		if (urlDesired(request.getClientUrl()) != null) {
+			return super.mapRequest(request);
+		}
+		return _delegate.mapRequest(request);
+	}
+
+	@Override
+	public Url mapHandler(IRequestHandler requestHandler) {
+		Url url = super.mapHandler(requestHandler);
+		if (urlDesired(url) != null) {
+			return url;
+		}
+		return _delegate.mapHandler(requestHandler);
+	}
+
+	@Override
+	protected UrlInfo parseRequest(Request request) {
+		Url url = request.getUrl();
+		Class<? extends IRequestablePage> desired = urlDesired(url);
+		if (desired != null) {
+			PageComponentInfo info = getPageComponentInfo(url);
+			PageParameters pageParameters = extractPageParameters(request, 0, new PageParametersEncoder());
+			return new UrlInfo(info, desired, pageParameters);
+		}
+		return null;
+	}
+
+	@Override
+	protected Url buildUrl(UrlInfo info) {
+		Url url = new Url();
+		encodePageComponentInfo(url, info.getPageComponentInfo());
+		return encodePageParameters(url, info.getPageParameters(), new PageParametersEncoder());
+	}
+
+	@Override
+	protected boolean pageMustHaveBeenCreatedBookmarkable() {
+		return false;
+	}
+
+	/**
+	 * Checks if {@link WinterMapper} is responsible for the given {@link URL}
+	 * 
+	 * @param url {@link URL} to check
+	 * @return {@code true} if {@link URL}belongs to this mapper
+	 */
+	private Class<? extends IRequestablePage> urlDesired(Url url) {
+		if (url != null) {
+			String addr = url.canonical().toString();
+			for (String pattern : mappings.keySet()) {
+				if (addr.startsWith(pattern)) {
+					return mappings.get(pattern);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Loads static mappings from disk
+	 * @see #MAPPINGS_FILE
+	 */
+	private void loadMappings() {
+		Properties mappings = new Properties();
+		InputStream mappingStream = getClass().getClassLoader().getResourceAsStream(MAPPINGS_FILE);
+		try {
+			logger.debug("Trying to read external mappings from " + MAPPINGS_FILE);
+			mappings.load(mappingStream);
+			for (Entry<Object, Object> entry : mappings.entrySet()) {
+				String startsWith = (String) entry.getKey();
+				String className = (String) entry.getValue();
+				Class<? extends IRequestablePage> clazz = Class.forName(className).asSubclass(IRequestablePage.class);
+				registerMapping(startsWith, clazz);
+			}
+		} catch (FileNotFoundException e) {
+			logger.debug("No external mapping file found!");
+		} catch (IOException e) {
+			logger.debug("Error while reading external mapping file.", e);
+		} catch (ClassNotFoundException e) {
+			logger.debug("No such class for mapping is not available", e);
+		}
+	}
+
+	/**
+	 * Sets a fallback mapper for {@link WinterMapper}
+	 * 
+	 * @param delegate
+	 *            desire {@link IRequestMapper}
+	 */
+	public static void setDelegate(IRequestMapper delegate) {
+		_delegate = delegate;
+	}
+
+}

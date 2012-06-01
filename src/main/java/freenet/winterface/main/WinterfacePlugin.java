@@ -1,85 +1,84 @@
 package freenet.winterface.main;
 
-import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
-import org.apache.wicket.protocol.http.WicketFilter;
-import org.apache.wicket.protocol.http.WicketServlet;
-import org.apache.wicket.util.time.Duration;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import java.net.URL;
 
+import org.apache.log4j.Logger;
+
+import freenet.node.Node;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.winterface.web.WinterfaceApplication;
+import freenet.winterface.core.FreenetManager;
 
-public class WinterfacePlugin implements FredPlugin, FredPluginThreadless,
-		FredPluginVersioned {
-	
-	private Server server;
+/**
+ * Winterface {@link FredPlugin}
+ * <p>
+ * Replaces FProxy with Apache Wicket and Jetty web server.
+ * </p>
+ * 
+ * @author pasub
+ * 
+ */
+public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredPluginVersioned {
 
-//	static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
+	/**
+	 * Log4j logger
+	 */
+	static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
+
+	/**
+	 * {@link URL} at which {@link WinterfacePlugin} resides
+	 */
+	private URL plugin_path;
+
+	/**
+	 * True if in development mode. Change to {@code false} to switch to
+	 * deployment mode
+	 */
+	private final static boolean DEV_MODE = false;
 
 	@Override
 	public void runPlugin(PluginRespirator pr) {
-		initServer();
+		// If not in development mode
+		if (!(pr == null)) {
+			// Do not remove this! it's vital
+			FreenetManager.init(pr);
+		}
+		// Load path
+		plugin_path = this.getClass().getClassLoader().getResource(".");
+		// Register logger and so on
+		logger.debug("Loaded WinterFacePlugin on path " + plugin_path);
+		// initServer();
+		ServerWrapper.startServer(DEV_MODE);
 	}
 
 	@Override
 	public void terminate() {
-		try {
-			server.stop();
-			server.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		ServerWrapper.terminateServer();
 	}
 
 	@Override
 	public String getVersion() {
-		// TODO Auto-generated method stub
+		// FIXME do something :P
 		return null;
 	}
 
-	public void initServer() {
-		int timeout = (int) Duration.ONE_HOUR.getMilliseconds();
-
-		server = new Server();
-		SocketConnector connector = new SocketConnector();
-
-		// Set some timeout options to make debugging easier.
-		connector.setMaxIdleTime(timeout);
-		connector.setSoLingerTime(-1);
-		connector.setPort(8080);
-		server.addConnector(connector);
-
-		ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		ServletHolder sh = new ServletHolder(WicketServlet.class);
-		sh.setInitParameter(ContextParamWebApplicationFactory.APP_CLASS_PARAM, WinterfaceApplication.class.getName());
-		sh.setInitParameter(WicketFilter.FILTER_MAPPING_PARAM, "/*");
-		sch.addServlet(sh, "/*");
-		
-		server.setHandler(sch);
-		
-
-		try {
-			System.out
-					.println(">>> STARTING EMBEDDED JETTY SERVER, PRESS ANY KEY TO STOP");
-			server.start();
-			System.in.read();
-			System.out.println(">>> STOPPING EMBEDDED JETTY SERVER");
-			terminate();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
+	/**
+	 * Returns {@code true} if in development mode.
+	 * 
+	 * @return {@code false} if in deployment mode
+	 */
+	public static boolean inDevMode() {
+		return DEV_MODE;
 	}
 
+	/**
+	 * Just for test cases if {@link Node} is not needed
+	 * 
+	 * @param args
+	 *            start arguments
+	 */
 	public static void main(String[] args) {
 		WinterfacePlugin p = new WinterfacePlugin();
 		p.runPlugin(null);
