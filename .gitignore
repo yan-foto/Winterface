@@ -1,1 +1,9 @@
+# Backup files
+*~
+*.swp
+# Build related
 /target
+/.classpath
+# Eclipse settings
+/.settings
+/.project
