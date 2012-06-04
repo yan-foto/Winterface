@@ -18,28 +18,28 @@ import org.eclipse.jetty.servlet.ServletHolder;
  * @author pausb
  * 
  */
-public class ServerWrapper {
+public class ServerManager {
 
 	/**
 	 * Server Port
 	 */
-	private static int port = 8080;
+	private final static int port = 8080;
 
 	/**
 	 * Idle time for a connection
 	 */
 	// FIXME change this for deployment mode
-	private static int idle_timeout = (int) Duration.ONE_HOUR.getMilliseconds();
+	private final static int idle_timeout = (int) Duration.ONE_HOUR.getMilliseconds();
 
 	/**
 	 * An instance of running server
 	 */
-	private static Server server;
+	private Server server;
 
 	/**
 	 * Log4j logger
 	 */
-	private final static Logger logger = Logger.getLogger(ServerWrapper.class);
+	private final static Logger logger = Logger.getLogger(ServerManager.class);
 
 	/**
 	 * Starts {@link Server} in the desired mode.
@@ -57,7 +57,7 @@ public class ServerWrapper {
 	 *            {@code false} to start in deployment mode
 	 * @return running instance of {@link Server}
 	 */
-	public static Server startServer(boolean devMode) {
+	public Server startServer(boolean devMode) {
 		if (server == null) {
 			server = new Server();
 			SocketConnector connector = new SocketConnector();
@@ -102,22 +102,9 @@ public class ServerWrapper {
 	}
 
 	/**
-	 * Return current instance of {@link Server}
-	 * <p>
-	 * Note if {@link #startServer(boolean)} has never been invoked or server
-	 * has been terminated, this method returns {@code null}
-	 * </p>
-	 * 
-	 * @return current instance of {@link Server}
-	 */
-	public static Server getServer() {
-		return server;
-	}
-
-	/**
 	 * Terminates {@link Server} (if running)
 	 */
-	public static void terminateServer() {
+	public void terminateServer() {
 		if (server != null) {
 			try {
 				server.stop();

@@ -3,6 +3,7 @@ package freenet.winterface.core;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Server;
 
 import freenet.node.Node;
 import freenet.pluginmanager.FredPlugin;
@@ -35,8 +36,14 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	 * True if in development mode. Change to {@code false} to switch to
 	 * deployment mode
 	 */
-	private final static boolean DEV_MODE = false;
-	
+	private final static boolean DEV_MODE = true;
+
+	/**
+	 * An instance of {@link ServerManager} for all {@link Server} related
+	 * functionalities
+	 */
+	private ServerManager serverManager;
+
 	@Override
 	public void runPlugin(PluginRespirator pr) {
 		// Load path
@@ -44,12 +51,13 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 		// Register logger and so on
 		logger.debug("Loaded WinterFacePlugin on path " + plugin_path);
 		// initServer();
-		ServerWrapper.startServer(DEV_MODE);
+		serverManager = new ServerManager();
+		serverManager.startServer(DEV_MODE);
 	}
 
 	@Override
 	public void terminate() {
-		ServerWrapper.terminateServer();
+		serverManager.terminateServer();
 	}
 
 	@Override
