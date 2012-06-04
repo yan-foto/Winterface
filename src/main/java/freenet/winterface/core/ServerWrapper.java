@@ -1,4 +1,4 @@
-package freenet.winterface.main;
+package freenet.winterface.core;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
@@ -11,7 +11,6 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import freenet.winterface.web.WinterfaceApplication;
 
 /**
  * A class to take care of {@link Server}

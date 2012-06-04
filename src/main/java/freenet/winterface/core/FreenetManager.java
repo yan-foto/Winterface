@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import freenet.node.Node;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.winterface.main.WinterfacePlugin;
 
 /**
  * A class to manage all Freenet related functionalities.

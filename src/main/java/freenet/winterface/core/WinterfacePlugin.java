@@ -1,4 +1,4 @@
-package freenet.winterface.main;
+package freenet.winterface.core;
 
 import java.net.URL;
 
@@ -9,7 +9,6 @@ import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.winterface.core.FreenetManager;
 
 /**
  * Winterface {@link FredPlugin}
