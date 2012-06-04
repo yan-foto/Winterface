@@ -67,15 +67,6 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	}
 
 	/**
-	 * Returns {@code true} if in development mode.
-	 * 
-	 * @return {@code false} if in deployment mode
-	 */
-	public static boolean inDevMode() {
-		return DEV_MODE;
-	}
-
-	/**
 	 * Just for test cases if {@link Node} is not needed
 	 * 
 	 * @param args
