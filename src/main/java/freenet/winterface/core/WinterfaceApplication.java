@@ -27,8 +27,8 @@ public class WinterfaceApplication extends WebApplication {
 		// Gather all browser data
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 		// Configuring custom mapper
-		WinterMapper.setDelegate(getRootRequestMapper());
-		setRootRequestMapper(WinterMapper.getInstance());
+		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
+		setRootRequestMapper(mapper);
 	}
 
 	@Override

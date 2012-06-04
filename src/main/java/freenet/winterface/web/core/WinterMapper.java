@@ -48,17 +48,12 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	 * Fallback {@link IRequestMapper}. In case there is no defined mapping for
 	 * given {@link URL}, the fallback mapper is activated
 	 */
-	private static IRequestMapper _delegate;
+	private IRequestMapper delegate;
 
 	/**
 	 * Contains mappings
 	 */
-	private static HashMap<String, Class<? extends IRequestablePage>> mappings = new HashMap<String, Class<? extends IRequestablePage>>();
-
-	/**
-	 * Singleton instance
-	 */
-	private static WinterMapper instance;
+	private HashMap<String, Class<? extends IRequestablePage>> mappings;
 
 	/**
 	 * Constructs.
@@ -69,18 +64,10 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	 * @param delegate
 	 *            fallback {@link IRequestMapper}
 	 */
-	private WinterMapper() {
-		if (_delegate == null) {
-			throw new IllegalStateException("Fallback mapper cannot be null (use setDelegate() method)");
-		}
+	public WinterMapper(IRequestMapper delegate) {
+		this.delegate = delegate;
+		mappings = new HashMap<String, Class<? extends IRequestablePage>>();
 		loadMappings();
-	}
-
-	public synchronized static WinterMapper getInstance() {
-		if (instance == null) {
-			instance = new WinterMapper();
-		}
-		return instance;
 	}
 
 	/**
@@ -92,13 +79,13 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	 * @param pageClass
 	 *            {@link Page} to forward to
 	 */
-	public static void registerMapping(String startsWith, Class<? extends IRequestablePage> pageClass) {
+	public void registerMapping(String startsWith, Class<? extends IRequestablePage> pageClass) {
 		mappings.put(startsWith, pageClass);
 	}
 
 	@Override
 	public int getCompatibilityScore(Request request) {
-		return _delegate.getCompatibilityScore(request);
+		return delegate.getCompatibilityScore(request);
 	}
 
 	@Override
@@ -106,7 +93,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 		if (urlDesired(request.getClientUrl()) != null) {
 			return super.mapRequest(request);
 		}
-		return _delegate.mapRequest(request);
+		return delegate.mapRequest(request);
 	}
 
 	@Override
@@ -115,7 +102,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 		if (urlDesired(url) != null) {
 			return url;
 		}
-		return _delegate.mapHandler(requestHandler);
+		return delegate.mapHandler(requestHandler);
 	}
 
 	@Override
@@ -145,7 +132,8 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	/**
 	 * Checks if {@link WinterMapper} is responsible for the given {@link URL}
 	 * 
-	 * @param url {@link URL} to check
+	 * @param url
+	 *            {@link URL} to check
 	 * @return {@code true} if {@link URL}belongs to this mapper
 	 */
 	private Class<? extends IRequestablePage> urlDesired(Url url) {
@@ -162,6 +150,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 
 	/**
 	 * Loads static mappings from disk
+	 * 
 	 * @see #MAPPINGS_FILE
 	 */
 	private void loadMappings() {
@@ -183,16 +172,6 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 		} catch (ClassNotFoundException e) {
 			logger.debug("No such class for mapping is not available", e);
 		}
-	}
-
-	/**
-	 * Sets a fallback mapper for {@link WinterMapper}
-	 * 
-	 * @param delegate
-	 *            desire {@link IRequestMapper}
-	 */
-	public static void setDelegate(IRequestMapper delegate) {
-		_delegate = delegate;
 	}
 
 }
