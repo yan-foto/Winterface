@@ -10,11 +10,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import freenet.winterface.web.nav.AbstractNavCallback;
-import freenet.winterface.web.nav.NavCallbackInterface;
+import freenet.winterface.web.nav.AbstractNavItem;
 import freenet.winterface.web.nav.NavPanel;
-import freenet.winterface.web.nav.NavigationContributer;
-import freenet.winterface.web.nav.PageNavCallback;
+import freenet.winterface.web.nav.NavContributer;
+import freenet.winterface.web.nav.PageNavItem;
 
 /**
  * Base {@link WebPage} for all other WinterFace {@link Page}s.
@@ -26,7 +25,7 @@ import freenet.winterface.web.nav.PageNavCallback;
  * @author pausb
  * @see NakedWinterPage
  */
-public abstract class WinterPage extends WebPage implements NavigationContributer {
+public abstract class WinterPage extends WebPage implements NavContributer {
 
 	/**
 	 * Generated serial version ID
@@ -36,12 +35,12 @@ public abstract class WinterPage extends WebPage implements NavigationContribute
 	/**
 	 * Initial list of navigation items
 	 */
-	protected static List<NavCallbackInterface> navs = new ArrayList<NavCallbackInterface>();
+	protected static List<AbstractNavItem> navs = new ArrayList<AbstractNavItem>();
 
 	static {
 		// Add navigation here
-		navs.add(new PageNavCallback(TestPage.class, "Menu 1"));
-		navs.add(new PageNavCallback(TestPage2.class, "Helloooooow"));
+		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
+		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));
 	}
 
 	@Override
@@ -61,12 +60,12 @@ public abstract class WinterPage extends WebPage implements NavigationContribute
 		add(logoLink);
 
 		// Navigation Panel
-		LoadableDetachableModel<NavCallbackInterface> navModel = new LoadableDetachableModel<NavCallbackInterface>() {
+		LoadableDetachableModel<AbstractNavItem> navModel = new LoadableDetachableModel<AbstractNavItem>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected NavCallbackInterface load() {
+			protected AbstractNavItem load() {
 				return getMainNav();
 			}
 		};
@@ -80,10 +79,10 @@ public abstract class WinterPage extends WebPage implements NavigationContribute
 	/**
 	 * Serves as helper method to deliver initial navigation
 	 * 
-	 * @return {@link NavCallbackInterface} of top menu level
+	 * @return {@link AbstractNavItem} of top menu level
 	 */
-	public static NavCallbackInterface getMainNav() {
-		return new AbstractNavCallback(null) {
+	public static AbstractNavItem getMainNav() {
+		return new PageNavItem(null,null) {
 
 			@Override
 			public void onClick(Page page) {
@@ -91,14 +90,14 @@ public abstract class WinterPage extends WebPage implements NavigationContribute
 			}
 
 			@Override
-			public List<NavCallbackInterface> getChilds(Page page) {
+			public List<AbstractNavItem> getChilds(Page page) {
 				return navs;
 			}
 		};
 	}
 	
 	@Override
-	public List<NavCallbackInterface> getNavigations() {
+	public List<AbstractNavItem> getNavigations() {
 		return null;
 	}
 }

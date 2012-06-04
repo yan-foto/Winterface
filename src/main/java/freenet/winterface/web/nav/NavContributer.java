@@ -10,13 +10,13 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  * @see NavPanel
- * @see NavCallbackInterface
+ * @see AbstractNavItem
  */
-public interface NavigationContributer {
+public interface NavContributer {
 	/**
 	 * Returns a {@link List} of menu items for this {@link Page}
 	 * 
 	 * @return children menu items of {@link Page}
 	 */
-	List<NavCallbackInterface> getNavigations();
+	List<AbstractNavItem> getNavigations();
 }

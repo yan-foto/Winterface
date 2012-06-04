@@ -5,12 +5,11 @@ import java.util.List;
 import org.apache.wicket.Page;
 
 /**
- * Interface which represents a menu item in navigation panel
+ * An abstract parent class for a navigation menu item
  * 
  * @author pausb
- * 
  */
-public interface NavCallbackInterface {
+public abstract interface AbstractNavItem {
 
 	/**
 	 * Returns name of menu item
@@ -18,7 +17,7 @@ public interface NavCallbackInterface {
 	 * @return name of menu item
 	 */
 	public String getName();
-
+	
 	/**
 	 * Returns a list of children for current menu item. This method return a
 	 * list not equal to {@code null} if the current page corresponds to this
@@ -28,7 +27,7 @@ public interface NavCallbackInterface {
 	 *            current (active) page
 	 * @return list of submenus (children)
 	 */
-	public List<NavCallbackInterface> getChilds(Page page);
+	public List<AbstractNavItem> getChilds(Page page);
 
 	/**
 	 * If menu is active in the given page
@@ -38,7 +37,7 @@ public interface NavCallbackInterface {
 	 * @return {@code true} if menu corresponds to this page
 	 */
 	public boolean isActive(Page page);
-
+	
 	/**
 	 * {@link Page} to forward to if menu is selected
 	 * 

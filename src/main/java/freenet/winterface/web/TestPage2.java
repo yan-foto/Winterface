@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 
-import freenet.winterface.web.nav.NavCallbackInterface;
-import freenet.winterface.web.nav.PageNavCallback;
+import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.PageNavItem;
 
 public class TestPage2 extends WinterPage{
 	
@@ -20,9 +20,9 @@ public class TestPage2 extends WinterPage{
 	}
 	
 	@Override
-	public List<NavCallbackInterface> getNavigations() {
-		List<NavCallbackInterface> result = new ArrayList<NavCallbackInterface>();
-		result.add(new PageNavCallback(Dashboard.class, "Back Home"));
+	public List<AbstractNavItem> getNavigations() {
+		List<AbstractNavItem> result = new ArrayList<AbstractNavItem>();
+		result.add(new PageNavItem(Dashboard.class, "Back Home"));
 		return result;
 	}
 }

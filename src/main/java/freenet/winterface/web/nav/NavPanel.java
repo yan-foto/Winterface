@@ -23,7 +23,7 @@ import org.apache.wicket.model.PropertyModel;
  * 
  * @author pausb
  * @see NavCallbackInterface
- * @see PageNavCallback
+ * @see PageNavItem
  */
 public final class NavPanel extends Panel {
 
@@ -45,7 +45,7 @@ public final class NavPanel extends Panel {
 	 * @param callbackModel
 	 *            {@link IModel} used to generate navigation content
 	 */
-	public NavPanel(String id, IModel<NavCallbackInterface> callbackModel) {
+	public NavPanel(String id, IModel<AbstractNavItem> callbackModel) {
 		this(id, callbackModel, 0);
 	}
 
@@ -59,7 +59,7 @@ public final class NavPanel extends Panel {
 	 * @param level
 	 *            depth level
 	 */
-	public NavPanel(String id, IModel<NavCallbackInterface> callbackModel, int level) {
+	public NavPanel(String id, IModel<AbstractNavItem> callbackModel, int level) {
 		super(id);
 		this.level = level;
 		initPanel(callbackModel);
@@ -71,7 +71,7 @@ public final class NavPanel extends Panel {
 	 * @param callbackModel
 	 *            {@link IModel} used to generate content
 	 */
-	private void initPanel(final IModel<NavCallbackInterface> callbackModel) {
+	private void initPanel(final IModel<AbstractNavItem> callbackModel) {
 		// Use field called "name" to get name of menu
 		// TODO support i18n
 		final IModel<String> nameModel = new PropertyModel<String>(callbackModel, "Name");
@@ -94,7 +94,7 @@ public final class NavPanel extends Panel {
 		};
 
 		// Menu link to page
-		Link<NavCallbackInterface> link = new Link<NavCallbackInterface>("nav-link", callbackModel) {
+		Link<AbstractNavItem> link = new Link<AbstractNavItem>("nav-link", callbackModel) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -118,23 +118,23 @@ public final class NavPanel extends Panel {
 		add(link);
 
 		// Model used to generate children (if any)
-		LoadableDetachableModel<List<NavCallbackInterface>> childModel = new LoadableDetachableModel<List<NavCallbackInterface>>() {
+		LoadableDetachableModel<List<AbstractNavItem>> childModel = new LoadableDetachableModel<List<AbstractNavItem>>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected List<NavCallbackInterface> load() {
+			protected List<AbstractNavItem> load() {
 				return callbackModel.getObject().getChilds(getPage());
 			}
 		};
 
 		// Add Children
-		ListView<NavCallbackInterface> childList = new ListView<NavCallbackInterface>("nav-children", childModel) {
+		ListView<AbstractNavItem> childList = new ListView<AbstractNavItem>("nav-children", childModel) {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void populateItem(ListItem<NavCallbackInterface> item) {
+			protected void populateItem(ListItem<AbstractNavItem> item) {
 				item.add(new NavPanel("nav-child", item.getModel(), level + 1));
 			}
 

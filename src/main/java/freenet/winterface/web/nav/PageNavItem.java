@@ -9,14 +9,19 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  * @see NavPanel
- * @see NavCallbackInterface
+ * @see AbstractNavItem
  */
-public class PageNavCallback extends AbstractNavCallback {
+public class PageNavItem implements AbstractNavItem {
+	
+	/**
+	 * Name of menu item
+	 */
+	private final String menuName;
 
 	/**
 	 * {@link Page} corresponding to this menu item
 	 */
-	private Class<? extends Page> pageClass;
+	private final Class<? extends Page> pageClass;
 
 	/**
 	 * Constructs
@@ -26,17 +31,17 @@ public class PageNavCallback extends AbstractNavCallback {
 	 * @param name
 	 *            name of menu item
 	 */
-	public PageNavCallback(Class<? extends Page> pageClass, String name) {
-		super(name);
+	public PageNavItem(Class<? extends Page> pageClass, String name) {
+		this.menuName = name;
 		this.pageClass = pageClass;
 	}
 
 	@Override
-	public List<NavCallbackInterface> getChilds(Page page) {
-		List<NavCallbackInterface> result = null;
+	public List<AbstractNavItem> getChilds(Page page) {
+		List<AbstractNavItem> result = null;
 		if (isActive(page)) {
-			if (page instanceof NavigationContributer) {
-				result = ((NavigationContributer) page).getNavigations();
+			if (page instanceof NavContributer) {
+				result = ((NavContributer) page).getNavigations();
 			}
 		}
 		return result;
@@ -50,6 +55,11 @@ public class PageNavCallback extends AbstractNavCallback {
 	@Override
 	public void onClick(Page page) {
 		page.setResponsePage(pageClass);
+	}
+
+	@Override
+	public String getName() {
+		return menuName;
 	}
 
 }
