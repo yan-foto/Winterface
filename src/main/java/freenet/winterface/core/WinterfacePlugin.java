@@ -36,14 +36,9 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	 * deployment mode
 	 */
 	private final static boolean DEV_MODE = false;
-
+	
 	@Override
 	public void runPlugin(PluginRespirator pr) {
-		// If not in development mode
-		if (!(pr == null)) {
-			// Do not remove this! it's vital
-			FreenetManager.init(pr);
-		}
 		// Load path
 		plugin_path = this.getClass().getClassLoader().getResource(".");
 		// Register logger and so on
