@@ -19,7 +19,7 @@ import freenet.clients.http.bookmark.BookmarkManager;
  * @see BookmarkManager
  */
 @SuppressWarnings("serial")
-public class BookmarksPanel extends Panel {
+public class BookmarksPanel extends DashboardPanel {
 
 	public BookmarksPanel(String id) {
 		super(id);
@@ -46,6 +46,11 @@ public class BookmarksPanel extends Panel {
 			}
 		};
 		add(bookmarkView);
+	}
+
+	@Override
+	public String getName() {
+		return "Bookmarks";
 	}
 
 }
