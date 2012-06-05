@@ -18,20 +18,14 @@ import freenet.clients.http.bookmark.BookmarkManager;
  * @author pausb
  * @see BookmarkManager
  */
+@SuppressWarnings("serial")
 public class BookmarksPanel extends Panel {
 
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = -1277711728654734727L;
-	
 	public BookmarksPanel(String id) {
 		super(id);
 		// Get all bookmark categories and encapsulate it as an IModel
 		final List<BookmarkCategory> bookmarkItems = BookmarkManager.MAIN_CATEGORY.getAllSubCategories();
 		ListView<BookmarkCategory> bookmarkView = new ListView<BookmarkCategory>("category", bookmarkItems) {
-
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(ListItem<BookmarkCategory> item) {
@@ -42,8 +36,6 @@ public class BookmarksPanel extends Panel {
 				// List bookmarks belonging to this category
 				List<BookmarkItem> items = modelObject.getItems();
 				ListView<BookmarkItem> bookmarks = new ListView<BookmarkItem>("bookmarks", items) {
-
-					private static final long serialVersionUID = 1L;
 
 					@Override
 					protected void populateItem(ListItem<BookmarkItem> item) {

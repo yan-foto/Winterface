@@ -8,12 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import freenet.winterface.web.nav.AbstractNavItem;
 import freenet.winterface.web.nav.PageNavItem;
 
+@SuppressWarnings("serial")
 public class TestPage2 extends WinterPage{
-	
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = -286439131102758658L;
 	
 	public TestPage2() {
 		add(new Label("path", getRequest().getUrl().canonical().toString()));

@@ -8,11 +8,7 @@ import org.apache.wicket.markup.html.WebPage;
  * @author pasub
  * @see WinterPage
  */
+@SuppressWarnings("serial")
 public class NakedWinterPage extends WebPage {
-
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = 2374416058986933047L;
 
 }

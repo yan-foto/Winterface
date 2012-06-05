@@ -9,12 +9,8 @@ import freenet.winterface.web.markup.BookmarksPanel;
  * @author pausb
  * 
  */
+@SuppressWarnings("serial")
 public class Dashboard extends WinterPage {
-
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = 6838537407373153818L;
 
 	public Dashboard() {
 		super();

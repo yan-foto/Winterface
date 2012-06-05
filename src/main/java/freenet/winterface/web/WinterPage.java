@@ -25,12 +25,8 @@ import freenet.winterface.web.nav.PageNavItem;
  * @author pausb
  * @see NakedWinterPage
  */
+@SuppressWarnings("serial")
 public abstract class WinterPage extends WebPage implements NavContributer {
-
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = 7945130272222445826L;
 
 	/**
 	 * Initial list of navigation items
@@ -50,8 +46,6 @@ public abstract class WinterPage extends WebPage implements NavContributer {
 		// Logo link
 		Link<String> logoLink = new Link<String>("logo-link") {
 
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void onClick() {
 				setResponsePage(Dashboard.class);
@@ -61,8 +55,6 @@ public abstract class WinterPage extends WebPage implements NavContributer {
 
 		// Navigation Panel
 		LoadableDetachableModel<AbstractNavItem> navModel = new LoadableDetachableModel<AbstractNavItem>() {
-
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected AbstractNavItem load() {
