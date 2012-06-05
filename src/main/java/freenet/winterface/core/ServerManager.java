@@ -40,6 +40,8 @@ public class ServerManager {
 	 * Log4j logger
 	 */
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
+	
+	public static final String FREENET_ID = "plugin-respirator";
 
 	/**
 	 * Starts {@link Server} in the desired mode.
@@ -57,7 +59,7 @@ public class ServerManager {
 	 *            {@code false} to start in deployment mode
 	 * @return running instance of {@link Server}
 	 */
-	public Server startServer(boolean devMode) {
+	public Server startServer(boolean devMode,final FreenetWrapper fw) {
 		if (server == null) {
 			server = new Server();
 			SocketConnector connector = new SocketConnector();
@@ -88,7 +90,13 @@ public class ServerManager {
 			// }
 			sch.addServlet(resourceServlet, "/static/*");
 			logger.debug("Set Jetty to load static resources from " + staticPath);
-
+			
+			/*
+			 * Add PluginRespirator to servlet context
+			 * So it can be retrievable by our WebApplication
+			 */
+			sch.setAttribute(FREENET_ID, fw);
+			
 			server.setHandler(sch);
 
 			try {

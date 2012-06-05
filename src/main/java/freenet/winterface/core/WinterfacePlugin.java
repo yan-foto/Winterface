@@ -52,7 +52,7 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 		logger.debug("Loaded WinterFacePlugin on path " + plugin_path);
 		// initServer();
 		serverManager = new ServerManager();
-		serverManager.startServer(DEV_MODE);
+		serverManager.startServer(DEV_MODE,new FreenetWrapper(pr));
 	}
 
 	@Override

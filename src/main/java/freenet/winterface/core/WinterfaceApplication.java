@@ -13,6 +13,8 @@ import freenet.winterface.web.core.WinterMapper;
  * 
  */
 public class WinterfaceApplication extends WebApplication {
+	
+	private FreenetWrapper freenetWrapper;
 
 	@Override
 	protected void init() {
@@ -29,11 +31,17 @@ public class WinterfaceApplication extends WebApplication {
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
+		
+		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
 	}
 
 	@Override
 	public Class<? extends Page> getHomePage() {
 		return Dashboard.class;
+	}
+	
+	public FreenetWrapper getFreenetWrapper() {
+		return freenetWrapper;
 	}
 
 }
