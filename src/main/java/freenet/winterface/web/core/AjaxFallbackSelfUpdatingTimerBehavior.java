@@ -23,12 +23,8 @@ import org.apache.wicket.util.time.Duration;
  * @author pausb
  * 
  */
+@SuppressWarnings("serial")
 public class AjaxFallbackSelfUpdatingTimerBehavior extends AjaxSelfUpdatingTimerBehavior {
-
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = -7643293484748596585L;
 
 	/**
 	 * Constructs
