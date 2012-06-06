@@ -2,6 +2,7 @@ package freenet.winterface.web;
 
 import freenet.winterface.web.markup.BookmarksPanel;
 import freenet.winterface.web.markup.PeersPanel;
+import freenet.winterface.web.markup.VersionPanel;
 
 
 /**
@@ -17,6 +18,7 @@ public class Dashboard extends WinterPage {
 		super();
 		add(new BookmarksPanel("bookmarks-panel"));
 		add(new PeersPanel("peers-panel"));
+		add(new VersionPanel("version"));
 	}
 	
 }
