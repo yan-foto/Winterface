@@ -25,12 +25,8 @@ import org.apache.wicket.model.PropertyModel;
  * @see NavCallbackInterface
  * @see PageNavItem
  */
+@SuppressWarnings("serial")
 public final class NavPanel extends Panel {
-
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = 6604599898601871553L;
 
 	/**
 	 * Denotes the depth level
