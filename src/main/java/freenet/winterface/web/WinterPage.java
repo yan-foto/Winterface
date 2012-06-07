@@ -10,8 +10,8 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.AbstractNavItem;
-import freenet.winterface.web.nav.NavPanel;
 import freenet.winterface.web.nav.NavContributer;
 import freenet.winterface.web.nav.PageNavItem;
 
@@ -38,7 +38,7 @@ public abstract class WinterPage extends WebPage implements NavContributer {
 		navs = new ArrayList<AbstractNavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
-		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));	
+		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));
 	}
 
 	@Override

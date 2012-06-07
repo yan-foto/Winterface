@@ -1,4 +1,4 @@
-package freenet.winterface.web.nav;
+package freenet.winterface.web.markup;
 
 import java.util.List;
 
@@ -13,6 +13,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
+import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.PageNavItem;
 
 /**
  * {@link Panel} that renders the navigation menu.
