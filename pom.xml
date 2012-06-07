@@ -93,8 +93,8 @@
 					</archiverConfig>
 					<archive>
 						<manifestEntries>
-							<Plugin-Main-Class>freenet.winterface.main.WinterfacePlugin</Plugin-Main-Class>
-							<Main-Class>freenet.winterface.main.WinterfacePlugin</Main-Class>
+							<Plugin-Main-Class>freenet.winterface.core.WinterfacePlugin</Plugin-Main-Class>
+							<Main-Class>freenet.winterface.core.WinterfacePlugin</Main-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
