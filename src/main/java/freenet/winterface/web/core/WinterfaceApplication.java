@@ -3,6 +3,8 @@ package freenet.winterface.web.core;
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 
+import freenet.winterface.core.FreenetWrapper;
+import freenet.winterface.core.ServerManager;
 import freenet.winterface.web.Dashboard;
 
 /**

@@ -8,7 +8,7 @@ import org.apache.wicket.util.time.Duration;
 
 import freenet.node.PeerManager;
 import freenet.winterface.core.FreenetWrapper;
-import freenet.winterface.core.WinterfaceApplication;
+import freenet.winterface.web.core.WinterfaceApplication;
 
 
 @SuppressWarnings("serial")
