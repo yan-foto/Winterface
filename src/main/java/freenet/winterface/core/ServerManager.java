@@ -11,14 +11,28 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import freenet.winterface.web.core.WinterfaceApplication;
 
 /**
- * A class to take care of {@link Server}
+ * Takes care of {@link Server}
+ * <p>
+ * Responsible for:
+ * <ul>
+ * <li>Starting the server</li>
+ * <li>Configuring the server</li>
+ * <li>Terminating the server</li>
+ * </ul>
+ * </p>
  * 
  * @author pausb
  * 
  */
 public class ServerManager {
+	
+	/**
+	 * An instance of running server
+	 */
+	private Server server;
 
 	/**
 	 * Server Port
@@ -30,11 +44,6 @@ public class ServerManager {
 	 */
 	// FIXME change this for deployment mode
 	private final static int idle_timeout = (int) Duration.ONE_HOUR.getMilliseconds();
-
-	/**
-	 * An instance of running server
-	 */
-	private Server server;
 
 	/**
 	 * Log4j logger

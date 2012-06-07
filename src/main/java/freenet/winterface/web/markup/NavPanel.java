@@ -1,4 +1,4 @@
-package freenet.winterface.web.nav;
+package freenet.winterface.web.markup;
 
 import java.util.List;
 
@@ -13,6 +13,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
+import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.PageNavItem;
 
 /**
  * {@link Panel} that renders the navigation menu.
@@ -75,8 +78,6 @@ public final class NavPanel extends Panel {
 		// Model to add "active" class to menu if currently in respective page
 		LoadableDetachableModel<String> classModel = new LoadableDetachableModel<String>() {
 
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			protected String load() {
 				return callbackModel.getObject().isActive(getPage()) ? "active" : null;
@@ -91,8 +92,6 @@ public final class NavPanel extends Panel {
 
 		// Menu link to page
 		Link<AbstractNavItem> link = new Link<AbstractNavItem>("nav-link", callbackModel) {
-
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void onClick() {
@@ -116,8 +115,6 @@ public final class NavPanel extends Panel {
 		// Model used to generate children (if any)
 		LoadableDetachableModel<List<AbstractNavItem>> childModel = new LoadableDetachableModel<List<AbstractNavItem>>() {
 
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			protected List<AbstractNavItem> load() {
 				return callbackModel.getObject().getChilds(getPage());
@@ -126,8 +123,6 @@ public final class NavPanel extends Panel {
 
 		// Add Children
 		ListView<AbstractNavItem> childList = new ListView<AbstractNavItem>("nav-children", childModel) {
-
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(ListItem<AbstractNavItem> item) {

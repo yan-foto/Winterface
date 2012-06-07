@@ -12,7 +12,7 @@ import org.apache.wicket.Page;
  * @see NavPanel
  * @see AbstractNavItem
  */
-public interface NavContributer {
+public interface NavContributor {
 	/**
 	 * Returns a {@link List} of menu items for this {@link Page}
 	 * 

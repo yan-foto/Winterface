@@ -40,8 +40,8 @@ public class PageNavItem implements AbstractNavItem {
 	public List<AbstractNavItem> getChilds(Page page) {
 		List<AbstractNavItem> result = null;
 		if (isActive(page)) {
-			if (page instanceof NavContributer) {
-				result = ((NavContributer) page).getNavigations();
+			if (page instanceof NavContributor) {
+				result = ((NavContributor) page).getNavigations();
 			}
 		}
 		return result;

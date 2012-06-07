@@ -10,30 +10,32 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.AbstractNavItem;
-import freenet.winterface.web.nav.NavPanel;
-import freenet.winterface.web.nav.NavContributer;
+import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.PageNavItem;
 
 /**
  * Base {@link WebPage} for all other WinterFace {@link Page}s.
  * <p>
  * This {@link Page} contains the logo and the navigation menu.<br />
- * This class also contains initial items of navigation menu (see {@link #getMainNav()})
+ * This class also contains initial items of navigation menu (see
+ * {@link #getMainNav()})
  * </p>
  * 
  * @author pausb
  * @see NakedWinterPage
  */
 @SuppressWarnings("serial")
-public abstract class WinterPage extends WebPage implements NavContributer {
+public abstract class WinterPage extends WebPage implements NavContributor {
 
 	/**
 	 * Initial list of navigation items
 	 */
-	protected static List<AbstractNavItem> navs = new ArrayList<AbstractNavItem>();
+	private List<AbstractNavItem> navs;
 
-	static {
+	public WinterPage() {
+		navs = new ArrayList<AbstractNavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
 		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));
@@ -73,8 +75,8 @@ public abstract class WinterPage extends WebPage implements NavContributer {
 	 * 
 	 * @return {@link AbstractNavItem} of top menu level
 	 */
-	public static AbstractNavItem getMainNav() {
-		return new PageNavItem(null,null) {
+	public AbstractNavItem getMainNav() {
+		return new PageNavItem(null, null) {
 
 			@Override
 			public void onClick(Page page) {
@@ -87,7 +89,7 @@ public abstract class WinterPage extends WebPage implements NavContributer {
 			}
 		};
 	}
-	
+
 	@Override
 	public List<AbstractNavItem> getNavigations() {
 		return null;

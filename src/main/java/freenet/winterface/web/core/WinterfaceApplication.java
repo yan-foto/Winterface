@@ -1,10 +1,9 @@
-package freenet.winterface.core;
+package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import freenet.winterface.web.Dashboard;
-import freenet.winterface.web.core.WinterMapper;
 
 /**
  * {@link WebApplication} of Winterface.
