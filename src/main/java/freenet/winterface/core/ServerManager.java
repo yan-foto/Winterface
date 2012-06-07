@@ -11,6 +11,8 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import freenet.winterface.web.core.WinterfaceApplication;
+
 /**
  * Takes care of {@link Server}
  * <p>

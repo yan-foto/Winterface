@@ -12,7 +12,7 @@ import org.apache.wicket.model.Model;
 
 import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.AbstractNavItem;
-import freenet.winterface.web.nav.NavContributer;
+import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.PageNavItem;
 
 /**
@@ -27,7 +27,7 @@ import freenet.winterface.web.nav.PageNavItem;
  * @see NakedWinterPage
  */
 @SuppressWarnings("serial")
-public abstract class WinterPage extends WebPage implements NavContributer {
+public abstract class WinterPage extends WebPage implements NavContributor {
 
 	/**
 	 * Initial list of navigation items
