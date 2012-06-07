@@ -1,5 +1,5 @@
 /**
- * This package contains all classes which are involved with back-end functionalities such as:
+ * Contains all classes which are involved with back-end functionalities such as:
  * <ul>
  * 	<li>Start the plug-in (see {@link freenet.winterface.core.WinterfacePlugin})</li>
  * 	<li>Wrap Freenet-related stuff (see {@link freenet.winterface.core.FreenetWrapper})</li>

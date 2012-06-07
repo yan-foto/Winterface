@@ -11,9 +11,16 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-
 /**
- * A class to take care of {@link Server}
+ * Takes care of {@link Server}
+ * <p>
+ * Responsible for:
+ * <ul>
+ * <li>Starting the server</li>
+ * <li>Configuring the server</li>
+ * <li>Terminating the server</li>
+ * </ul>
+ * </p>
  * 
  * @author pausb
  * 
