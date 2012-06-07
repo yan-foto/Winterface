@@ -23,26 +23,26 @@ import freenet.pluginmanager.PluginRespirator;
 public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredPluginVersioned {
 
 	/**
-	 * Log4j logger
-	 */
-	static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
-
-	/**
 	 * {@link URL} at which {@link WinterfacePlugin} resides
 	 */
 	private URL plugin_path;
-
-	/**
-	 * True if in development mode. Change to {@code false} to switch to
-	 * deployment mode
-	 */
-	private final static boolean DEV_MODE = true;
 
 	/**
 	 * An instance of {@link ServerManager} for all {@link Server} related
 	 * functionalities
 	 */
 	private ServerManager serverManager;
+
+	/**
+	 * Log4j logger
+	 */
+	private static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
+
+	/**
+	 * True if in development mode. Change to {@code false} to switch to
+	 * deployment mode
+	 */
+	private final static boolean DEV_MODE = true;
 
 	@Override
 	public void runPlugin(PluginRespirator pr) {

@@ -35,16 +35,6 @@ import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 public class WinterMapper extends AbstractBookmarkableMapper {
 
 	/**
-	 * Log4j Logger
-	 */
-	private static final Logger logger = Logger.getLogger(WinterMapper.class);
-
-	/**
-	 * File to read static mappings from
-	 */
-	private static final String MAPPINGS_FILE = "mappings.properties";
-
-	/**
 	 * Fallback {@link IRequestMapper}. In case there is no defined mapping for
 	 * given {@link URL}, the fallback mapper is activated
 	 */
@@ -54,6 +44,16 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	 * Contains mappings
 	 */
 	private HashMap<String, Class<? extends IRequestablePage>> mappings;
+
+	/**
+	 * Log4j Logger
+	 */
+	private static final Logger logger = Logger.getLogger(WinterMapper.class);
+
+	/**
+	 * File to read static mappings from
+	 */
+	private static final String MAPPINGS_FILE = "mappings.properties";
 
 	/**
 	 * Constructs.

@@ -26,6 +26,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
  * 
  */
 public class ServerManager {
+	
+	/**
+	 * An instance of running server
+	 */
+	private Server server;
 
 	/**
 	 * Server Port
@@ -37,11 +42,6 @@ public class ServerManager {
 	 */
 	// FIXME change this for deployment mode
 	private final static int idle_timeout = (int) Duration.ONE_HOUR.getMilliseconds();
-
-	/**
-	 * An instance of running server
-	 */
-	private Server server;
 
 	/**
 	 * Log4j logger
