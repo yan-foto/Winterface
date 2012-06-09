@@ -1,5 +1,6 @@
 package freenet.winterface.web.nav;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.wicket.Page;
@@ -11,7 +12,8 @@ import org.apache.wicket.Page;
  * @see NavPanel
  * @see AbstractNavItem
  */
-public class PageNavItem implements AbstractNavItem {
+@SuppressWarnings("serial")
+public class PageNavItem implements AbstractNavItem, Serializable{
 	
 	/**
 	 * Name of menu item
