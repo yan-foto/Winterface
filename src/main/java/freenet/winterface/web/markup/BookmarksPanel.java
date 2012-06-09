@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import freenet.clients.http.bookmark.Bookmark;
 import freenet.clients.http.bookmark.BookmarkCategory;
-import freenet.clients.http.bookmark.BookmarkItem;
 import freenet.clients.http.bookmark.BookmarkManager;
+import freenet.winterface.web.core.BookmarkItemModel;
 
 /**
  * A simple {@link Panel} to show/edit {@link Bookmark}s.
@@ -21,36 +22,36 @@ import freenet.clients.http.bookmark.BookmarkManager;
 @SuppressWarnings("serial")
 public class BookmarksPanel extends DashboardPanel {
 
+	LoadableDetachableModel<List<BookmarkCategory>> bmModel;
+
 	public BookmarksPanel(String id) {
 		super(id);
-		// Get all bookmark categories and encapsulate it as an IModel
-		final List<BookmarkCategory> bookmarkItems = BookmarkManager.MAIN_CATEGORY.getAllSubCategories();
-		ListView<BookmarkCategory> bookmarkView = new ListView<BookmarkCategory>("category", bookmarkItems) {
+		// Make it detachable so its not serialized
+		bmModel = new LoadableDetachableModel<List<BookmarkCategory>>() {
+
+			@Override
+			protected List<BookmarkCategory> load() {
+				return BookmarkManager.MAIN_CATEGORY.getAllSubCategories();
+			}
+
+		};
+		
+		// Make use of chaining models
+		PropertyListView<BookmarkCategory> cats = new PropertyListView<BookmarkCategory>("category",bmModel) {
 
 			@Override
 			protected void populateItem(ListItem<BookmarkCategory> item) {
-				// Name
-				BookmarkCategory modelObject = item.getModelObject();
-				item.add(new Label("name", modelObject.getName()));
-
-				// List bookmarks belonging to this category
-				List<BookmarkItem> items = modelObject.getItems();
-				ListView<BookmarkItem> bookmarks = new ListView<BookmarkItem>("bookmarks", items) {
-
-					@Override
-					protected void populateItem(ListItem<BookmarkItem> item) {
-						item.add(new Label("bookmark", item.getModelObject().getName()));
-					}
-				};
-				item.add(bookmarks);
+				item.add(new Label("name"));
+				item.add(new BookmarkItemModel("items"));
 			}
+			
 		};
-		add(bookmarkView);
+
+		add(cats);
 	}
 
 	@Override
 	public String getName() {
 		return "Bookmarks";
 	}
-
 }
