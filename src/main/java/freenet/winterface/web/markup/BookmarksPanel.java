@@ -1,8 +1,8 @@
 package freenet.winterface.web.markup;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -11,7 +11,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import freenet.clients.http.bookmark.Bookmark;
 import freenet.clients.http.bookmark.BookmarkCategory;
 import freenet.clients.http.bookmark.BookmarkManager;
-import freenet.winterface.web.core.BookmarkItemModel;
 
 /**
  * A simple {@link Panel} to show/edit {@link Bookmark}s.
@@ -22,29 +21,31 @@ import freenet.winterface.web.core.BookmarkItemModel;
 @SuppressWarnings("serial")
 public class BookmarksPanel extends DashboardPanel {
 
-	LoadableDetachableModel<List<BookmarkCategory>> bmModel;
-
+	/**
+	 * Constructs
+	 * @param id of HTML tag to replace this panel with
+	 */
 	public BookmarksPanel(String id) {
 		super(id);
 		// Make it detachable so its not serialized
-		bmModel = new LoadableDetachableModel<List<BookmarkCategory>>() {
+		LoadableDetachableModel<List<BookmarkCategory>> bmModel = new LoadableDetachableModel<List<BookmarkCategory>>() {
 
 			@Override
 			protected List<BookmarkCategory> load() {
-				return BookmarkManager.MAIN_CATEGORY.getAllSubCategories();
+				ArrayList<BookmarkCategory> result = new ArrayList<BookmarkCategory>();
+				result.add(BookmarkManager.MAIN_CATEGORY);
+				return result;
 			}
 
 		};
 		
 		// Make use of chaining models
-		PropertyListView<BookmarkCategory> cats = new PropertyListView<BookmarkCategory>("category",bmModel) {
+		PropertyListView<BookmarkCategory> cats = new PropertyListView<BookmarkCategory>("categories",bmModel) {
 
 			@Override
 			protected void populateItem(ListItem<BookmarkCategory> item) {
-				item.add(new Label("name"));
-				item.add(new BookmarkItemModel("items"));
+				item.add(new BookmarkCategoryPanel("content",item.getModel()));
 			}
-			
 		};
 
 		add(cats);
