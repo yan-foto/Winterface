@@ -3,6 +3,7 @@ package freenet.winterface.web.markup;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,6 +28,7 @@ public class BookmarksPanel extends DashboardPanel {
 	 */
 	public BookmarksPanel(String id) {
 		super(id);
+		
 		// Make it detachable so its not serialized
 		LoadableDetachableModel<List<BookmarkCategory>> bmModel = new LoadableDetachableModel<List<BookmarkCategory>>() {
 
@@ -44,11 +46,17 @@ public class BookmarksPanel extends DashboardPanel {
 
 			@Override
 			protected void populateItem(ListItem<BookmarkCategory> item) {
-				item.add(new BookmarkCategoryPanel("content",item.getModel()));
+				item.add(new BookmarkCategoryPanel("content",item.getModel(),""));
 			}
 		};
-
-		add(cats);
+		cats.setReuseItems(true);
+		
+		// A container to mix listView with Ajax
+		WebMarkupContainer container = new WebMarkupContainer("bookmarks-container");
+		container.setOutputMarkupId(true);
+		
+		container.add(cats);
+		add(container);
 	}
 
 	@Override

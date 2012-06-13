@@ -2,11 +2,17 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
 	<div wicket:id="name"></div>
-	<table>
-		<tr wicket:id="items">
+	<table wicket:id="items">
+		<tr>
 			<td width="85%"><span wicket:id="name" class="bookmark"></span></td>
-			<!-- 			<td width="15%"><a wicket:id="delete"><span -->
-			<!-- 					wicket:id="delete-label"></span></a></td> -->
+			<td width="15%">
+				<a wicket:id="delete"><span wicket:id="delete-label"></span></a>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span wicket:id="feedback"></span>
+			</td>
 		</tr>
 	</table>
 	<div wicket:id="allSubCategories">

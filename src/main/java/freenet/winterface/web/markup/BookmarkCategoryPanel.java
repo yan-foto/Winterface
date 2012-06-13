@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -24,15 +25,18 @@ public class BookmarkCategoryPanel extends Panel {
 	 * Model of {@link BookmarkCategory} for this panel
 	 */
 	private IModel<BookmarkCategory> model;
+	
+	private String parentPath;
 
 	/**
 	 * Constructs
 	 * @param id id of HTML tag to replace this panel with
 	 * @param model data model of this panel
 	 */
-	public BookmarkCategoryPanel(String id, IModel<BookmarkCategory> model) {
+	public BookmarkCategoryPanel(String id, IModel<BookmarkCategory> model, String parentPath) {
 		super(id, model);
 		this.model = model;
+		this.parentPath = parentPath;
 	}
 
 	@Override
@@ -40,7 +44,7 @@ public class BookmarkCategoryPanel extends Panel {
 		super.onInitialize();
 		// Add category name and BookmarkItem(s)
 		add(new Label("name"));
-		add(new BookmarkItemView("items"));
+		add(new BookmarkItemView("items",getItemPath()));
 		BookmarkCategory category = model.getObject();
 		// Check for sub categories
 		Component subCats = null;
@@ -49,16 +53,21 @@ public class BookmarkCategoryPanel extends Panel {
 			subCats.setVisible(false);
 		} else {
 			subCats = new PropertyListView<BookmarkCategory>("allSubCategories") {
-
+				
 				@Override
 				protected void populateItem(ListItem<BookmarkCategory> item) {
-					item.add(new BookmarkCategoryPanel("content", item.getModel()));
+					item.add(new BookmarkCategoryPanel("content", item.getModel(),getItemPath()));
 				}
 
-			};
+			}.setReuseItems(true);
 
 		}
 		add(subCats);
+	}
+	
+	public String getItemPath() {
+		String categoryName = model.getObject().getName();
+		return parentPath+categoryName;
 	}
 
 }
