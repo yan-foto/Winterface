@@ -44,11 +44,16 @@
 			<artifactId>jetty-webapp</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>
-	<dependency>
-		<groupId>org.apache.wicket</groupId>
-		<artifactId>wicket-core</artifactId>
-		<version>${wicket.version}</version>
-	</dependency>
+		<dependency>
+			<groupId>org.apache.wicket</groupId>
+			<artifactId>wicket-core</artifactId>
+			<version>${wicket.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wicket</groupId>
+			<artifactId>wicket-extensions</artifactId>
+			<version>${wicket.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
