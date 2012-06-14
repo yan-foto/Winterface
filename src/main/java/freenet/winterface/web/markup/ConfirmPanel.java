@@ -27,7 +27,7 @@ public abstract class ConfirmPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onOk();
+				onOk(target);
 				replaceBack(target);
 			}
 		};
@@ -55,6 +55,6 @@ public abstract class ConfirmPanel extends Panel {
 		}
 	}
 	
-	protected abstract void onOk();
+	protected abstract void onOk(AjaxRequestTarget target);
 
 }
