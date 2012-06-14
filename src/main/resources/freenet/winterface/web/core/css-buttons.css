@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+
+.button {
+	background-color: #ffbbga;
+	background-color: #bbbbbb;
+	text-decoration: none;
+	line-height: 29px;
+	height: 30px;
+	display: inline-block;
+	padding-right: 20px;
+}
+
+.button .tick {
+	background: url(img/tick.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .cancel {
+	background: url(img/cancel.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .delete {
+	background: url(img/delete.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .arrow_up {
+	background: url(img/arrow_up.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .arrow_down {
+	background: url(img/arrow_out.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .arrow_out {
+	background: url(img/arrow_out.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .pencil {
+	background: url(img/pencil.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
+
+.button .cut {
+	background: url(img/pencil.png) no-repeat 10px 5px;
+	text-indent: 30px;
+	display: inline-block;
+}
