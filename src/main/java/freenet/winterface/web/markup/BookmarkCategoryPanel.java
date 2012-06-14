@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -15,7 +14,7 @@ import freenet.winterface.web.core.BookmarkItemView;
 /**
  * A {@link DashboardPanel} which recursively renders bookmark categories.
  * 
- * @author pouyan
+ * @author pausb
  * @see BookmarkItemView
  */
 @SuppressWarnings("serial")
@@ -25,13 +24,16 @@ public class BookmarkCategoryPanel extends Panel {
 	 * Model of {@link BookmarkCategory} for this panel
 	 */
 	private IModel<BookmarkCategory> model;
-	
+
 	private String parentPath;
 
 	/**
 	 * Constructs
-	 * @param id id of HTML tag to replace this panel with
-	 * @param model data model of this panel
+	 * 
+	 * @param id
+	 *            id of HTML tag to replace this panel with
+	 * @param model
+	 *            data model of this panel
 	 */
 	public BookmarkCategoryPanel(String id, IModel<BookmarkCategory> model, String parentPath) {
 		super(id, model);
@@ -42,9 +44,13 @@ public class BookmarkCategoryPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		// Feedback row
+		WebMarkupContainer feedback = new WebMarkupContainer("feedback");
+		feedback.setOutputMarkupId(true);
+		add(feedback);
 		// Add category name and BookmarkItem(s)
 		add(new Label("name"));
-		add(new BookmarkItemView("items",getItemPath()));
+		add(new BookmarkItemView("items", getItemPath()));
 		BookmarkCategory category = model.getObject();
 		// Check for sub categories
 		Component subCats = null;
@@ -53,10 +59,10 @@ public class BookmarkCategoryPanel extends Panel {
 			subCats.setVisible(false);
 		} else {
 			subCats = new PropertyListView<BookmarkCategory>("allSubCategories") {
-				
+
 				@Override
 				protected void populateItem(ListItem<BookmarkCategory> item) {
-					item.add(new BookmarkCategoryPanel("content", item.getModel(),getItemPath()));
+					item.add(new BookmarkCategoryPanel("content", item.getModel(), getItemPath()));
 				}
 
 			}.setReuseItems(true);
@@ -64,10 +70,10 @@ public class BookmarkCategoryPanel extends Panel {
 		}
 		add(subCats);
 	}
-	
+
 	public String getItemPath() {
 		String categoryName = model.getObject().getName();
-		return parentPath+categoryName;
+		return parentPath + categoryName;
 	}
 
 }

@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
-	<div wicket:id="name"></div>
-	<table wicket:id="items">
-		<tr>
-			<td width="85%"><span wicket:id="name" class="bookmark"></span></td>
-			<td width="15%">
-				<a wicket:id="delete"><span wicket:id="delete-label"></span></a>
+	<div class="bookmark-category-name" wicket:id="name"></div>
+	<table class="bookmarks-table">
+		<tr wicket:id="items">
+			<td class="bookmark-item"><span wicket:id="name" class="bookmark"></span></td>
+			<td class="bookmark-controls">
+				<a wicket:id="edit"><img wicket:id="edit-label"></img></a>
+				<a wicket:id="delete"><img wicket:id="delete-label"></img></a>
+				<a wicket:id="cut"><img wicket:id="cut-label"></img></a>
+				<a wicket:id="up"><img wicket:id="up-label"></img></a>
+				<a wicket:id="down"><img wicket:id="down-label"></img></a>
 			</td>
 		</tr>
 		<tr>
