@@ -7,7 +7,6 @@ html,body,#content {
 */
 #header {
 	padding-bottom: 15px;
-	margin-bottom: 30px;
 	border-bottom: black 5px solid;
 }
 
@@ -18,12 +17,21 @@ html,body,#content {
 	margin-bottom: 50px;
 }
 
+.dash-panel {
+	border-bottom: 5px black solid;
+	margin: 5px 0;
+	padding: 10px;
+}
+
 /*
 * ------------------------- FOOTER ----------------------------
 */
 #footer-wrapper {
-	margin-top: -50px;
 	text-align: center;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: fixed;
 }
 
 /*
@@ -67,4 +75,24 @@ html,body,#content {
 
 #navigation ul li:first-child {
 	padding: 0px;
+}
+
+/*
+* ------------------------- BOOKMARKS -------------------------
+*/
+.bookmark-controls {
+	float: right;
+}
+
+.bookmarks-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.bookmarks-table .odd-row {
+	background-color: #BFEDFF;
+}
+
+.bookmark-category-name {
+	background-color: #FFFEBF;
 }
