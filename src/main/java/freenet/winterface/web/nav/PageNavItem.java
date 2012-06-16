@@ -9,9 +9,9 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  * @see NavPanel
- * @see AbstractNavItem
+ * @see NavItem
  */
-public class PageNavItem implements AbstractNavItem {
+public class PageNavItem implements NavItem {
 	
 	/**
 	 * Name of menu item
@@ -37,8 +37,8 @@ public class PageNavItem implements AbstractNavItem {
 	}
 
 	@Override
-	public List<AbstractNavItem> getChilds(Page page) {
-		List<AbstractNavItem> result = null;
+	public List<NavItem> getChilds(Page page) {
+		List<NavItem> result = null;
 		if (isActive(page)) {
 			if (page instanceof NavContributor) {
 				result = ((NavContributor) page).getNavigations();

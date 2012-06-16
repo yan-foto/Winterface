@@ -9,7 +9,7 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  */
-public abstract interface AbstractNavItem {
+public abstract interface NavItem {
 
 	/**
 	 * Returns name of menu item
@@ -27,7 +27,7 @@ public abstract interface AbstractNavItem {
 	 *            current (active) page
 	 * @return list of submenus (children)
 	 */
-	public List<AbstractNavItem> getChilds(Page page);
+	public List<NavItem> getChilds(Page page);
 
 	/**
 	 * If menu is active in the given page
