@@ -6,13 +6,12 @@ import java.util.List;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import freenet.winterface.web.markup.NavPanel;
-import freenet.winterface.web.nav.NavItem;
 import freenet.winterface.web.nav.NavContributor;
+import freenet.winterface.web.nav.NavItem;
 import freenet.winterface.web.nav.PageNavItem;
 
 /**
@@ -44,16 +43,6 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		// Logo link
-//		Link<String> logoLink = new Link<String>("logo-link") {
-//
-//			@Override
-//			public void onClick() {
-//				setResponsePage(Dashboard.class);
-//			}
-//		};
-//		add(logoLink);
 
 		// Navigation Panel
 		LoadableDetachableModel<NavItem> navModel = new LoadableDetachableModel<NavItem>() {
