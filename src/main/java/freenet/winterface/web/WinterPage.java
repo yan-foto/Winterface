@@ -46,14 +46,14 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		super.onInitialize();
 
 		// Logo link
-		Link<String> logoLink = new Link<String>("logo-link") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(Dashboard.class);
-			}
-		};
-		add(logoLink);
+//		Link<String> logoLink = new Link<String>("logo-link") {
+//
+//			@Override
+//			public void onClick() {
+//				setResponsePage(Dashboard.class);
+//			}
+//		};
+//		add(logoLink);
 
 		// Navigation Panel
 		LoadableDetachableModel<AbstractNavItem> navModel = new LoadableDetachableModel<AbstractNavItem>() {

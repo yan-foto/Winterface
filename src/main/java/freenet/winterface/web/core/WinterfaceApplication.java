@@ -28,6 +28,8 @@ public class WinterfaceApplication extends WebApplication {
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
+		// Add Auto-Linking
+		getMarkupSettings().setAutomaticLinking(true);
 	}
 
 	@Override
