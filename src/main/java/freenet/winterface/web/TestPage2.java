@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 
-import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.NavItem;
 import freenet.winterface.web.nav.PageNavItem;
 
 @SuppressWarnings("serial")
@@ -16,8 +16,8 @@ public class TestPage2 extends WinterPage{
 	}
 	
 	@Override
-	public List<AbstractNavItem> getNavigations() {
-		List<AbstractNavItem> result = new ArrayList<AbstractNavItem>();
+	public List<NavItem> getNavigations() {
+		List<NavItem> result = new ArrayList<NavItem>();
 		result.add(new PageNavItem(Dashboard.class, "Back Home"));
 		return result;
 	}

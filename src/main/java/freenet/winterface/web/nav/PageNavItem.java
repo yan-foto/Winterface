@@ -10,10 +10,10 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  * @see NavPanel
- * @see AbstractNavItem
+ * @see NavItem
  */
 @SuppressWarnings("serial")
-public class PageNavItem implements AbstractNavItem, Serializable{
+public class PageNavItem implements NavItem, Serializable{
 	
 	/**
 	 * Name of menu item
@@ -39,8 +39,8 @@ public class PageNavItem implements AbstractNavItem, Serializable{
 	}
 
 	@Override
-	public List<AbstractNavItem> getChilds(Page page) {
-		List<AbstractNavItem> result = null;
+	public List<NavItem> getChilds(Page page) {
+		List<NavItem> result = null;
 		if (isActive(page)) {
 			if (page instanceof NavContributor) {
 				result = ((NavContributor) page).getNavigations();

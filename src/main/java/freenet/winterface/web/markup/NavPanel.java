@@ -14,7 +14,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.NavItem;
 import freenet.winterface.web.nav.PageNavItem;
 
 /**
@@ -44,7 +44,7 @@ public final class NavPanel extends Panel {
 	 * @param callbackModel
 	 *            {@link IModel} used to generate navigation content
 	 */
-	public NavPanel(String id, IModel<AbstractNavItem> callbackModel) {
+	public NavPanel(String id, IModel<NavItem> callbackModel) {
 		this(id, callbackModel, 0);
 	}
 
@@ -58,7 +58,7 @@ public final class NavPanel extends Panel {
 	 * @param level
 	 *            depth level
 	 */
-	public NavPanel(String id, IModel<AbstractNavItem> callbackModel, int level) {
+	public NavPanel(String id, IModel<NavItem> callbackModel, int level) {
 		super(id);
 		this.level = level;
 		initPanel(callbackModel);
@@ -70,7 +70,7 @@ public final class NavPanel extends Panel {
 	 * @param callbackModel
 	 *            {@link IModel} used to generate content
 	 */
-	private void initPanel(final IModel<AbstractNavItem> callbackModel) {
+	private void initPanel(final IModel<NavItem> callbackModel) {
 		// Use field called "name" to get name of menu
 		// TODO support i18n
 		final IModel<String> nameModel = new PropertyModel<String>(callbackModel, "Name");
@@ -91,7 +91,7 @@ public final class NavPanel extends Panel {
 		};
 
 		// Menu link to page
-		Link<AbstractNavItem> link = new Link<AbstractNavItem>("nav-link", callbackModel) {
+		Link<NavItem> link = new Link<NavItem>("nav-link", callbackModel) {
 
 			@Override
 			public void onClick() {
@@ -113,19 +113,19 @@ public final class NavPanel extends Panel {
 		add(link);
 
 		// Model used to generate children (if any)
-		LoadableDetachableModel<List<AbstractNavItem>> childModel = new LoadableDetachableModel<List<AbstractNavItem>>() {
+		LoadableDetachableModel<List<NavItem>> childModel = new LoadableDetachableModel<List<NavItem>>() {
 
 			@Override
-			protected List<AbstractNavItem> load() {
+			protected List<NavItem> load() {
 				return callbackModel.getObject().getChilds(getPage());
 			}
 		};
 
 		// Add Children
-		ListView<AbstractNavItem> childList = new ListView<AbstractNavItem>("nav-children", childModel) {
+		ListView<NavItem> childList = new ListView<NavItem>("nav-children", childModel) {
 
 			@Override
-			protected void populateItem(ListItem<AbstractNavItem> item) {
+			protected void populateItem(ListItem<NavItem> item) {
 				item.add(new NavPanel("nav-child", item.getModel(), level + 1));
 			}
 
