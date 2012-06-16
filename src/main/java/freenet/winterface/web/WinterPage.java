@@ -11,7 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import freenet.winterface.web.markup.NavPanel;
-import freenet.winterface.web.nav.AbstractNavItem;
+import freenet.winterface.web.nav.NavItem;
 import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.PageNavItem;
 
@@ -32,10 +32,10 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	/**
 	 * Initial list of navigation items
 	 */
-	private List<AbstractNavItem> navs;
+	private List<NavItem> navs;
 
 	public WinterPage() {
-		navs = new ArrayList<AbstractNavItem>();
+		navs = new ArrayList<NavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
 		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));
@@ -46,10 +46,10 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		super.onInitialize();
 
 		// Navigation Panel
-		LoadableDetachableModel<AbstractNavItem> navModel = new LoadableDetachableModel<AbstractNavItem>() {
+		LoadableDetachableModel<NavItem> navModel = new LoadableDetachableModel<NavItem>() {
 
 			@Override
-			protected AbstractNavItem load() {
+			protected NavItem load() {
 				return getMainNav();
 			}
 		};
@@ -63,9 +63,9 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	/**
 	 * Serves as helper method to deliver initial navigation
 	 * 
-	 * @return {@link AbstractNavItem} of top menu level
+	 * @return {@link NavItem} of top menu level
 	 */
-	public AbstractNavItem getMainNav() {
+	public NavItem getMainNav() {
 		return new PageNavItem(null, null) {
 
 			@Override
@@ -74,14 +74,14 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 			}
 
 			@Override
-			public List<AbstractNavItem> getChilds(Page page) {
+			public List<NavItem> getChilds(Page page) {
 				return navs;
 			}
 		};
 	}
 
 	@Override
-	public List<AbstractNavItem> getNavigations() {
+	public List<NavItem> getNavigations() {
 		return null;
 	}
 }

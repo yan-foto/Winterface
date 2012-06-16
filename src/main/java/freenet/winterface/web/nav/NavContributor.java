@@ -10,7 +10,7 @@ import org.apache.wicket.Page;
  * 
  * @author pausb
  * @see NavPanel
- * @see AbstractNavItem
+ * @see NavItem
  */
 public interface NavContributor {
 	/**
@@ -18,5 +18,5 @@ public interface NavContributor {
 	 * 
 	 * @return children menu items of {@link Page}
 	 */
-	List<AbstractNavItem> getNavigations();
+	List<NavItem> getNavigations();
 }
