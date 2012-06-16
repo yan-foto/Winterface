@@ -32,8 +32,9 @@ public class WinterfaceApplication extends WebApplication {
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
-		
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
+		// Add Auto-Linking
+		getMarkupSettings().setAutomaticLinking(true);
 	}
 
 	@Override
