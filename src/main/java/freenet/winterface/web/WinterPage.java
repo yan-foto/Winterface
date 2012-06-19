@@ -37,7 +37,7 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		navs = new ArrayList<NavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
-		navs.add(new PageNavItem(TestPage2.class, "Helloooooow"));
+		navs.add(new PageNavItem(TestPage2.class, "Menu 2"));
 	}
 
 	@Override

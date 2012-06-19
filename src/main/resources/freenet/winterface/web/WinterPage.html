@@ -8,18 +8,23 @@
 </head>
 <body>
 	<!-- Beginning of Header (Logo + Nav) -->
-	<div id="header" class="container_12">
-		<div id="logo" class="grid_2">
-			<a href="Dashboard.html" title="To Dashboard"><img src="/static/images/logo.png"></a>
+	<div id="header-wrapper" class="clearfix">
+		<div id="header" class="container_12">
+			<div id="logo" class="grid_2">
+				<a href="Dashboard.html" title="To Dashboard"><img
+					src="/static/images/logo.png"></a>
+			</div>
+			<div wicket:id="navigation" id="navigation" class="grid_10"></div>
 		</div>
-		<div wicket:id="navigation" id="navigation" class="grid_10"></div>
 	</div>
 	<!-- 	Beginning of actual content -->
-	<div id="content" class="container_12">
-		<wicket:child/>
+	<div id="content-wrapper" class="clearfix">
+		<div id="content" class="container_12">
+			<wicket:child />
+		</div>
 	</div>
 	<!-- 	Beginning of Footer -->
-	<div id="footer-wrapper" class="container_12">
+	<div id="footer-wrapper" class="clearfix">
 		<div id="footer">
 			<wicket:container wicket:id="footer"></wicket:container>
 		</div>
