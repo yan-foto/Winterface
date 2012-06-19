@@ -1,26 +1,45 @@
 html,body,#content {
-	height: 100%
+	height: 100%;
+}
+
+body {
+	background-color: #FAFAFA;
 }
 
 /*
 * ------------------------- HEADER ----------------------------
 */
 #header {
-	padding-bottom: 15px;
-	border-bottom: black 5px solid;
+	padding: 15px 0;
 }
 
 /*
 * ------------------------- CONTENT ----------------------------
 */
-#content {
-	margin-bottom: 50px;
+#content-wrapper {
+	background: url("/static/images/bg.png") repeat-y scroll 50% 0
+		transparent;
 }
 
+#content {
+	background-color: #FFFFFF;
+	border-bottom: 5px solid;
+	border-top: 5px solid;
+}
+
+/*
+* ------------------------- DASHPANEL --------------------------
+*/
 .dash-panel {
-	border-bottom: 5px black solid;
+	border-bottom: 5px solid;
 	margin: 5px 0;
 	padding: 10px;
+}
+
+.dash-panel .panel-name {
+	border-bottom: 2px dotted;
+	margin-bottom: 5px;
+	text-indent: 5px;
 }
 
 /*
@@ -77,20 +96,35 @@ html,body,#content {
 	padding: 0px;
 }
 
+.nav-link {
+	color: #000;
+	text-decoration: none;
+	font-family: Verdana, sans-serif;
+}
+
 /*
 * ------------------------- BOOKMARKS -------------------------
 */
-.bookmark-controls {
-	float: right;
-}
-
 .bookmarks-table {
 	width: 100%;
 	border-collapse: collapse;
 }
 
+.bookmark-controls {
+	float: right;
+	display: none;
+}
+
+.bookmarks-table tr:hover .bookmark-controls {
+	display: inline;
+}
+
 .bookmarks-table .odd-row {
 	background-color: #BFEDFF;
+}
+
+.bookmarks-table .even-row {
+	
 }
 
 .bookmark-category-name {
