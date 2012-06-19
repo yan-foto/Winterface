@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
 @SuppressWarnings("serial")
@@ -26,7 +27,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	}
 
 	public AjaxFallbackCssButton(String id, IModel<String> model) {
-		this(id, model, button_icon.TICK);
+		this(id, model, null);
 	}
 
 	public AjaxFallbackCssButton(String id, IModel<String> model, button_icon icon) {
@@ -39,34 +40,36 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	protected void onInitialize() {
 		super.onInitialize();
 		// Customize Css class
-		add(new AttributeAppender("class", " " + "button"));
+		add(new AttributeAppender("class", Model.of("button")," "));
 		// Add label
 		Component label = null;
 		if (labelModel != null) {
 			label = new Label(getId() + "-label", labelModel);
-			if (showIcon) {
-				label.add(new AttributeAppender("class", " " + iconName()));
+			if(showIcon) {
+				label.add(new AttributeAppender("class",Model.of("with-icon")," "));
+				label.add(new AttributeAppender("class", Model.of(iconName())," "));
 			}
-		}else {
+		}
+		else {
 			label = new Image(getId()+"-label", getResource("img/"+iconName()+".png"));
 		}
 		add(label);
 	}
 
-	public void setIcon(button_icon icon) {
+	public AjaxFallbackCssButton setIcon(button_icon icon) {
 		this.icon = icon;
+		return this;
 	}
 
-	public void setIconVisible(boolean show) {
+	public AjaxFallbackCssButton setIconVisible(boolean show) {
 		this.showIcon = show;
+		return this;
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		if (labelModel != null && showIcon) {
-			response.renderCSSReference(getResource("css-buttons.css"));
-		}
+		response.renderCSSReference(getResource("css-buttons.css"));
 	}
 	
 	private PackageResourceReference getResource(String name) {

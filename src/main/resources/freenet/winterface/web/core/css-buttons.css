@@ -1,59 +1,53 @@
 @CHARSET "UTF-8";
 
 .button {
-	background-color: #ffbbga;
-	background-color: #bbbbbb;
 	text-decoration: none;
-	line-height: 29px;
-	height: 30px;
 	display: inline-block;
-	padding-right: 20px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background: #F5F5F5
+		url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IGZpbGw9IiNGRkYiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48cmVjdCBmaWxsPSIjRjVGNUY1IiByeD0iNSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==);
+	padding: 1px 3px;
+	color: #121212;
+}
+
+.button .with-icon {
+	text-indent: 30px;
+	display: inline-block;
+	background-position: 5px 0px;
+	background-repeat: no-repeat;
+	padding-right: 5px;
 }
 
 .button .tick {
-	background: url(img/tick.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/tick.png);
 }
 
 .button .cancel {
-	background: url(img/cancel.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/cancel.png);
 }
 
 .button .delete {
-	background: url(img/delete.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/delete.png);
 }
 
 .button .arrow_up {
-	background: url(img/arrow_up.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/arrow_up.png);
 }
 
 .button .arrow_down {
-	background: url(img/arrow_out.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/arrow_out.png);
 }
 
 .button .arrow_out {
-	background: url(img/arrow_out.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/arrow_out.png);
 }
 
 .button .pencil {
-	background: url(img/pencil.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/pencil.png);
 }
 
 .button .cut {
-	background: url(img/pencil.png) no-repeat 10px 5px;
-	text-indent: 30px;
-	display: inline-block;
+	background-image: url(img/pencil.png);
 }
