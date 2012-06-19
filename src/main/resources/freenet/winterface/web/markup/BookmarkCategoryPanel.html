@@ -4,19 +4,21 @@
 	<div class="bookmark-category-name" wicket:id="name"></div>
 	<table class="bookmarks-table">
 		<tr wicket:id="items">
-			<td class="bookmark-item"><span wicket:id="name" class="bookmark"></span></td>
-			<td class="bookmark-controls">
-				<a wicket:id="edit"><img wicket:id="edit-label"></img></a>
-				<a wicket:id="delete"><img wicket:id="delete-label"></img></a>
-				<a wicket:id="cut"><img wicket:id="cut-label"></img></a>
-				<a wicket:id="up"><img wicket:id="up-label"></img></a>
-				<a wicket:id="down"><img wicket:id="down-label"></img></a>
+			<td class="bookmark-item">
+				<span wicket:id="name" class="bookmark"></span>
+			</td>
+			<td>
+				<span class="bookmark-controls">
+					<a wicket:id="edit"><img wicket:id="edit-label"></img></a>
+					<a wicket:id="delete"><img wicket:id="delete-label"></img></a>
+					<a wicket:id="cut"><img wicket:id="cut-label"></img></a>
+					<a wicket:id="up"><img wicket:id="up-label"></img></a>
+					<a wicket:id="down"><img wicket:id="down-label"></img></a>
+				</span>
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2">
-				<span wicket:id="feedback"></span>
-			</td>
+			<td colspan="2"><span wicket:id="feedback"></span></td>
 		</tr>
 	</table>
 	<div wicket:id="allSubCategories">
