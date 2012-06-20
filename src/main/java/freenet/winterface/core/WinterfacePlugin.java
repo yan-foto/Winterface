@@ -5,8 +5,11 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 
+import freenet.config.SubConfig;
+import freenet.l10n.BaseL10n.LANGUAGE;
 import freenet.node.Node;
 import freenet.pluginmanager.FredPlugin;
+import freenet.pluginmanager.FredPluginConfigurable;
 import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
@@ -20,7 +23,7 @@ import freenet.pluginmanager.PluginRespirator;
  * @author pasub
  * 
  */
-public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredPluginVersioned {
+public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredPluginVersioned, FredPluginConfigurable {
 
 	/**
 	 * {@link URL} at which {@link WinterfacePlugin} resides
@@ -75,6 +78,20 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	public static void main(String[] args) {
 		WinterfacePlugin p = new WinterfacePlugin();
 		p.runPlugin(null);
+	}
+
+	@Override
+	public String getString(String arg0) {
+		return arg0;
+	}
+
+	@Override
+	public void setLanguage(LANGUAGE arg0) {
+	}
+
+	@Override
+	public void setupConfig(SubConfig subconfig) {
+		Configuration.initialize(subconfig);
 	}
 
 }

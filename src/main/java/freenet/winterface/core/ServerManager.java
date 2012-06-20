@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
-import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -35,17 +34,6 @@ public class ServerManager {
 	private Server server;
 
 	/**
-	 * Server Port
-	 */
-	private final static int port = 8080;
-
-	/**
-	 * Idle time for a connection
-	 */
-	// FIXME change this for deployment mode
-	private final static int idle_timeout = (int) Duration.ONE_HOUR.getMilliseconds();
-
-	/**
 	 * Log4j logger
 	 */
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
@@ -74,9 +62,9 @@ public class ServerManager {
 			SocketConnector connector = new SocketConnector();
 
 			// Set some timeout options to make debugging easier.
-			connector.setMaxIdleTime(idle_timeout);
+			connector.setMaxIdleTime(Configuration.getIdleTimeout());
 			connector.setSoLingerTime(-1);
-			connector.setPort(port);
+			connector.setPort(Configuration.getPort());
 			server.addConnector(connector);
 
 			ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -109,7 +97,7 @@ public class ServerManager {
 			server.setHandler(sch);
 
 			try {
-				logger.info("Starting Jetty Server on port " + port);
+				logger.info("Starting Jetty Server on port " + Configuration.getPort());
 				server.start();
 			} catch (Exception e) {
 				logger.error("Error by server startup!", e);
