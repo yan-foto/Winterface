@@ -32,7 +32,7 @@ import freenet.winterface.web.core.WinterfaceApplication;
  * 
  */
 public class ServerManager {
-	
+
 	/**
 	 * An instance of running server
 	 */
@@ -42,7 +42,7 @@ public class ServerManager {
 	 * Log4j logger
 	 */
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
-	
+
 	public static final String FREENET_ID = "plugin-respirator";
 
 	/**
@@ -61,16 +61,20 @@ public class ServerManager {
 	 *            {@code false} to start in deployment mode
 	 * @return running instance of {@link Server}
 	 */
-	public Server startServer(boolean devMode,final FreenetWrapper fw) {
+	public Server startServer(boolean devMode, final FreenetWrapper fw) {
 		if (server == null) {
 			server = new Server();
-			SocketConnector connector = new SocketConnector();
 
-			// Set some timeout options to make debugging easier.
-			connector.setMaxIdleTime(Configuration.getIdleTimeout());
-			connector.setSoLingerTime(-1);
-			connector.setPort(Configuration.getPort());
-			server.addConnector(connector);
+			// Bind
+			String[] hosts = Configuration.getBindToHosts().split(",");
+			for (String host : hosts) {
+				SocketConnector connector = new SocketConnector();
+				connector.setMaxIdleTime(Configuration.getIdleTimeout());
+				connector.setSoLingerTime(-1);
+				connector.setHost(host);
+				connector.setPort(Configuration.getPort());
+				server.addConnector(connector);
+			}
 
 			ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
 			FilterHolder fh = new FilterHolder(IPFilter.class);
@@ -95,13 +99,13 @@ public class ServerManager {
 			// }
 			sch.addServlet(resourceServlet, "/static/*");
 			logger.debug("Set Jetty to load static resources from " + staticPath);
-			
+
 			/*
-			 * Add PluginRespirator to servlet context
-			 * So it can be retrievable by our WebApplication
+			 * Add PluginRespirator to servlet context So it can be retrievable
+			 * by our WebApplication
 			 */
 			sch.setAttribute(FREENET_ID, fw);
-			
+
 			server.setHandler(sch);
 
 			try {

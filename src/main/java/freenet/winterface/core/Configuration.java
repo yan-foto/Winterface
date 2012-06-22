@@ -31,6 +31,8 @@ public class Configuration {
 	private static String allowedHosts;
 	/** Full access hosts */
 	private static String fullAccessHosts;
+	/** Bind to addresses */
+	private static String bindTo;
 
 	/** Default server port value */
 	private final static int PORT_DEFAULT = 8080;
@@ -56,6 +58,11 @@ public class Configuration {
 	private final static String FULLACCESS_HOSTS_DEFAULT = "127.0.0.1,0:0:0:0:0:0:0:1";
 	/** Full access hosts entry name in config file */
 	private final static String FULLACCESS_HOSTS_OPTION = "allowedHostsFullAccess";
+
+	/** Default bindto hosts */
+	private final static String BINDTO_DEFAULT = "127.0.0.1,0:0:0:0:0:0:0:1";
+	/** Full access hosts entry name in config file */
+	private final static String BINDTO_OPTION = "bindTo";
 
 	/** regex to find invalid characters allowed hosts */
 	private final static String allowedChars = "[^:,\\.\\d]";
@@ -132,7 +139,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if(!isHostListValid(val)) {
+			if (!isHostListValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			allowedHosts = val;
@@ -156,10 +163,33 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if(!isHostListValid(val)) {
+			if (!isHostListValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			fullAccessHosts = val;
+		}
+
+	}
+
+	/**
+	 * {@link ConfigCallback} for bind to hosts
+	 * 
+	 * @author pausb
+	 * 
+	 */
+	static class BindToHosts extends StringCallback {
+
+		@Override
+		public String get() {
+			return bindTo;
+		}
+
+		@Override
+		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
+			if (isHostListValid(val)) {
+				throw new InvalidConfigValueException("Host list contains illegal characters.");
+			}
+			bindTo = val;
 		}
 
 	}
@@ -188,6 +218,8 @@ public class Configuration {
 		subConfig.register(FULLACCESS_HOSTS_OPTION, FULLACCESS_HOSTS_DEFAULT, ++sortOrder, true, false, shortDesc(FULLACCESS_HOSTS_OPTION),
 				longDesc(FULLACCESS_HOSTS_OPTION), new FullAccessHosts());
 		fullAccessHosts = subConfig.getString(FULLACCESS_HOSTS_OPTION);
+		subConfig.register(BINDTO_OPTION, BINDTO_DEFAULT, ++sortOrder, true, false, shortDesc(BINDTO_OPTION), longDesc(BINDTO_OPTION), new BindToHosts());
+		bindTo = subConfig.getString(BINDTO_OPTION);
 	}
 
 	/**
@@ -269,6 +301,15 @@ public class Configuration {
 	 */
 	public static String getFullAccessHosts() {
 		return fullAccessHosts;
+	}
+
+	/**
+	 * Returns a list of hosts to bind server to
+	 * 
+	 * @return comma separated list of hosts to bind to
+	 */
+	public static String getBindToHosts() {
+		return bindTo;
 	}
 
 }
