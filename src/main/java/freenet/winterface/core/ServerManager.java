@@ -1,5 +1,9 @@
 package freenet.winterface.core;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
 import org.apache.wicket.protocol.http.WicketFilter;
@@ -7,6 +11,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -68,6 +73,9 @@ public class ServerManager {
 			server.addConnector(connector);
 
 			ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
+			FilterHolder fh = new FilterHolder(IPFilter.class);
+			fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, Configuration.getAllowedHosts());
+			sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
 			ServletHolder sh = new ServletHolder(WicketServlet.class);
 			sh.setInitParameter(ContextParamWebApplicationFactory.APP_CLASS_PARAM, WinterfaceApplication.class.getName());
 			sh.setInitParameter(WicketFilter.FILTER_MAPPING_PARAM, "/*");
