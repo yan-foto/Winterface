@@ -1,5 +1,8 @@
 package freenet.winterface.core;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.wicket.util.time.Duration;
 
 import freenet.config.ConfigCallback;
@@ -53,6 +56,9 @@ public class Configuration {
 	private final static String FULLACCESS_HOSTS_DEFAULT = "127.0.0.1,0:0:0:0:0:0:0:1";
 	/** Full access hosts entry name in config file */
 	private final static String FULLACCESS_HOSTS_OPTION = "allowedHostsFullAccess";
+
+	/** regex to find invalid characters allowed hosts */
+	private final static String allowedChars = "[^:,\\.\\d]";
 
 	/**
 	 * {@link ConfigCallback} for gate public way mode
@@ -126,6 +132,9 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
+			if(!isHostListValid(val)) {
+				throw new InvalidConfigValueException("Host list contains illegal characters.");
+			}
 			allowedHosts = val;
 			throw new NodeNeedRestartException("Winterface server needs to be restarted.");
 		}
@@ -147,6 +156,9 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
+			if(!isHostListValid(val)) {
+				throw new InvalidConfigValueException("Host list contains illegal characters.");
+			}
 			fullAccessHosts = val;
 		}
 
@@ -198,6 +210,20 @@ public class Configuration {
 	 */
 	private static String longDesc(String optionName) {
 		return "Config." + optionName + "Long";
+	}
+
+	/**
+	 * Checks a comma separated list of hosts (IPv4 and IPv6) for illegal
+	 * characters ({".",",",":","[0-9]"})
+	 * 
+	 * @param hosts
+	 *            a comma separated list of hosts
+	 * @return {@code true} if list contains to illegal characters
+	 */
+	private static boolean isHostListValid(String hosts) {
+		Pattern p = Pattern.compile(allowedChars);
+		Matcher m = p.matcher(hosts);
+		return m.find();
 	}
 
 	/**

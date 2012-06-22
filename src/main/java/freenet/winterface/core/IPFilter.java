@@ -1,8 +1,6 @@
 package freenet.winterface.core;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,9 +27,6 @@ public class IPFilter implements Filter {
 	/** List of allowedHosts as read from filter config */
 	private String[] allowedHosts;
 
-	/** regex to find invalid characters allowed hosts */
-	private final String allowedChars = "[^:,\\.\\d]";
-
 	/** Filter parameter name containing allowed hosts */ 
 	public final static String ALLOWED_HOSTS_PARAM = "allowedHosts";
 
@@ -43,11 +38,6 @@ public class IPFilter implements Filter {
 		String configAllowed = filterConfig.getInitParameter(ALLOWED_HOSTS_PARAM);
 		logger.info("Filter initiated with following hosts: "+configAllowed);
 		allowedHosts = configAllowed.split(",");
-		Pattern p = Pattern.compile(allowedChars);
-		Matcher m = p.matcher(configAllowed);
-		if (m.find()) {
-			throw new ServletException("List of allowed hosts contains illegal characters");
-		}
 	}
 
 	@Override
@@ -60,7 +50,8 @@ public class IPFilter implements Filter {
 			}
 		}
 		logger.debug("Blocked request from "+remoteHost);
-		((HttpServletResponse)response).sendError(HttpServletResponse.SC_FORBIDDEN);
+		((HttpServletResponse)response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+		((HttpServletResponse)response).sendRedirect("/403");
 	}
 
 	@Override
