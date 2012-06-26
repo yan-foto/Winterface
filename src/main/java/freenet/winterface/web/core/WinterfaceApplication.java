@@ -6,6 +6,7 @@ import org.apache.wicket.protocol.http.WebApplication;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
 import freenet.winterface.web.Dashboard;
+import freenet.winterface.web.ErrorPage;
 
 /**
  * {@link WebApplication} of Winterface.
@@ -20,13 +21,6 @@ public class WinterfaceApplication extends WebApplication {
 	@Override
 	protected void init() {
 		super.init();
-		// New resource path
-		// TODO Add this for theming etc.
-		// String resourcePath = FreenetManager.getNode().getNodeDir().getPath()
-		// + FreenetManager.WinterFaceResources;
-		// IResourceSettings resourceSettings = getResourceSettings();
-		// resourceSettings.addResourceFolder(resourcePath);
-		// logger.info("Added wicket resource path at " + resourcePath);
 		// Gather all browser data
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 		// Configuring custom mapper
@@ -35,6 +29,7 @@ public class WinterfaceApplication extends WebApplication {
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
+		mountPage("/error", ErrorPage.class);
 	}
 
 	@Override

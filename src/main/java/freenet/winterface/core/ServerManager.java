@@ -3,6 +3,7 @@ package freenet.winterface.core;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
@@ -11,6 +12,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -86,6 +88,12 @@ public class ServerManager {
 			if (!devMode) {
 				sh.setInitParameter("wicket.configuration", "deployment");
 			}
+
+			ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+			errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/error");
+			errorHandler.addErrorPage(HttpServletResponse.SC_FORBIDDEN, "/error");
+			sch.setErrorHandler(errorHandler);
+
 			sch.addServlet(sh, "/*");
 
 			// Static resources

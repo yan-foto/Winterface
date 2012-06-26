@@ -1,6 +1,8 @@
 package freenet.winterface.core;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -8,6 +10,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
@@ -27,31 +30,36 @@ public class IPFilter implements Filter {
 	/** List of allowedHosts as read from filter config */
 	private String[] allowedHosts;
 
-	/** Filter parameter name containing allowed hosts */ 
+	/** Filter parameter name containing allowed hosts */
 	public final static String ALLOWED_HOSTS_PARAM = "allowedHosts";
 
+	/** List of urls not to block **/
+	private final static List<String> whiteUrls = Arrays.asList("/error", "/static");
+
 	/** Log4j Logger */
-	public final static Logger logger = Logger.getLogger(IPFilter.class);
+	private final static Logger logger = Logger.getLogger(IPFilter.class);
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		String configAllowed = filterConfig.getInitParameter(ALLOWED_HOSTS_PARAM);
-		logger.info("Filter initiated with following hosts: "+configAllowed);
+		logger.info("Filter initiated with following hosts: " + configAllowed);
 		allowedHosts = configAllowed.split(",");
 	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		String path = ((HttpServletRequest) request).getServletPath();
 		String remoteHost = request.getRemoteHost();
+		boolean unblock = false;
 		for (String allowed : allowedHosts) {
-			if (remoteHost.equals(allowed)) {
-				chain.doFilter(request, response);
-				return;
-			}
+			unblock |= remoteHost.equals(allowed);
 		}
-		logger.debug("Blocked request from "+remoteHost);
-		((HttpServletResponse)response).setStatus(HttpServletResponse.SC_FORBIDDEN);
-		((HttpServletResponse)response).sendRedirect("/403");
+		if (unblock || whiteUrls.contains(path)) {
+			chain.doFilter(request, response);
+			return;
+		}
+		logger.debug("Blocked request from " + remoteHost + " on path " + path);
+		((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	@Override
