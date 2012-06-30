@@ -10,12 +10,12 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Page;
+import org.apache.wicket.core.request.mapper.AbstractBookmarkableMapper;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.component.IRequestablePage;
-import org.apache.wicket.request.mapper.AbstractBookmarkableMapper;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
