@@ -1,8 +1,11 @@
 package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
+import org.apache.wicket.atmosphere.AtmosphereEventSubscriptionCollector;
+import org.apache.wicket.atmosphere.EventBus;
 import org.apache.wicket.protocol.http.WebApplication;
 
+import freenet.keys.FreenetURI;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
 import freenet.winterface.web.Dashboard;
@@ -15,20 +18,42 @@ import freenet.winterface.web.ErrorPage;
  * 
  */
 public class WinterfaceApplication extends WebApplication {
-	
+
+	/**
+	 * A Wrapper which takes care of freenet related stuff
+	 */
 	private FreenetWrapper freenetWrapper;
+
+	/**
+	 * Tracks {@link FreenetURI}s being fetched
+	 */
+	private FetchTrackerManager trackerManager;
+
+	/**
+	 * Bus to push websocket messages to
+	 */
+	private EventBus eventBus;
 
 	@Override
 	protected void init() {
 		super.init();
 		// Gather all browser data
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+		// Add Websockets support
+		this.eventBus = new EventBus(this);
+		// A workaround for https://issues.apache.org/jira/browse/WICKET-4642
+		// A patch is promised to be release (as of 09.07.2012)
+		getComponentPostOnBeforeRenderListeners().add(new AtmosphereEventSubscriptionCollector(eventBus));
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
+		// Retrieve FreenetWrapper
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
+		// Setup manager for FProxyFetchTracker
+		trackerManager = new FetchTrackerManager(freenetWrapper, this);
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
+		// Setup error pages
 		mountPage("/error", ErrorPage.class);
 	}
 
@@ -36,9 +61,33 @@ public class WinterfaceApplication extends WebApplication {
 	public Class<? extends Page> getHomePage() {
 		return Dashboard.class;
 	}
-	
+
+	/**
+	 * Returns {@link FreenetWrapper}, which contains Freenet related objects
+	 * 
+	 * @return {@link FreenetWrapper}
+	 */
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
+	}
+
+	/**
+	 * Return {@link FetchTrackerManager} responsible to track progress of
+	 * {@link FreenetURI}s being fetched
+	 * 
+	 * @return {@link FetchTrackerManager}
+	 */
+	public FetchTrackerManager getTrackerManager() {
+		return trackerManager;
+	}
+
+	/**
+	 * Returns {@link EventBus} of this application to send Messages to
+	 * 
+	 * @return {@link EventBus}
+	 */
+	public EventBus getEventBus() {
+		return eventBus;
 	}
 
 }
