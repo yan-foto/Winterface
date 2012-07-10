@@ -164,6 +164,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 				String className = (String) entry.getValue();
 				Class<? extends IRequestablePage> clazz = Class.forName(className).asSubclass(IRequestablePage.class);
 				registerMapping(startsWith, clazz);
+				logger.debug(String.format("Urls starting with %s will be mapped to %s", startsWith,className));
 			}
 		} catch (FileNotFoundException e) {
 			logger.debug("No external mapping file found!");
