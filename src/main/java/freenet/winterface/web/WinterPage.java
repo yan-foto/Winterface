@@ -3,12 +3,16 @@ package freenet.winterface.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 
+import freenet.winterface.core.Configuration;
 import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.NavItem;
@@ -82,5 +86,32 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	@Override
 	public List<NavItem> getNavigations() {
 		return null;
+	}
+
+	/**
+	 * A convenient method to feth {@link HttpServletRequest}
+	 * 
+	 * @return {@link HttpServletRequest} for this {@link WebPage}
+	 */
+	protected HttpServletRequest getHttpServletRequest() {
+		ServletWebRequest request = (ServletWebRequest) getRequest();
+		return request.getContainerRequest();
+	}
+
+	/**
+	 * Returns {@code true} if remote host has full access.
+	 * 
+	 * @return {@code false} if remote host has no full access.
+	 * @see Configuration
+	 */
+	protected boolean isAllowedFullAccess() {
+		String remoteAddr = getHttpServletRequest().getRemoteAddr();
+		String[] fullAccessHosts = Configuration.getFullAccessHosts().split(",");
+		for (String host : fullAccessHosts) {
+			if (host.equals(remoteAddr)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
