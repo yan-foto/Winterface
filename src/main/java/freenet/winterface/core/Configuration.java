@@ -35,7 +35,7 @@ public class Configuration {
 	/** Bind to addresses */
 	private static String bindTo;
 	/** Maximum size for transparent pass-through */
-	public static long maxLength;
+	private static long maxLength;
 
 	/** Default server port value */
 	private final static int PORT_DEFAULT = 8080;
