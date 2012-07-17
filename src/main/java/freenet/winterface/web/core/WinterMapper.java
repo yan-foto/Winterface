@@ -120,7 +120,12 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	@Override
 	protected Url buildUrl(UrlInfo info) {
 		Url url = new Url();
+		url.getSegments().add(getContext().getNamespace());
+		url.getSegments().add(getContext().getBookmarkableIdentifier());
+		url.getSegments().add(info.getPageClass().getName());
+
 		encodePageComponentInfo(url, info.getPageComponentInfo());
+
 		return encodePageParameters(url, info.getPageParameters(), new PageParametersEncoder());
 	}
 
@@ -164,7 +169,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 				String className = (String) entry.getValue();
 				Class<? extends IRequestablePage> clazz = Class.forName(className).asSubclass(IRequestablePage.class);
 				registerMapping(startsWith, clazz);
-				logger.debug(String.format("Urls starting with %s will be mapped to %s", startsWith,className));
+				logger.debug(String.format("Urls starting with %s will be mapped to %s", startsWith, className));
 			}
 		} catch (FileNotFoundException e) {
 			logger.debug("No external mapping file found!");
