@@ -75,7 +75,7 @@ public class FetchTrackerManager implements RequestClient {
 	 * @throws FetchException
 	 */
 	public FProxyFetchWaiter getProgress(FreenetURI uri, long maxSize, FetchContext fctx) throws FetchException {
-		// FIXME do something with filter policy :/
+		// FIXME Maybe add filter policy to the Configuration
 		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, maxSize, fctx, FProxyFetchInProgress.REFILTER_POLICY.ACCEPT_OLD);
 		FetchListener listener = new FetchListener(this, waiter.progress);
 		listeners.add(listener);
