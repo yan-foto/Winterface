@@ -8,7 +8,7 @@ import org.apache.wicket.model.Model;
 @SuppressWarnings("serial")
 public class FetchProgressPanel extends Panel {
 
-	IModel<Float> progressModel;
+	private IModel<Float> progressModel;
 
 	public FetchProgressPanel(String id, IModel<Float> model) {
 		super(id);
@@ -28,5 +28,5 @@ public class FetchProgressPanel extends Panel {
 		progress.setEscapeModelStrings(false);
 		add(progress);
 	}
-
+	
 }
