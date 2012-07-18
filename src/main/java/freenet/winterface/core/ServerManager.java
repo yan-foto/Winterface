@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.ContextParamWebApplicationFactory;
 import org.apache.wicket.protocol.http.WicketFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.MeteorServlet;
 import org.eclipse.jetty.server.Server;
@@ -81,13 +82,13 @@ public class ServerManager {
 
 			ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
 			ServletHolder meteorServletHolder = new ServletHolder(MeteorServlet.class);
-			meteorServletHolder.setInitParameter(ApplicationConfig.FILTER_CLASS, WicketFilter.class.getName());
+			meteorServletHolder.setInitParameter(ApplicationConfig.SERVLET_CLASS, WicketServlet.class.getName());
 			meteorServletHolder.setInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true");
 			meteorServletHolder.setInitParameter(ApplicationConfig.PROPERTY_NATIVE_COMETSUPPORT, "true");
 
 			// XXX Evil dirty hack
 			// This is necessary so Atmosphere passes URLs containing "@" down
-			// the filter chain
+			// the filter chain.
 			// This is supposed to be fixed in future releases (see
 			// https://github.com/Atmosphere/atmosphere/issues/498)
 			meteorServletHolder.setInitParameter(ApplicationConfig.MAPPING, "[a-zA-Z0-9-&.=;\\,\\\\~?@]+");
@@ -98,6 +99,7 @@ public class ServerManager {
 				meteorServletHolder.setInitParameter("wicket.configuration", "deployment");
 			}
 			meteorServletHolder.setInitOrder(0);
+			
 			FilterHolder fh = new FilterHolder(IPFilter.class);
 			fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, Configuration.getAllowedHosts());
 			sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
