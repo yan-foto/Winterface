@@ -1,7 +1,6 @@
 package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.atmosphere.AtmosphereEventSubscriptionCollector;
 import org.apache.wicket.atmosphere.EventBus;
 import org.apache.wicket.protocol.http.WebApplication;
 
@@ -41,9 +40,6 @@ public class WinterfaceApplication extends WebApplication {
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 		// Add Websockets support
 		this.eventBus = new EventBus(this);
-		// A workaround for https://issues.apache.org/jira/browse/WICKET-4642
-		// A patch is promised to be release (as of 09.07.2012)
-		getComponentPostOnBeforeRenderListeners().add(new AtmosphereEventSubscriptionCollector(eventBus));
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
