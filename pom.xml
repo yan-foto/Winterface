@@ -9,20 +9,28 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jetty.version>8.1.3.v20120416</jetty.version>
-		<wicket.version>6.0.0-beta2</wicket.version>
+		<wicket.version>6.0.0-beta3</wicket.version>
+		<fred.library>/home/pouyan/git</fred.library>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>org.freenetproject</groupId>
-			<artifactId>fred</artifactId>
-			<version>0.7.5.1405</version>
-			<scope>provided</scope>
+		<groupId>org.freenetproject</groupId>
+		<artifactId>fred</artifactId>
+		<version>0.7.5.1405</version>
+		<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.freenetproject</groupId>
 			<artifactId>freenet-ext</artifactId>
 			<version>26</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.freenetproject</groupId>
+			<artifactId>fred</artifactId>
+			<version>0.7.5.1405</version>
+			<scope>system</scope>
+			<systemPath>${fred.library}/fred.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -54,6 +62,16 @@
 			<artifactId>wicket-extensions</artifactId>
 			<version>${wicket.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.wicket</groupId>
+			<artifactId>wicket-atmosphere</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wicketstuff</groupId>
+			<artifactId>wicketstuff-html5</artifactId>
+			<version>6.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -70,10 +88,6 @@
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
-			</resource>
-			<resource>
-				<filtering>false</filtering>
-				<directory>src/main/webapp</directory>
 			</resource>
 		</resources>
 		<plugins>
@@ -114,26 +128,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>8080</port>
-							<maxIdleTime>3600000</maxIdleTime>
-						</connector>
-						<!-- <connector implementation="org.eclipse.jetty.server.ssl.SslSocketConnector"> -->
-						<!-- <port>8443</port> -->
-						<!-- <maxIdleTime>3600000</maxIdleTime> -->
-						<!-- <keystore>${project.build.directory}/test-classes/keystore</keystore> -->
-						<!-- <password>wicket</password> -->
-						<!-- <keyPassword>wicket</keyPassword> -->
-						<!-- </connector> -->
-					</connectors>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>2.8</version>
@@ -161,6 +155,10 @@
 		<repository>
 			<id>pterodactylus</id>
 			<url>http://maven.pterodactylus.net/</url>
+		</repository>
+		<repository>
+			<id>Apache Nexus</id>
+			<url>https://repository.apache.org/content/repositories/releases/</url>
 		</repository>
 	</repositories>
 </project>
