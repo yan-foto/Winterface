@@ -10,7 +10,6 @@ import freenet.l10n.BaseL10n.LANGUAGE;
 import freenet.node.Node;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginConfigurable;
-import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
 
@@ -23,7 +22,7 @@ import freenet.pluginmanager.PluginRespirator;
  * @author pasub
  * 
  */
-public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredPluginVersioned, FredPluginConfigurable {
+public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPluginConfigurable {
 
 	/**
 	 * {@link URL} at which {@link WinterfacePlugin} resides
