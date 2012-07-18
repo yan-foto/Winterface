@@ -5,7 +5,6 @@ import org.apache.wicket.atmosphere.EventBus;
 
 import freenet.clients.http.FProxyFetchInProgress;
 import freenet.clients.http.FProxyFetchListener;
-import freenet.clients.http.FProxyFetchWaiter;
 import freenet.keys.FreenetURI;
 
 /**
@@ -23,7 +22,7 @@ public class FetchListener implements FProxyFetchListener {
 	private final FetchTrackerManager manager;
 
 	/** Log4j logger */
-	private final static Logger logger = Logger.getLogger(FProxyFetchListener.class);
+	private final static Logger logger = Logger.getLogger(FetchListener.class);
 
 	/**
 	 * Constructs
@@ -37,14 +36,13 @@ public class FetchListener implements FProxyFetchListener {
 		this.progress = progress;
 		this.manager = manager;
 		this.progress.addListener(this);
-		logger.debug("Started listening for fetch events for URI: " + progress.uri);
+		logger.debug("Fetch listener registered for URI: " + progress.uri);
 	}
 
 	@Override
 	public void onEvent() {
 		logger.debug("Received fetch event for URI: " + progress.uri);
-		FProxyFetchWaiter waiter = progress.getWaiter();
-		manager.eventBus.post(waiter);
+		manager.eventBus.post(progress);
 		if (progress.finished()) {
 			logger.debug("Fetching completed: " + progress.uri);
 			manager.removeListener(this);
