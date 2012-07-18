@@ -11,7 +11,7 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import freenet.clients.http.bookmark.BookmarkCategory;
 import freenet.clients.http.bookmark.BookmarkItem;
 import freenet.clients.http.bookmark.BookmarkManager;
-import freenet.winterface.web.core.AjaxFallbackCssButton.button_icon;
+import freenet.winterface.web.core.AjaxFallbackCssButton.ButtonIcon;
 import freenet.winterface.web.markup.BookmarkCategoryPanel;
 import freenet.winterface.web.markup.BookmarksPanel;
 
@@ -73,7 +73,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
 			}
 		};
-		editButton.setIcon(button_icon.PENCIL);
+		editButton.setIcon(ButtonIcon.PENCIL);
 		item.add(editButton);
 		// Delete link (with confirm)
 		AjaxFallbackConfirmLink deleteButton = new AjaxFallbackConfirmLink("delete", feedback) {
@@ -85,7 +85,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 				logger.info("Removed bookmark " + bookmarkPath);
 			}
 		};
-		deleteButton.setIcon(button_icon.CANCEL);
+		deleteButton.setIcon(ButtonIcon.CANCEL);
 		item.add(deleteButton);
 		// Cut link
 		AjaxFallbackCssButton cutButton = new AjaxFallbackCssButton("cut") {
@@ -96,7 +96,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
 			}
 		};
-		cutButton.setIcon(button_icon.CUT);
+		cutButton.setIcon(ButtonIcon.CUT);
 		item.add(cutButton);
 		// Move up
 		AjaxFallbackCssButton upButton = new AjaxFallbackCssButton("up") {
@@ -107,7 +107,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 				logger.info("Moved bookmark up " + bookmarkPath);
 			}
 		};
-		upButton.setIcon(button_icon.ARROW_UP);
+		upButton.setIcon(ButtonIcon.ARROW_UP);
 		// First item cannot be moved up again
 		if (item.getIndex() == 0) {
 			upButton.setVisible(false);
@@ -122,7 +122,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 				logger.info("Moved bookmark down " + bookmarkPath);
 			}
 		};
-		downButton.setIcon(button_icon.ARROW_DOWN);
+		downButton.setIcon(ButtonIcon.ARROW_DOWN);
 		// Last item cannot be moved down
 		if (item.getIndex() == getViewSize() - 1) {
 			downButton.setVisible(false);
