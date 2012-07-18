@@ -15,10 +15,10 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> implements IHeaderContributor {
 
 	private IModel<String> labelModel;
-	private button_icon icon = button_icon.TICK;
+	private ButtonIcon icon = ButtonIcon.TICK;
 	private boolean showIcon;
 
-	public static enum button_icon {
+	public enum ButtonIcon {
 		TICK, CANCEL, DELETE, ARROW_UP, ARROW_DOWN, ARROW_OUT,PENCIL,CUT
 	}
 
@@ -30,7 +30,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		this(id, model, null);
 	}
 
-	public AjaxFallbackCssButton(String id, IModel<String> model, button_icon icon) {
+	public AjaxFallbackCssButton(String id, IModel<String> model, ButtonIcon icon) {
 		super(id);
 		this.labelModel = model;
 		this.icon = icon;
@@ -56,7 +56,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		add(label);
 	}
 
-	public AjaxFallbackCssButton setIcon(button_icon icon) {
+	public AjaxFallbackCssButton setIcon(ButtonIcon icon) {
 		this.icon = icon;
 		return this;
 	}
