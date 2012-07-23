@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import freenet.winterface.core.Configuration;
 import freenet.winterface.web.markup.NavPanel;
@@ -38,12 +39,22 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	private List<NavItem> navs;
 
 	public WinterPage() {
+		super();
+		initNav();
+	}
+
+	public WinterPage(PageParameters params) {
+		super(params);
+		initNav();
+	}
+	
+	private void initNav() {
 		navs = new ArrayList<NavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
 		navs.add(new PageNavItem(TestPage2.class, "Menu 2"));
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
