@@ -1,7 +1,6 @@
 package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.atmosphere.EventBus;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import freenet.keys.FreenetURI;
@@ -28,18 +27,11 @@ public class WinterfaceApplication extends WebApplication {
 	 */
 	private FetchTrackerManager trackerManager;
 
-	/**
-	 * Bus to push websocket messages to
-	 */
-	private EventBus eventBus;
-
 	@Override
 	protected void init() {
 		super.init();
 		// Gather all browser data
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
-		// Add Websockets support
-		this.eventBus = new EventBus(this);
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
@@ -75,15 +67,6 @@ public class WinterfaceApplication extends WebApplication {
 	 */
 	public FetchTrackerManager getTrackerManager() {
 		return trackerManager;
-	}
-
-	/**
-	 * Returns {@link EventBus} of this application to send Messages to
-	 * 
-	 * @return {@link EventBus}
-	 */
-	public EventBus getEventBus() {
-		return eventBus;
 	}
 
 }
