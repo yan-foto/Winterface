@@ -13,7 +13,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import freenet.node.useralerts.UserAlert;
-import freenet.winterface.web.core.AjaxFallbackCssButton.buttonIcon;
+import freenet.winterface.web.core.AjaxFallbackCssButton.ButtonIcon;
 import freenet.winterface.web.markup.AlertsPanel;
 
 @SuppressWarnings("serial")
@@ -70,7 +70,7 @@ public class AlertsView extends PropertyListView<UserAlert> {
 				
 			}
 		};
-		hide.setIcon(buttonIcon.CANCEL);
+		hide.setIcon(ButtonIcon.CANCEL);
 		hideContainer.add(hide);
 		hideContainer.setVisible(item.getModelObject().userCanDismiss());
 		item.add(hideContainer);
