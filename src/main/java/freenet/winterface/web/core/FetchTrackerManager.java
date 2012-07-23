@@ -1,9 +1,8 @@
 package freenet.winterface.web.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.atmosphere.EventBus;
+import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.db4o.ObjectContainer;
 
@@ -12,6 +11,7 @@ import freenet.client.FetchException;
 import freenet.client.HighLevelSimpleClient;
 import freenet.client.HighLevelSimpleClientImpl;
 import freenet.clients.http.FProxyFetchInProgress;
+import freenet.clients.http.FProxyFetchResult;
 import freenet.clients.http.FProxyFetchTracker;
 import freenet.clients.http.FProxyFetchWaiter;
 import freenet.keys.FreenetURI;
@@ -32,15 +32,12 @@ import freenet.winterface.core.FreenetWrapper;
  */
 public class FetchTrackerManager implements RequestClient {
 
-	/** {@link EventBus} to push progress updates to */
-	public final EventBus eventBus;
-
 	/** Used to get {@link FetchContext} from */
 	private HighLevelSimpleClientImpl client;
 	/** Actual FProxy fetch tracker */
 	private FProxyFetchTracker tracker;
-	/** A list of listeners to monitor progress of each fetch */
-	private List<FetchListener> listeners;
+
+	private Set<FetchListener> listeners;
 
 	/**
 	 * Constructs.
@@ -54,8 +51,7 @@ public class FetchTrackerManager implements RequestClient {
 		NodeClientCore core = wrapper.getNode().clientCore;
 		this.client = new HighLevelSimpleClientImpl(core, core.tempBucketFactory, core.random, RequestStarter.INTERACTIVE_PRIORITY_CLASS, true, true);
 		this.tracker = new FProxyFetchTracker(core.clientContext, client.getFetchContext(), this);
-		this.eventBus = application.getEventBus();
-		this.listeners = new ArrayList<FetchListener>();
+		listeners = new HashSet<FetchListener>();
 	}
 
 	/**
@@ -73,13 +69,40 @@ public class FetchTrackerManager implements RequestClient {
 	 *            fetch context
 	 * @return {@link FProxyFetchWaiter} of the fetch process.
 	 * @throws FetchException
+	 * @throws MalformedURLException
 	 */
-	public FProxyFetchWaiter getProgress(FreenetURI uri, long maxSize, FetchContext fctx) throws FetchException {
+	public void initProgress(String path, long maxSize, FetchContext fctx) throws FetchException, MalformedURLException {
+		FreenetURI uri = new FreenetURI(path);
 		// FIXME Maybe add filter policy to the Configuration
-		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, maxSize, fctx, FProxyFetchInProgress.REFILTER_POLICY.ACCEPT_OLD);
-		FetchListener listener = new FetchListener(this, waiter.progress);
-		listeners.add(listener);
-		return waiter;
+		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, maxSize, fctx, FProxyFetchInProgress.REFILTER_POLICY.RE_FILTER);
+		FetchListener fetchListener = listenerFor(waiter.progress);
+		if (fetchListener == null) {
+			fetchListener = new FetchListener(this, waiter.progress);
+			addListener(fetchListener);
+		}
+	}
+
+	public FProxyFetchResult getResult(String path) throws MalformedURLException {
+		FreenetURI uri = new FreenetURI(path);
+		return listenerFor(uri).getLatest();
+	}
+
+	public FetchListener listenerFor(FProxyFetchInProgress progress) {
+		for (FetchListener listener : listeners) {
+			if (listener.progress.equals(progress)) {
+				return listener;
+			}
+		}
+		return null;
+	}
+
+	public FetchListener listenerFor(FreenetURI uri) {
+		for (FetchListener listener : listeners) {
+			if (listener.uri.equals(uri)) {
+				return listener;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -101,12 +124,10 @@ public class FetchTrackerManager implements RequestClient {
 		return client;
 	}
 
-	/**
-	 * Removes a {@link FetchListener} from list of listeners
-	 * 
-	 * @param listener
-	 *            to remove
-	 */
+	void addListener(FetchListener listener) {
+		listeners.add(listener);
+	}
+
 	void removeListener(FetchListener listener) {
 		listeners.remove(listener);
 	}

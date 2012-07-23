@@ -5,25 +5,23 @@ import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.atmosphere.AtmosphereBehavior;
-import org.apache.wicket.atmosphere.EventBus;
-import org.apache.wicket.atmosphere.Subscribe;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.RequestHandlerStack;
 import org.apache.wicket.request.http.flow.AbortWithHttpErrorCodeException;
-import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.time.Duration;
 
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
 import freenet.client.HighLevelSimpleClientImpl;
-import freenet.clients.http.FProxyFetchInProgress;
 import freenet.clients.http.FProxyFetchResult;
-import freenet.clients.http.FProxyFetchWaiter;
 import freenet.keys.FreenetURI;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.web.core.FetchTrackerManager;
+import freenet.winterface.web.core.FreenetURIHandler;
 import freenet.winterface.web.core.WinterfaceApplication;
 import freenet.winterface.web.markup.FetchProgressPanel;
 
@@ -37,43 +35,20 @@ import freenet.winterface.web.markup.FetchProgressPanel;
 @SuppressWarnings("serial")
 public class FreenetURIPage extends WinterPage {
 
-	/** {@link FreenetURI} to be fetched */
-	private transient FreenetURI uri;
-	/** Manages fetching monitor */
-	private transient FetchTrackerManager trackerManager;
-	/** Use this to get progress by first page load */
-	private transient FProxyFetchInProgress progress;
-	/** {@link Panel} which renders the progress */
-	private FetchProgressPanel progressPanel;
-	
-	private IModel<Float> progressModel;
+	/** FreenetURI to be fetched */
+	private final String path;
 
-	private boolean connected;
-	private final transient EventBus eventBus;
+	/** Interval to refresh progress */
+	private static final Duration RELOAD_DURATION = Duration.milliseconds(3000);
 
 	/** Log4j logger */
 	private static final Logger logger = Logger.getLogger(FreenetURIPage.class);
-	
-	public FreenetURIPage() {
-		eventBus = ((WinterfaceApplication)getApplication()).getEventBus();
-	}
 
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		connected = false;
-		add(new FetchAtmosphereBehavior(this));
-		// Parse path and create FreenetURI
-		String path = getRequest().getUrl().canonical().toString();
-		path = path.replace("wicket/bookmarkable/freenet.winterface.web.FreenetURIPage/", "");
-		try {
-			uri = new FreenetURI(path);
-		} catch (MalformedURLException e) {
-			logger.error("Error while parsing FreenetURI", e);
-			throw new AbortWithHttpErrorCodeException(404);
-		}
+	public FreenetURIPage(PageParameters params) {
+		super(params);
+		path = parametersToPath(params);
 		// Tracker Manager
-		trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
+		FetchTrackerManager trackerManager = trackerManager();
 		HighLevelSimpleClientImpl client = trackerManager.getClient();
 		// Max size in HTTP header
 		HttpServletRequest request = getHttpServletRequest();
@@ -85,74 +60,129 @@ public class FreenetURIPage extends WinterPage {
 		}
 		FetchContext cntx = new FetchContext(client.getFetchContext(), FetchContext.IDENTICAL_MASK, true, null);
 		cntx.maxOutputLength = maxLength;
+		// Try to init the progress (if not available already)
 		try {
-			logger.debug("Attempting to fetch URI: " + uri);
-			progress = trackerManager.getProgress(uri, maxLength, cntx).progress;
+			logger.debug("Attempting to init fetch for path " + path);
+			trackerManager.initProgress(path, maxLength, cntx);
 		} catch (FetchException e) {
 			logger.error("Error while fetching Freenet URI", e);
+		} catch (MalformedURLException e) {
+			logger.error("Error while parsing FreenetURI", e);
+			throw new AbortWithHttpErrorCodeException(404);
 		}
-		progressModel = Model.of(getProgressPercent(progress));
-		progressPanel = new FetchProgressPanel("content", progressModel);
-		progressPanel.setOutputMarkupId(true);
-		add(progressPanel);
 	}
 
-	@Subscribe
-	public void receiveEvent(AjaxRequestTarget target, FProxyFetchInProgress progress) {
-		if (!progress.uri.equals(uri) || !connected) {
-			// Does not interest us
-			return;
-		}
-		logger.debug("Pushing progress of URI "+progress.uri);
-		progressModel.setObject(getProgressPercent(progress));
-		progressPanel = (FetchProgressPanel) progressPanel.replaceWith(new FetchProgressPanel("content", progressModel));
-		target.add(progressPanel);
+	private FetchTrackerManager trackerManager() {
+		FetchTrackerManager trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
+		return trackerManager;
 	}
 
-	/**
-	 * Returns current progress in percent.
-	 * <p>
-	 * This method is used to generate a value for progress tag in
-	 * {@link FetchProgressPanel}
-	 * </p>
-	 * 
-	 * @param waiter
-	 *            {@link FProxyFetchWaiter} to get current progress from
-	 * @return 0.0 &lt; progress &lt; 1.0
-	 */
-	private float getProgressPercent(FProxyFetchInProgress progress) {
-		FProxyFetchResult resultFast = progress.getWaiter().getResultFast();
-		float result = -1.0f;
-		if (resultFast.requiredBlocks > 0) {
-			result = resultFast.fetchedBlocks / resultFast.requiredBlocks;
+	private String parametersToPath(PageParameters params) {
+		int segmentCount = params.getIndexedCount();
+		String[] segments = new String[segmentCount];
+		for (int i = 0; i < segmentCount; i++) {
+			segments[i] = params.get(i).toString();
 		}
-		resultFast.close();
-		return result;
+		String path = segments[0];
+		for (int i = 1; i < segments.length; i++) {
+			path += ("/" + segments[i]);
+		}
+		return path;
 	}
 
-	private class FetchAtmosphereBehavior extends AtmosphereBehavior {
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		FProxyFetchResult latestResult = getLatestResult();
+		if (!latestResult.isFinished()) {
+			final FetchProgressPanel resultsPanel = new FetchProgressPanel("progress", new CompoundPropertyModel<FProxyFetchResult>(new ResultModel(path)));
+			resultsPanel.setOutputMarkupId(true);
+			add(resultsPanel);
 
-		final FreenetURIPage parent;
+			// Add timer to refresh progress
+			AbstractAjaxTimerBehavior refreshBehavior = new AbstractAjaxTimerBehavior(RELOAD_DURATION) {
 
-		private FetchAtmosphereBehavior(FreenetURIPage parent) {
-			this.parent = parent;
+				@Override
+				protected void onTimer(AjaxRequestTarget target) {
+					if (getLatestResult().isFinished()) {
+						logger.debug(String.format("Fetching %s finished. Relaoading the page", path));
+						setResponsePage(FreenetURIPage.class, FreenetURIPage.this.getPageParameters());
+						return;
+					}
+					target.add(resultsPanel);
+				}
+			};
+			add(refreshBehavior);
+		} else {
+			/*
+			 * Data is available. Get a new FreenetURIHandler to write it to
+			 * response
+			 */
+			throw new RequestHandlerStack.ReplaceHandlerException(new FreenetURIHandler(latestResult), false);
 		}
+	}
 
+	private FProxyFetchResult getLatestResult() {
+		FProxyFetchResult latestResult = null;
+		try {
+			latestResult = trackerManager().getResult(path);
+		} catch (MalformedURLException e) {
+			// Should never happen, since FetchTrackerManager#initProgress has
+			// already been called in constructor
+			e.printStackTrace();
+		}
+		return latestResult;
+	}
+
+	@Override
+	public boolean isVersioned() {
+		// Provide no versioning for this page
+		return false;
+	}
+
+//	@Override
+//	public void onEvent() {
+//		FProxyFetchWaiter waiter = progress.getWaiter();
+//		FProxyFetchResult result = waiter.getResultFast();
+//		if (result.isFinished()) {
+//			logger.debug("Fetching finished for URI " + progress.uri);
+//			progress.removeListener(this);
+//			return;
+//		} else {
+//			logger.debug("New fetch results for URI " + progress.uri);
+//		}
+//		// Close everything we don't need anymore
+//		if (waiter != null) {
+//			waiter.close();
+//		}
+//		if (latestResult != null) {
+//			latestResult.close();
+//		}
+//		// Update the latest result
+//		latestResult = result;
+//	}
+
+	private class ResultModel extends LoadableDetachableModel<FProxyFetchResult> {
+
+		private String path;
+		
+		public ResultModel(String path) {
+			super();
+			this.path = path;
+		}
+		
 		@Override
-		public void onResourceRequested() {
-			super.onResourceRequested();
-			logger.info("Connection established.");
-			parent.connected = true;
-			eventBus.post(progress);
+		protected FProxyFetchResult load() {
+			FetchTrackerManager trackerManager = FreenetURIPage.this.trackerManager();
+			try {
+				return trackerManager.getResult(path);
+			} catch (MalformedURLException e) {
+				// Should never happen
+				e.printStackTrace();
+			}
+			return null;
 		}
 
-		@Override
-		public void onDisconnect(AtmosphereResourceEvent arg0) {
-			super.onDisconnect(arg0);
-			logger.info("Connection disconnected.");
-			parent.connected = false;
-		}
-
-	};
+	}
 
 }
