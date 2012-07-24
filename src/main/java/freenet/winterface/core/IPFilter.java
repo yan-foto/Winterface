@@ -49,16 +49,16 @@ public class IPFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		String path = ((HttpServletRequest) request).getServletPath();
-		String remoteHost = request.getRemoteHost();
+		String remoteAddr = request.getRemoteAddr();
 		boolean unblock = false;
 		for (String allowed : allowedHosts) {
-			unblock |= remoteHost.equals(allowed);
+			unblock |= IPUtils.quietMatches(allowed, remoteAddr);
 		}
 		if (unblock || whiteUrls.contains(path)) {
 			chain.doFilter(request, response);
 			return;
 		}
-		logger.debug("Blocked request from " + remoteHost + " on path " + path);
+		logger.debug("Blocked request from " + remoteAddr + " on path " + path);
 		((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
 	}
 

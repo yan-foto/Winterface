@@ -1,8 +1,5 @@
 package freenet.winterface.core;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.wicket.util.time.Duration;
 
 import freenet.config.ConfigCallback;
@@ -63,9 +60,6 @@ public class Configuration {
 	private final static String BINDTO_DEFAULT = "127.0.0.1,0:0:0:0:0:0:0:1";
 	/** Full access hosts entry name in config file */
 	private final static String BINDTO_OPTION = "bindTo";
-
-	/** regex to find invalid characters allowed hosts */
-	private final static String allowedChars = "[^:,\\.\\d]";
 
 	/**
 	 * {@link ConfigCallback} for gate public way mode
@@ -186,7 +180,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if (isHostListValid(val)) {
+			if (!isHostListValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			bindTo = val;
@@ -245,20 +239,6 @@ public class Configuration {
 	}
 
 	/**
-	 * Checks a comma separated list of hosts (IPv4 and IPv6) for illegal
-	 * characters ({".",",",":","[0-9]"})
-	 * 
-	 * @param hosts
-	 *            a comma separated list of hosts
-	 * @return {@code true} if list contains to illegal characters
-	 */
-	private static boolean isHostListValid(String hosts) {
-		Pattern p = Pattern.compile(allowedChars);
-		Matcher m = p.matcher(hosts);
-		return m.find();
-	}
-
-	/**
 	 * Returns server port
 	 * 
 	 * @return server port
@@ -310,6 +290,24 @@ public class Configuration {
 	 */
 	public static String getBindToHosts() {
 		return bindTo;
+	}
+
+	/**
+	 * Checks a comma separated list of hosts (IPs) for validity.
+	 * 
+	 * @param hostList
+	 *            comma separated list of IPs to check
+	 * @return {@code true} if all IPs are valid
+	 * @see IPUtils#isValid(String)
+	 */
+	private static boolean isHostListValid(String hostList) {
+		String[] hosts = hostList.split("\\,");
+		for (String host : hosts) {
+			if (!IPUtils.isValid(host)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
