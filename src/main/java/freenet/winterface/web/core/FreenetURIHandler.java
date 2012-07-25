@@ -63,9 +63,13 @@ public class FreenetURIHandler implements IRequestHandler {
 			InputStream is = result.data.getInputStream();
 			OutputStream os = response.getOutputStream();
 			IOUtils.copy(is, os);
+			is.close();
 		} catch (IOException e) {
 			logger.error("Error while reading result data.", e);
-		}
+		} catch (NullPointerException e) {
+			// XXX How can this even happen!?
+			logger.error("Result's data is null!",e);
+		} 
 	}
 
 	@Override

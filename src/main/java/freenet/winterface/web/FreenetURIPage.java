@@ -72,30 +72,12 @@ public class FreenetURIPage extends WinterPage {
 		}
 	}
 
-	private FetchTrackerManager trackerManager() {
-		FetchTrackerManager trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
-		return trackerManager;
-	}
-
-	private String parametersToPath(PageParameters params) {
-		int segmentCount = params.getIndexedCount();
-		String[] segments = new String[segmentCount];
-		for (int i = 0; i < segmentCount; i++) {
-			segments[i] = params.get(i).toString();
-		}
-		String path = segments[0];
-		for (int i = 1; i < segments.length; i++) {
-			path += ("/" + segments[i]);
-		}
-		return path;
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		FProxyFetchResult latestResult = getLatestResult();
-		if (!latestResult.isFinished()) {
-			final FetchProgressPanel resultsPanel = new FetchProgressPanel("progress", new CompoundPropertyModel<FProxyFetchResult>(new ResultModel(path)));
+		if (!latestResult.isFinished() || !latestResult.hasData()) {
+			final FetchProgressPanel resultsPanel = new FetchProgressPanel("progress", new CompoundPropertyModel<FProxyFetchResult>(new ResultModel()));
 			resultsPanel.setOutputMarkupId(true);
 			add(resultsPanel);
 
@@ -113,15 +95,54 @@ public class FreenetURIPage extends WinterPage {
 				}
 			};
 			add(refreshBehavior);
-		} else {
+		} else if (latestResult.isFinished() && latestResult.hasData()) {
 			/*
 			 * Data is available. Get a new FreenetURIHandler to write it to
 			 * response
 			 */
+			logger.debug("Passing data to " + FreenetURIHandler.class.getName());
 			throw new RequestHandlerStack.ReplaceHandlerException(new FreenetURIHandler(latestResult), false);
 		}
 	}
 
+	/**
+	 * Fetches {@link FetchTrackerManager} from {@link WinterfaceApplication}
+	 * 
+	 * @return {@link FetchTrackerManager}
+	 */
+	private FetchTrackerManager trackerManager() {
+		FetchTrackerManager trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
+		return trackerManager;
+	}
+
+	/**
+	 * Implodes the {@link PageParameters} to a {@link String}, which is later
+	 * used to generate a {@link FreenetURI}
+	 * 
+	 * @param params
+	 *            indexed {@link PageParameters}
+	 * @return A {@link FreenetURI} in {@link String} format
+	 */
+	private String parametersToPath(PageParameters params) {
+		int segmentCount = params.getIndexedCount();
+		String[] segments = new String[segmentCount];
+		for (int i = 0; i < segmentCount; i++) {
+			segments[i] = params.get(i).toString();
+		}
+		String path = segments[0];
+		for (int i = 1; i < segments.length; i++) {
+			path += ("/" + segments[i]);
+		}
+		return path;
+	}
+
+	/**
+	 * Returns latest {@link FProxyFetchResult} for the current
+	 * {@link FreenetURI}
+	 * 
+	 * @return latest fetch results
+	 */
+	// TODO Let FetchTrackerManager manage fetches with regard to page ID
 	private FProxyFetchResult getLatestResult() {
 		FProxyFetchResult latestResult = null;
 		try {
@@ -129,60 +150,29 @@ public class FreenetURIPage extends WinterPage {
 		} catch (MalformedURLException e) {
 			// Should never happen, since FetchTrackerManager#initProgress has
 			// already been called in constructor
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return latestResult;
+	}
+	
+	/**
+	 * A {@link LoadableDetachableModel} containing latest
+	 * {@link FProxyFetchResult}s for {@link FreenetURIPage}
+	 * 
+	 */
+	private class ResultModel extends LoadableDetachableModel<FProxyFetchResult> {
+
+		@Override
+		protected FProxyFetchResult load() {
+			return FreenetURIPage.this.getLatestResult();
+		}
+
 	}
 
 	@Override
 	public boolean isVersioned() {
 		// Provide no versioning for this page
 		return false;
-	}
-
-//	@Override
-//	public void onEvent() {
-//		FProxyFetchWaiter waiter = progress.getWaiter();
-//		FProxyFetchResult result = waiter.getResultFast();
-//		if (result.isFinished()) {
-//			logger.debug("Fetching finished for URI " + progress.uri);
-//			progress.removeListener(this);
-//			return;
-//		} else {
-//			logger.debug("New fetch results for URI " + progress.uri);
-//		}
-//		// Close everything we don't need anymore
-//		if (waiter != null) {
-//			waiter.close();
-//		}
-//		if (latestResult != null) {
-//			latestResult.close();
-//		}
-//		// Update the latest result
-//		latestResult = result;
-//	}
-
-	private class ResultModel extends LoadableDetachableModel<FProxyFetchResult> {
-
-		private String path;
-		
-		public ResultModel(String path) {
-			super();
-			this.path = path;
-		}
-		
-		@Override
-		protected FProxyFetchResult load() {
-			FetchTrackerManager trackerManager = FreenetURIPage.this.trackerManager();
-			try {
-				return trackerManager.getResult(path);
-			} catch (MalformedURLException e) {
-				// Should never happen
-				e.printStackTrace();
-			}
-			return null;
-		}
-
 	}
 
 }

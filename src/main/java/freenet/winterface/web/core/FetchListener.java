@@ -22,12 +22,16 @@ import freenet.keys.FreenetURI;
  */
 public class FetchListener implements FProxyFetchListener {
 
+	/** {@link FreenetURI} being monitored */
 	public final FreenetURI uri;
 	/** Progress to monitor */
 	final FProxyFetchInProgress progress;
 	/** Manager responsible for the fetching */
 	final FetchTrackerManager manager;
-	
+	/**
+	 * Latest {@link FProxyFetchResult} which is updated on each
+	 * {@link #onEvent()} call
+	 */
 	private FProxyFetchResult latestResult;
 
 	/** Log4j logger */
@@ -49,23 +53,31 @@ public class FetchListener implements FProxyFetchListener {
 		updateLatestResult();
 		logger.debug("Fetch listener registered for URI: " + progress.uri);
 	}
-	
+
+	/**
+	 * Updates {@link #latestResult}
+	 */
 	private void updateLatestResult() {
 		FProxyFetchWaiter waiter = progress.getWaiter();
-		if(latestResult!=null) {
+		if (latestResult != null) {
 			latestResult.close();
 		}
 		latestResult = waiter.getResultFast();
 		waiter.close();
 	}
-	
+
+	/**
+	 * Returns latest {@link FProxyFetchResult} of current fetching progress
+	 * 
+	 * @return latest result
+	 */
 	public FProxyFetchResult getLatest() {
 		return latestResult;
 	}
 
 	@Override
 	public void onEvent() {
-		logger.debug("Received fetch event for URI: " + progress.uri);
+		logger.trace("Received fetch event for URI: " + progress.uri);
 		if (progress.finished()) {
 			logger.debug("Fetching completed: " + progress.uri);
 		}
