@@ -60,7 +60,7 @@ public class FreenetURIHandler implements IRequestHandler {
 		}
 
 		try {
-			InputStream is = result.data.getInputStream();
+			InputStream is = result.getData().getInputStream();
 			OutputStream os = response.getOutputStream();
 			IOUtils.copy(is, os);
 			is.close();

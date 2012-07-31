@@ -89,10 +89,10 @@ public class FetchTrackerManager implements RequestClient {
 		}
 		// FIXME Maybe add filter policy to the Configuration
 		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, maxSize, fctx, FProxyFetchInProgress.REFILTER_POLICY.RE_FILTER);
-		FetchListener fetchListener = listenerFor(uri, waiter.progress, fctx);
+		FetchListener fetchListener = listenerFor(uri, waiter.getProgress(), fctx);
 		if (fetchListener == null) {
 			logger.debug(String.format("No existing listeners found for URI %s. Registering new one.", uri));
-			fetchListener = new FetchListener(this, waiter.progress);
+			fetchListener = new FetchListener(this, waiter.getProgress());
 			addListener(fetchListener);
 		}
 	}
