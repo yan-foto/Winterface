@@ -8,12 +8,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.cookies.CookieUtils;
 
 import freenet.winterface.core.Configuration;
+import freenet.winterface.web.core.WinterfaceApplication;
 import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.NavItem;
@@ -33,28 +36,40 @@ import freenet.winterface.web.nav.PageNavItem;
 @SuppressWarnings("serial")
 public abstract class WinterPage extends WebPage implements NavContributor {
 
-	/**
-	 * Initial list of navigation items
-	 */
+	/** Initial list of navigation items */
 	private List<NavItem> navs;
 
+	/** Cookie name */
+	private final String COOKIE_KEY_PREFIX = "winterface.freenet";
+
+	/**
+	 * Constructs
+	 */
 	public WinterPage() {
-		super();
-		initNav();
+		this(null);
 	}
 
+	/**
+	 * Constructs
+	 * 
+	 * @param params
+	 *            {@link PageParameters}
+	 */
 	public WinterPage(PageParameters params) {
 		super(params);
 		initNav();
 	}
-	
+
+	/**
+	 * Initiates the root navigation menu items
+	 */
 	private void initNav() {
 		navs = new ArrayList<NavItem>();
 		// Add navigation here
 		navs.add(new PageNavItem(TestPage.class, "Menu 1"));
 		navs.add(new PageNavItem(TestPage2.class, "Menu 2"));
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -125,4 +140,33 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		}
 		return false;
 	}
+
+	/**
+	 * Save given values as a semicolon separated String in a cookie.
+	 * 
+	 * @param name
+	 *            cookie name suffix
+	 * @param values
+	 *            values
+	 */
+	public void saveInConfigCookie(String suffix, String... values) {
+		cookieUtils().save(COOKIE_KEY_PREFIX + suffix, values);
+	}
+
+	/**
+	 * Loads values assigned with desired cookie
+	 * 
+	 * @param name
+	 *            cookie name suffix
+	 * @return array of assigned values
+	 */
+	public String[] loadFromConfigCookie(String suffix) {
+		String load = cookieUtils().load(COOKIE_KEY_PREFIX + suffix);
+		return load != null ? load.split(FormComponent.VALUE_SEPARATOR) : null;
+	}
+	
+	private CookieUtils cookieUtils() {
+		return ((WinterfaceApplication)getApplication()).getCookieUtils();
+	}
+	
 }
