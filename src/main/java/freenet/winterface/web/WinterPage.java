@@ -132,7 +132,8 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	 */
 	protected boolean isAllowedFullAccess() {
 		String remoteAddr = getHttpServletRequest().getRemoteAddr();
-		String[] fullAccessHosts = Configuration.getFullAccessHosts().split(",");
+		Configuration config = ((WinterfaceApplication)getApplication()).getConfiguration();
+		String[] fullAccessHosts = config.getFullAccessHosts().split(",");
 		for (String host : fullAccessHosts) {
 			if (host.equals(remoteAddr)) {
 				return true;

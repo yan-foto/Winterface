@@ -50,10 +50,12 @@ public class FreenetURIPage extends WinterPage {
 		// Tracker Manager
 		FetchTrackerManager trackerManager = trackerManager();
 		HighLevelSimpleClientImpl client = trackerManager.getClient();
+		// Configuration
+		Configuration config = ((WinterfaceApplication) getApplication()).getConfiguration();
 		// Max size in HTTP header
 		HttpServletRequest request = getHttpServletRequest();
-		long maxLength = Configuration.getMaxLength();
-		boolean restricted = (Configuration.isPublicGateway() && !isAllowedFullAccess());
+		long maxLength = config.getMaxLength();
+		boolean restricted = (config.isPublicGateway() && !isAllowedFullAccess());
 		if (restricted) {
 			String maxSize = request.getHeader("max-size");
 			maxLength = (maxSize == null ? maxLength : Long.valueOf(maxSize));
@@ -114,7 +116,7 @@ public class FreenetURIPage extends WinterPage {
 		FetchTrackerManager trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
 		return trackerManager;
 	}
-
+	
 	/**
 	 * Implodes the {@link PageParameters} to a {@link String}, which is later
 	 * used to generate a {@link FreenetURI}

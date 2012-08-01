@@ -32,7 +32,7 @@ public class Configuration {
 	/** Bind to addresses */
 	private String bindTo;
 	/** Maximum size for transparent pass-through */
-	private static long maxLength;
+	private long maxLength;
 
 	/** Default server port value */
 	private final static int PORT_DEFAULT = 8080;
@@ -203,7 +203,7 @@ public class Configuration {
 	 * 
 	 */
 
-	static class MaxLength extends LongCallback {
+	class MaxLength extends LongCallback {
 
 		@Override
 		public Long get() {
@@ -329,7 +329,7 @@ public class Configuration {
 	 * 
 	 * @return max length
 	 */
-	public static long getMaxLength() {
+	public long getMaxLength() {
 		return maxLength;
 	}
 	
