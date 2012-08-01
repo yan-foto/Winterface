@@ -4,6 +4,7 @@ html,body,#content {
 
 body {
 	background-color: #FAFAFA;
+	font-size: 80%;
 }
 
 /*
@@ -19,6 +20,7 @@ body {
 #content-wrapper {
 	background: url("/static/images/bg.png") repeat-y scroll 50% 0
 		transparent;
+	margin-bottom: 25px; /* Leave enough space for the footer */
 }
 
 #content {
@@ -129,4 +131,60 @@ body {
 
 .bookmark-category-name {
 	background-color: #FFFEBF;
+}
+
+/*
+* ------------------------- FORMS -----------------------------
+*/
+.form-title {
+	font-weight: bold;
+	vertical-align: top;
+	width: 40%;
+}
+
+.form-input {
+	width: 60%;
+}
+
+.form-part {
+	display: inline;
+	float: left;
+}
+
+.form-part-title {
+	margin-bottom: 10px;
+}
+
+.form-part-title {
+	margin-bottom: 10px;
+}
+
+.form-part-title h4 {
+	margin: 5px auto;
+}
+
+.form-submit {
+	float: right;
+	margin: 15px 30px;
+}
+/*
+* ------------------------- USER ALERTS -----------------------
+*/
+.alert .dismiss {
+	float: right;
+}
+
+/*
+* ------------------------- MISC ------------------------------
+*/
+.box {
+	border: 1px dotted #000000;
+	font-family: Avantgarde, sans-serif;
+	margin: 10px 20px;
+	padding: 10px;
+	width: 900px;
+}
+
+.clear {
+	clear: both;
 }

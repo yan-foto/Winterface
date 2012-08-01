@@ -2,11 +2,14 @@ package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.util.cookies.CookieUtils;
 
 import freenet.keys.FreenetURI;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
+import freenet.winterface.web.AddFriendPage;
+import freenet.winterface.web.AlertsPage;
 import freenet.winterface.web.Dashboard;
 import freenet.winterface.web.ErrorPage;
 
@@ -30,6 +33,8 @@ public class WinterfaceApplication extends WebApplication {
 	 */
 	private FetchTrackerManager trackerManager;
 
+	private CookieUtils cookieUtils;
+
 	@Override
 	protected void init() {
 		super.init();
@@ -43,15 +48,25 @@ public class WinterfaceApplication extends WebApplication {
 		// Setup manager for FProxyFetchTracker
 		trackerManager = new FetchTrackerManager(freenetWrapper, this);
 		config = (Configuration) getServletContext().getAttribute(ServerManager.CONFIG_ID);
+		// Instantiate cookie utils
+		cookieUtils = new CookieUtils();
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
-		// Setup error pages
-		mountPage("/error", ErrorPage.class);
+		
+		initPageMounts();
 	}
 
 	@Override
 	public Class<? extends Page> getHomePage() {
 		return Dashboard.class;
+	}
+
+	private void initPageMounts() {
+		// Setup error pages
+		mountPage("/error", ErrorPage.class);
+		// Custom mountings
+		mountPage("/addfriend", AddFriendPage.class);
+		mountPage("/messages", AlertsPage.class);
 	}
 
 	/**
@@ -75,6 +90,10 @@ public class WinterfaceApplication extends WebApplication {
 	 */
 	public FetchTrackerManager getTrackerManager() {
 		return trackerManager;
+	}
+
+	public CookieUtils getCookieUtils() {
+		return cookieUtils;
 	}
 
 }
