@@ -20,17 +20,17 @@ import freenet.support.api.StringCallback;
 public class Configuration {
 
 	/** Server port */
-	private static int port;
+	private int port;
 	/** Server idle timeout */
-	private static int idleTimeout;
+	private int idleTimeout;
 	/** If it is public gateway */
-	private static boolean isPublicGateway;
+	private boolean isPublicGateway;
 	/** Allowed hosts */
-	private static String allowedHosts;
+	private String allowedHosts;
 	/** Full access hosts */
-	private static String fullAccessHosts;
+	private String fullAccessHosts;
 	/** Bind to addresses */
-	private static String bindTo;
+	private String bindTo;
 	/** Maximum size for transparent pass-through */
 	private static long maxLength;
 
@@ -74,7 +74,7 @@ public class Configuration {
 	 * 
 	 * @author pausb
 	 */
-	static class PublicGatewayOption extends BooleanCallback {
+	class PublicGatewayOption extends BooleanCallback {
 
 		@Override
 		public Boolean get() {
@@ -93,7 +93,7 @@ public class Configuration {
 	 * @author pausb
 	 * 
 	 */
-	static class PortOption extends IntCallback {
+	class PortOption extends IntCallback {
 
 		@Override
 		public Integer get() {
@@ -112,7 +112,7 @@ public class Configuration {
 	 * @author pausb
 	 * 
 	 */
-	static class TimeoutOption extends IntCallback {
+	class TimeoutOption extends IntCallback {
 
 		@Override
 		public Integer get() {
@@ -132,7 +132,7 @@ public class Configuration {
 	 * @author pausb
 	 * 
 	 */
-	static class AllowedHosts extends StringCallback {
+	class AllowedHosts extends StringCallback {
 
 		@Override
 		public String get() {
@@ -141,7 +141,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if (!isHostListValid(val)) {
+			if (!IPUtils.isValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			allowedHosts = val;
@@ -156,7 +156,7 @@ public class Configuration {
 	 * @author pausb
 	 * 
 	 */
-	static class FullAccessHosts extends StringCallback {
+	class FullAccessHosts extends StringCallback {
 
 		@Override
 		public String get() {
@@ -165,7 +165,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if (!isHostListValid(val)) {
+			if (!IPUtils.isValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			fullAccessHosts = val;
@@ -179,7 +179,7 @@ public class Configuration {
 	 * @author pausb
 	 * 
 	 */
-	static class BindToHosts extends StringCallback {
+	class BindToHosts extends StringCallback {
 
 		@Override
 		public String get() {
@@ -224,7 +224,7 @@ public class Configuration {
 	 * @param subConfig
 	 *            {@link SubConfig} to be initialized
 	 */
-	static void initialize(SubConfig subConfig) {
+	void initialize(SubConfig subConfig) {
 		short sortOrder = 0;
 		// FIXME what is the last parameter? (isSize)
 		subConfig.register(PORT_OPTION, PORT_DEFAULT, sortOrder, true, false, shortDesc(PORT_OPTION), longDesc(PORT_OPTION), new PortOption(), false);
@@ -255,7 +255,7 @@ public class Configuration {
 	 *            option name
 	 * @return key for localization
 	 */
-	private static String shortDesc(String optionName) {
+	private String shortDesc(String optionName) {
 		return "Config." + optionName;
 	}
 
@@ -266,7 +266,7 @@ public class Configuration {
 	 *            option name
 	 * @return key for localization
 	 */
-	private static String longDesc(String optionName) {
+	private String longDesc(String optionName) {
 		return "Config." + optionName + "Long";
 	}
 
@@ -275,7 +275,7 @@ public class Configuration {
 	 * 
 	 * @return server port
 	 */
-	public static int getPort() {
+	public int getPort() {
 		return port;
 	}
 
@@ -284,7 +284,7 @@ public class Configuration {
 	 * 
 	 * @return server idle timeout
 	 */
-	public static int getIdleTimeout() {
+	public int getIdleTimeout() {
 		return idleTimeout;
 	}
 
@@ -293,7 +293,7 @@ public class Configuration {
 	 * 
 	 * @return {@code false} if not in public gateway mode
 	 */
-	public static boolean isPublicGateway() {
+	public boolean isPublicGateway() {
 		return isPublicGateway;
 	}
 
@@ -302,7 +302,7 @@ public class Configuration {
 	 * 
 	 * @return comma separated list of allowed hosts
 	 */
-	public static String getAllowedHosts() {
+	public String getAllowedHosts() {
 		return allowedHosts;
 	}
 
@@ -311,7 +311,7 @@ public class Configuration {
 	 * 
 	 * @return comma separated list of hosts with full access hosts
 	 */
-	public static String getFullAccessHosts() {
+	public String getFullAccessHosts() {
 		return fullAccessHosts;
 	}
 
@@ -320,12 +320,11 @@ public class Configuration {
 	 * 
 	 * @return comma separated list of hosts to bind to
 	 */
-	public static String getBindToHosts() {
+	public String getBindToHosts() {
 		return bindTo;
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Returns Maximum size for transparent pass-through
 	 * 
 	 * @return max length
@@ -342,7 +341,7 @@ public class Configuration {
 	 * @return {@code true} if all IPs are valid
 	 * @see IPUtils#isValid(String)
 	 */
-	private static boolean isHostListValid(String hostList) {
+	private boolean isHostListValid(String hostList) {
 		String[] hosts = hostList.split("\\,");
 		for (String host : hosts) {
 			if (!IPUtils.isValid(host)) {

@@ -4,6 +4,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import freenet.keys.FreenetURI;
+import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
 import freenet.winterface.web.Dashboard;
@@ -21,6 +22,8 @@ public class WinterfaceApplication extends WebApplication {
 	 * A Wrapper which takes care of freenet related stuff
 	 */
 	private FreenetWrapper freenetWrapper;
+	
+	private Configuration config;
 
 	/**
 	 * Tracks {@link FreenetURI}s being fetched
@@ -39,6 +42,7 @@ public class WinterfaceApplication extends WebApplication {
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
 		// Setup manager for FProxyFetchTracker
 		trackerManager = new FetchTrackerManager(freenetWrapper, this);
+		config = (Configuration) getServletContext().getAttribute(ServerManager.CONFIG_ID);
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
 		// Setup error pages
@@ -57,6 +61,10 @@ public class WinterfaceApplication extends WebApplication {
 	 */
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
+	}
+	
+	public Configuration getConfiguration() {
+		return config;
 	}
 
 	/**

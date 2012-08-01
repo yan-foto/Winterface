@@ -35,10 +35,11 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 	 */
 	private ServerManager serverManager;
 
-	/**
-	 * Log4j logger
-	 */
-	private static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
+	/** Configuration */
+	private final Configuration config;
+	
+	/** Current version */
+	private final static String VERSION = "0.1";
 
 	/**
 	 * True if in development mode. Change to {@code false} to switch to
@@ -46,6 +47,16 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 	 */
 	private final static boolean DEV_MODE = true;
 
+	/**
+	 * Log4j logger
+	 */
+	private static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
+	
+	
+	public WinterfacePlugin() {
+		config = new Configuration();
+	}
+	
 	@Override
 	public void runPlugin(PluginRespirator pr) {
 		// Load path
@@ -54,7 +65,7 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 		logger.debug("Loaded WinterFacePlugin on path " + plugin_path);
 		// initServer();
 		serverManager = new ServerManager();
-		serverManager.startServer(DEV_MODE,new FreenetWrapper(pr));
+		serverManager.startServer(DEV_MODE, config, new FreenetWrapper(pr));
 	}
 
 	@Override
@@ -64,8 +75,7 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 
 	@Override
 	public String getVersion() {
-		// FIXME do something :P
-		return null;
+		return VERSION;
 	}
 
 	/**
@@ -81,16 +91,21 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 
 	@Override
 	public String getString(String arg0) {
+		// Part of FredPluginL10n (which is not yet implemented)
+		// So we just ignore the translation for now
 		return arg0;
 	}
 
 	@Override
 	public void setLanguage(LANGUAGE arg0) {
+		// Part of FredPluginL10n (which is not yet implemented)
+		// Cannot throw exception, otherwise the plug-in wont start!
+		// throw new UnsupportedOperationException("Not implemented.");
 	}
 
 	@Override
 	public void setupConfig(SubConfig subconfig) {
-		Configuration.initialize(subconfig);
+		config.initialize(subconfig);
 	}
 
 }
