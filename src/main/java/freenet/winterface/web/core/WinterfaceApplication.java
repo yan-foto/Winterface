@@ -3,6 +3,7 @@ package freenet.winterface.web.core;
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 
+import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
 import freenet.winterface.web.Dashboard;
@@ -17,6 +18,8 @@ import freenet.winterface.web.ErrorPage;
 public class WinterfaceApplication extends WebApplication {
 	
 	private FreenetWrapper freenetWrapper;
+	
+	private Configuration config;
 
 	@Override
 	protected void init() {
@@ -27,6 +30,7 @@ public class WinterfaceApplication extends WebApplication {
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
+		config = (Configuration) getServletContext().getAttribute(ServerManager.CONFIG_ID);
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
 		mountPage("/error", ErrorPage.class);
@@ -39,6 +43,10 @@ public class WinterfaceApplication extends WebApplication {
 	
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
+	}
+	
+	public Configuration getConfiguration() {
+		return config;
 	}
 
 }

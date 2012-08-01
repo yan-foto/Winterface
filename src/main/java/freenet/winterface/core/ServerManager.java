@@ -49,6 +49,8 @@ public class ServerManager {
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
 
 	public static final String FREENET_ID = "plugin-respirator";
+	
+	public static final String CONFIG_ID = "winterface-configuration";
 
 	/**
 	 * Starts {@link Server} in the desired mode.
@@ -66,37 +68,38 @@ public class ServerManager {
 	 *            {@code false} to start in deployment mode
 	 * @return running instance of {@link Server}
 	 */
-	public Server startServer(boolean devMode, final FreenetWrapper fw) {
+	public Server startServer(boolean devMode, final Configuration config, final FreenetWrapper fw) {
 		if (server == null) {
 			server = new Server();
 
 			// Bind
-			String[] hosts = Configuration.getBindToHosts().split(",");
+			String[] hosts = config.getBindToHosts().split(",");
 			for (String host : hosts) {
 				SocketConnector connector = new SocketConnector();
-				connector.setMaxIdleTime(Configuration.getIdleTimeout());
+				connector.setMaxIdleTime(config.getIdleTimeout());
 				connector.setSoLingerTime(-1);
 				connector.setHost(host);
-				connector.setPort(Configuration.getPort());
+				connector.setPort(config.getPort());
 				server.addConnector(connector);
 			}
 
 			ServletContextHandler sch = new ServletContextHandler(ServletContextHandler.SESSIONS);
-			initIPFilter(sch);
+			initIPFilter(sch, config);
 			initErrorHandlers(sch);
 			initWicketServlet(devMode, sch);
 			initStaticResources(sch);
 
 			/*
-			 * Add PluginRespirator to servlet context So it can be retrievable
+			 * Add PluginRespirator/Configuration to servlet context So it can be retrievable
 			 * by our WebApplication
 			 */
 			sch.setAttribute(FREENET_ID, fw);
+			sch.setAttribute(CONFIG_ID, config);
 
 			server.setHandler(sch);
 
 			try {
-				logger.info("Starting Jetty Server on port " + Configuration.getPort());
+				logger.info("Starting Jetty Server on port " + config.getPort());
 				server.start();
 			} catch (Exception e) {
 				logger.error("Error by server startup!", e);
@@ -169,9 +172,9 @@ public class ServerManager {
 	 * @param sch
 	 *            parent {@link ServletContextHandler}
 	 */
-	private void initIPFilter(ServletContextHandler sch) {
+	private void initIPFilter(ServletContextHandler sch, Configuration config) {
 		FilterHolder fh = new FilterHolder(IPFilter.class);
-		fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, Configuration.getAllowedHosts());
+		fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, config.getAllowedHosts());
 		sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
 	}
 

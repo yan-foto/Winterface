@@ -36,6 +36,9 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	 */
 	private ServerManager serverManager;
 
+	/** Configuration */
+	private final Configuration config;
+	
 	/** Current version */
 	private final static String VERSION = "0.1";
 
@@ -50,6 +53,11 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 	 */
 	private static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
 	
+	
+	public WinterfacePlugin() {
+		config = new Configuration();
+	}
+	
 	@Override
 	public void runPlugin(PluginRespirator pr) {
 		// Load path
@@ -58,7 +66,7 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 		logger.debug("Loaded WinterFacePlugin on path " + plugin_path);
 		// initServer();
 		serverManager = new ServerManager();
-		serverManager.startServer(DEV_MODE, new FreenetWrapper(pr));
+		serverManager.startServer(DEV_MODE, config, new FreenetWrapper(pr));
 	}
 
 	@Override
@@ -98,7 +106,7 @@ public class WinterfacePlugin implements FredPlugin, FredPluginThreadless, FredP
 
 	@Override
 	public void setupConfig(SubConfig subconfig) {
-		Configuration.initialize(subconfig);
+		config.initialize(subconfig);
 	}
 
 }
