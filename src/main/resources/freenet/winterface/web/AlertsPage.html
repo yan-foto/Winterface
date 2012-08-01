@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:wicket="https://wicket.apache.org">
+<wicket:extend>
+<form wicket:id="priorityForm">
+	<div class="form-part box">
+		<h3><wicket:message key="AlertsPage.messagePrioritySelection"/></h3>
+		<div wicket:id="priorityGroup">
+			<table>
+				<tr>
+					<td><input type="radio" wicket:id="minor"/><wicket:message key="AlertsPage.minor"/></td>
+					<td><input type="radio" wicket:id="warning"/><wicket:message key="AlertsPage.warning"/></td>
+					<td><input type="radio" wicket:id="error"/><wicket:message key="AlertsPage.error"/></td>
+					<td><input type="radio" wicket:id="critical"/><wicket:message key="AlertsPage.critical"/></td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-submit"><input type="submit" wicket:id="submit" value="Submit" /></div>
+	</div>
+</form>
+<div wicket:id="info" class="box">No messages</div>
+<div wicket:id="alertsOverview" class="alerts-overview">
+	<div class="alert box" wicket:id="alerts">
+		<h4 wicket:id="Title">Title goes here.</h4>
+		<div class="alert-content">
+			<p wicket:id="Text">Alerts text message</p>
+			<a wicket:id="dismiss"><span wicket:id="dismiss-label">Dismiss button</span></a>
+		</div>
+		<div class="clear"></div>
+	</div>
+</div>
+</wicket:extend>
+</html>
