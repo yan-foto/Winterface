@@ -38,3 +38,6 @@ Wicket uses HTML templates (with its own XML attributes/elements) in order to dy
 ## Panels
 <tt>Panel</tt>s are reusable components with their own markup. Winterface starting page, Dashboard, uses for example various panels.
 
+# External License(s)
+Icons used for the interface are created by [Mark James](http://www.famfamfam.com/lab/icons/silk/) and released under [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/) 
+
