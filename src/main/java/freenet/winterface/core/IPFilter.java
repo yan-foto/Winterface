@@ -1,6 +1,7 @@
 package freenet.winterface.core;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,7 +53,12 @@ public class IPFilter implements Filter {
 		String remoteAddr = request.getRemoteAddr();
 		boolean unblock = false;
 		for (String allowed : allowedHosts) {
-			unblock |= IPUtils.quietMatches(allowed, remoteAddr);
+			try {
+				unblock |= IPUtils.quietMatches(allowed, remoteAddr);
+			} catch (UnknownHostException e){
+				logger.error("Error while matching allowed hosts and remoter address.",e);
+				unblock = false;
+			}
 		}
 		if (unblock || whiteUrls.contains(path)) {
 			chain.doFilter(request, response);

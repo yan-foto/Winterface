@@ -1,6 +1,7 @@
 package freenet.winterface.core;
 
-import java.util.regex.Matcher;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Does all IP related calculations such as subnetting.
@@ -22,12 +23,13 @@ public final class IPUtils {
 	 * @param addr
 	 *            string to turn into {@link IPAddress}
 	 * @return generated {@link IPAddress}
+	 * @throws UnknownHostException 
 	 */
-	public static IPAddress stringToIP(String addr) {
+	public static IPAddress stringToIP(String addr) throws UnknownHostException {
 		if (addr.contains(IPV4_HINT)) {
 			return new IPv4Address(addr);
 		} else if (addr.contains(IPV6_HINT)) {
-			return new IPv6Address(IPV6_HINT);
+			return new IPv6Address(addr);
 		} else {
 			throw new IllegalArgumentException("Invalid format");
 		}
@@ -45,8 +47,9 @@ public final class IPUtils {
 	 * @param other
 	 *            IP in {@link String} format
 	 * @return {@code true} if base IP <i>contains</i> other IP
+	 * @throws UnknownHostException 
 	 */
-	public static boolean matches(String base, String other) {
+	public static boolean matches(String base, String other) throws UnknownHostException {
 		IPAddress baseIP = stringToIP(base);
 		IPAddress otherIp = stringToIP(other);
 		return baseIP.matches(otherIp);
@@ -62,8 +65,9 @@ public final class IPUtils {
 	 * @param other
 	 *            IP in {@link String} format
 	 * @return {@code true} if base IP <i>contains</i> other IP
+	 * @throws UnknownHostException 
 	 */
-	public static boolean quietMatches(String base, String other) {
+	public static boolean quietMatches(String base, String other) throws UnknownHostException {
 		try {
 			return matches(base, other);
 		} catch (RuntimeException e) {
@@ -81,11 +85,15 @@ public final class IPUtils {
 	 * @see IPAddress
 	 */
 	public static boolean isValid(String addr) {
-		Matcher matcher = IPAddress.IPV4_PATTERN.matcher(addr);
-		if (matcher.matches()) {
-			return true;
+		int maskIndex = addr.indexOf(IPAddress.MASK_CHAR);
+		if(maskIndex>-1) {
+			addr = addr.substring(0,maskIndex);
 		}
-		matcher = IPAddress.IPV6_PATTERN.matcher(addr);
-		return matcher.matches();
+		try {
+			InetAddress.getByName(addr);
+		} catch (UnknownHostException e) {
+			return false;
+		}
+		return true;
 	}
 }

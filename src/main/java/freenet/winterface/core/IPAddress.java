@@ -1,9 +1,10 @@
 package freenet.winterface.core;
 
-import java.util.regex.Pattern;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
- * A general representaion of IPv4 and IPv6.
+ * A general representation of IPv4 and IPv6.
  * 
  * @author pausb
  * @see IPv4Address
@@ -11,14 +12,6 @@ import java.util.regex.Pattern;
  */
 public interface IPAddress {
 
-	/** Regex of valid IPv4 */
-	String IPV4_FORMAT = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})([/(\\d{1,2})]?)";
-	/** {@link Pattern} which matches a valid IPv4 */
-	Pattern IPV4_PATTERN = Pattern.compile(IPV4_FORMAT);
-	/** Regex of valid IPv6 */
-	String IPV6_FORMAT = "([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4}):([a-fA-F\\d]{1,4})([/\\d{1,3}]?)";
-	/** {@link Pattern} which matches a valid IPv6 */
-	Pattern IPV6_PATTERN = Pattern.compile(IPV6_FORMAT);
 	/** Character denoting start of subnet mask */
 	String MASK_CHAR = "/";
 	/** A mask to imitate unsigned byte */
@@ -41,8 +34,9 @@ public interface IPAddress {
 	 * @param other
 	 *            IP in string format
 	 * @return {@code false} if given IP doesn't match this one
+	 * @throws UnknownHostException
 	 */
-	boolean matches(String other);
+	boolean matches(String other) throws UnknownHostException;
 
 	/**
 	 * Returns {@code true} if IP matches given address.
@@ -58,12 +52,12 @@ public interface IPAddress {
 	boolean matches(IPAddress other);
 
 	/**
-	 * Returns string representation of IP address
+	 * Returns the wrapped {@link InetAddress}
 	 * 
-	 * @return {@link String} representation
+	 * @return wrapped address
 	 */
-	String toStringFormat();
-
+	InetAddress getInetAddress();
+	
 	/**
 	 * Returns number representation of IP address
 	 * 
@@ -72,16 +66,10 @@ public interface IPAddress {
 	Number toNumberFormat();
 
 	/**
-	 * Returns byte array representation of IP address
-	 * 
-	 * @return {@link Byte} array representation
-	 */
-	byte[] toByteFormat();
-
-	/**
 	 * Returns version of IP address
 	 * 
 	 * @return {@link Version}
 	 */
 	Version getVersion();
+	
 }
