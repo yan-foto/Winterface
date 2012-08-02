@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.wicket.Page;
 
+import freenet.winterface.web.markup.NavPanel;
+
 /**
  * Convenient way to create menu items in navigation panel
  * 
@@ -12,9 +14,11 @@ import org.apache.wicket.Page;
  * @see NavPanel
  * @see NavItem
  */
-@SuppressWarnings("serial")
 public class PageNavItem implements NavItem, Serializable{
 	
+	/** generated serial version UID */
+	private static final long serialVersionUID = 5456583203096481529L;
+
 	/**
 	 * Name of menu item
 	 */
