@@ -14,12 +14,13 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 @SuppressWarnings("serial")
 public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> implements IHeaderContributor {
 
-	/** {@link IModel} for content of button label */
-	private IModel<String> labelModel;
-	/** Button icon */
-	private ButtonIcon icon = ButtonIcon.TICK;
 	/** {@code true} to show icon */
 	private boolean showIcon;
+	/** Button icon */
+	private ButtonIcon icon = ButtonIcon.TICK;
+	
+	/** {@link IModel} for content of button label */
+	private final IModel<String> labelModel;
 
 	/** A list of available icons for button */
 	public enum ButtonIcon {
@@ -66,6 +67,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		super(id);
 		this.labelModel = model;
 		this.icon = icon;
+		this.showIcon = (this.icon!=null);
 	}
 
 	@Override
@@ -73,16 +75,18 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		super.onInitialize();
 		// Customize Css class
 		add(new AttributeAppender("class", Model.of("button"), " "));
+		// Icon name
+		String iconName = icon.toString().toLowerCase();
 		// Add label
 		Component label = null;
 		if (labelModel != null) {
 			label = new Label(getId() + "-label", labelModel);
 			if (showIcon) {
 				label.add(new AttributeAppender("class", Model.of("with-icon"), " "));
-				label.add(new AttributeAppender("class", Model.of(iconName()), " "));
+				label.add(new AttributeAppender("class", Model.of(iconName), " "));
 			}
 		} else {
-			label = new Image(getId() + "-label", getResource("img/" + iconName() + ".png"));
+			label = new Image(getId() + "-label", getResource("img/" + iconName + ".png"));
 		}
 		add(label);
 	}
@@ -126,10 +130,6 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	 */
 	private PackageResourceReference getResource(String name) {
 		return new PackageResourceReference(AjaxFallbackCssButton.class, name);
-	}
-
-	private String iconName() {
-		return icon.toString().toLowerCase();
 	}
 
 }
