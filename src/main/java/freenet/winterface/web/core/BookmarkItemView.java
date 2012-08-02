@@ -27,14 +27,14 @@ import freenet.winterface.web.markup.BookmarksPanel;
 public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
 	/**
-	 * Absolute path of parent item
-	 */
-	private String parentPath;
-	
-	/**
-	 * {@link BookmarkManager} to manage this {@link BookmarkItem}s
+	 * {@link B1ookmarkManager} to manage this {@link BookmarkItem}s
 	 */
 	private transient BookmarkManager bookmarkManager;
+
+	/**
+	 * Absolute path of parent item
+	 */
+	private final String parentPath;
 
 	/**
 	 * Log4j logger
@@ -43,8 +43,11 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
 	/**
 	 * Constructs
-	 * @param id Wicket ID of list container
-	 * @param parentPath Absolute path of parent item
+	 * 
+	 * @param id
+	 *            Wicket ID of list container
+	 * @param parentPath
+	 *            Absolute path of parent item
 	 */
 	public BookmarkItemView(String id, String parentPath) {
 		super(id);
@@ -65,6 +68,28 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 		// Feedback Panel
 		Component feedback = item.findParent(BookmarkCategoryPanel.class).get("feedback");
 		// Edit link
+		AjaxFallbackCssButton editButton = createEditButton();
+		item.add(editButton);
+		// Delete link (with confirm)
+		AjaxFallbackConfirmLink deleteButton = createDeleteButton(bookmarkPath, feedback);
+		item.add(deleteButton);
+		// Cut link
+		AjaxFallbackCssButton cutButton = createCutButton();
+		item.add(cutButton);
+		// Move up
+		AjaxFallbackCssButton upButton = createMoveupButton(item, bookmarkPath);
+		item.add(upButton);
+		// Move down
+		AjaxFallbackCssButton downButton = createMoveDownButton(item, bookmarkPath);
+		item.add(downButton);
+	}
+
+	/**
+	 * Creates edit button for current bookmark item
+	 * 
+	 * @return edit button
+	 */
+	private AjaxFallbackCssButton createEditButton() {
 		AjaxFallbackCssButton editButton = new AjaxFallbackCssButton("edit") {
 
 			@Override
@@ -74,8 +99,19 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 			}
 		};
 		editButton.setIcon(ButtonIcon.PENCIL);
-		item.add(editButton);
-		// Delete link (with confirm)
+		return editButton;
+	}
+
+	/**
+	 * Create delete button for current bookmark item
+	 * 
+	 * @param bookmarkPath
+	 *            item's path
+	 * @param feedback
+	 *            panel to show feedback
+	 * @return delte button
+	 */
+	private AjaxFallbackConfirmLink createDeleteButton(final String bookmarkPath, Component feedback) {
 		AjaxFallbackConfirmLink deleteButton = new AjaxFallbackConfirmLink("delete", feedback) {
 
 			@Override
@@ -86,8 +122,15 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 			}
 		};
 		deleteButton.setIcon(ButtonIcon.CANCEL);
-		item.add(deleteButton);
-		// Cut link
+		return deleteButton;
+	}
+
+	/**
+	 * Creates cut button for current bookmark item
+	 * 
+	 * @return cut button TODO: no implemented yet!
+	 */
+	private AjaxFallbackCssButton createCutButton() {
 		AjaxFallbackCssButton cutButton = new AjaxFallbackCssButton("cut") {
 
 			@Override
@@ -97,8 +140,19 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 			}
 		};
 		cutButton.setIcon(ButtonIcon.CUT);
-		item.add(cutButton);
-		// Move up
+		return cutButton;
+	}
+
+	/**
+	 * Creates button to move bookmark one step up in bookmark list
+	 * 
+	 * @param item
+	 *            bookmark item
+	 * @param bookmarkPath
+	 *            bookmark's path
+	 * @return move up button
+	 */
+	private AjaxFallbackCssButton createMoveupButton(final ListItem<BookmarkItem> item, final String bookmarkPath) {
 		AjaxFallbackCssButton upButton = new AjaxFallbackCssButton("up") {
 
 			@Override
@@ -112,8 +166,19 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 		if (item.getIndex() == 0) {
 			upButton.setVisible(false);
 		}
-		item.add(upButton);
-		// Move down
+		return upButton;
+	}
+
+	/**
+	 * Creates button to move bookmark one step up in bookmark list
+	 * 
+	 * @param item
+	 *            bookmark item
+	 * @param bookmarkPath
+	 *            bookmark's path
+	 * @return move down button
+	 */
+	private AjaxFallbackCssButton createMoveDownButton(final ListItem<BookmarkItem> item, final String bookmarkPath) {
 		AjaxFallbackCssButton downButton = new AjaxFallbackCssButton("down") {
 
 			@Override
@@ -127,7 +192,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 		if (item.getIndex() == getViewSize() - 1) {
 			downButton.setVisible(false);
 		}
-		item.add(downButton);
+		return downButton;
 	}
 
 }
