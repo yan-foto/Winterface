@@ -12,7 +12,7 @@ import freenet.clients.http.bookmark.BookmarkCategory;
 import freenet.winterface.web.core.BookmarkItemView;
 
 /**
- * A {@link DashboardPanel} which recursively renders bookmark categories.
+ * A {@link Panel} which recursively renders bookmark categories.
  * 
  * @author pausb
  * @see BookmarkItemView
