@@ -141,7 +141,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if (!IPUtils.isValid(val)) {
+			if (!isHostListValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			allowedHosts = val;
@@ -165,7 +165,7 @@ public class Configuration {
 
 		@Override
 		public void set(String val) throws InvalidConfigValueException, NodeNeedRestartException {
-			if (!IPUtils.isValid(val)) {
+			if (!isHostListValid(val)) {
 				throw new InvalidConfigValueException("Host list contains illegal characters.");
 			}
 			fullAccessHosts = val;

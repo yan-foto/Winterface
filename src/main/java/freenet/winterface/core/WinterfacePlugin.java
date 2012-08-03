@@ -37,12 +37,12 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 
 	/** Configuration */
 	private final Configuration config;
-	
+
 	/** Current version */
 	private final static String VERSION = "0.1";
 
 	/**
-	 * True if in development mode. Change to {@code false} to switch to
+	 * {@code true} if in development mode. Change to {@code false} to switch to
 	 * deployment mode
 	 */
 	private final static boolean DEV_MODE = true;
@@ -51,12 +51,11 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 	 * Log4j logger
 	 */
 	private static final Logger logger = Logger.getLogger(WinterfacePlugin.class);
-	
-	
+
 	public WinterfacePlugin() {
 		config = new Configuration();
 	}
-	
+
 	@Override
 	public void runPlugin(PluginRespirator pr) {
 		// Load path
@@ -91,14 +90,14 @@ public class WinterfacePlugin implements FredPlugin, FredPluginVersioned, FredPl
 
 	@Override
 	public String getString(String arg0) {
-		// Part of FredPluginL10n (which is not yet implemented)
+		// TODO Part of FredPluginL10n (which is not yet implemented)
 		// So we just ignore the translation for now
 		return arg0;
 	}
 
 	@Override
 	public void setLanguage(LANGUAGE arg0) {
-		// Part of FredPluginL10n (which is not yet implemented)
+		// TODO Part of FredPluginL10n (which is not yet implemented)
 		// Cannot throw exception, otherwise the plug-in wont start!
 		// throw new UnsupportedOperationException("Not implemented.");
 	}

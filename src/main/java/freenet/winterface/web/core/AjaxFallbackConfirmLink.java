@@ -18,9 +18,12 @@ import freenet.winterface.web.markup.ConfirmPanel;
 public abstract class AjaxFallbackConfirmLink extends AjaxFallbackCssButton {
 
 	/**
-	 * {@link Component} to render {@link ConfirmPanel}
+	 * {@link Component} to render {@link ConfirmPanel} in.
+	 * <p>
+	 * {@link ConfirmPanel} replaces this component.
+	 * </p>
 	 */
-	private Component parent;
+	private Component placeHolder;
 
 	/**
 	 * Default message for {@link ConfirmPanel}
@@ -51,18 +54,18 @@ public abstract class AjaxFallbackConfirmLink extends AjaxFallbackCssButton {
 	 */
 	public AjaxFallbackConfirmLink(String id, IModel<String> model, Component parent) {
 		super(id, model);
-		this.parent = parent;
+		this.placeHolder = parent;
 	}
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		ConfirmPanel cp = new ConfirmPanel(parent, msg) {
+		ConfirmPanel cp = new ConfirmPanel(placeHolder, msg) {
 			@Override
 			protected void onOk(AjaxRequestTarget target) {
 				onConfirm(target);
 			}
 		};
-		parent.replaceWith(cp);
+		placeHolder.replaceWith(cp);
 		if (target != null) {
 			target.add(cp);
 		}

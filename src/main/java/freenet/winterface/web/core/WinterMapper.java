@@ -40,20 +40,13 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	 */
 	private IRequestMapper delegate;
 
-	/**
-	 * Contains mappings
-	 */
+	/** Contains mappings */
 	private HashMap<String, Class<? extends IRequestablePage>> mappings;
 
-	/**
-	 * Log4j Logger
-	 */
-	private static final Logger logger = Logger.getLogger(WinterMapper.class);
-
-	/**
-	 * File to read static mappings from
-	 */
+	/** File to read static mappings from */
 	private static final String MAPPINGS_FILE = "mappings.properties";
+	/** Log4j Logger */
+	private static final Logger logger = Logger.getLogger(WinterMapper.class);
 
 	/**
 	 * Constructs.

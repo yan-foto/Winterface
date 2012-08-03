@@ -49,7 +49,7 @@ public class ServerManager {
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
 
 	public static final String FREENET_ID = "plugin-respirator";
-	
+
 	public static final String CONFIG_ID = "winterface-configuration";
 
 	/**
@@ -90,8 +90,8 @@ public class ServerManager {
 			initStaticResources(sch);
 
 			/*
-			 * Add PluginRespirator/Configuration to servlet context So it can be retrievable
-			 * by our WebApplication
+			 * Add PluginRespirator/Configuration to servlet context So it can
+			 * be retrievable by our WebApplication
 			 */
 			sch.setAttribute(FREENET_ID, fw);
 			sch.setAttribute(CONFIG_ID, config);
@@ -110,41 +110,15 @@ public class ServerManager {
 	}
 
 	/**
-	 * Creates and configures a new {@link Servlet} responsible for resources in
-	 * {@code static} folder.
+	 * Initializes and configures {@link IPFilter}
 	 * 
 	 * @param sch
 	 *            parent {@link ServletContextHandler}
 	 */
-	private void initStaticResources(ServletContextHandler sch) {
-		String staticPath = WinterfacePlugin.class.getClassLoader().getResource("static/").toExternalForm();
-		ServletHolder resourceServlet = new ServletHolder(DefaultServlet.class);
-		resourceServlet.setInitParameter("dirAllowed", "true");
-		resourceServlet.setInitParameter("resourceBase", staticPath);
-		resourceServlet.setInitParameter("pathInfoOnly", "true");
-		// if(DEV_MODE) {
-		// resourceServlet.setInitParameter("maxCacheSize", "0");
-		// }
-		sch.addServlet(resourceServlet, "/static/*");
-		logger.debug("Set Jetty to load static resources from " + staticPath);
-	}
-
-	/**
-	 * Initializes and configures {@link WicketServlet}
-	 * 
-	 * @param devMode
-	 *            {@code true} to start Wicket in development mode (see
-	 * @param sch
-	 */
-	private void initWicketServlet(boolean devMode, ServletContextHandler sch) {
-		ServletHolder sh = new ServletHolder(WicketServlet.class);
-		sh.setInitParameter(ContextParamWebApplicationFactory.APP_CLASS_PARAM, WinterfaceApplication.class.getName());
-		sh.setInitParameter(WicketFilter.FILTER_MAPPING_PARAM, "/*");
-		if (!devMode) {
-			sh.setInitParameter("wicket." + Application.CONFIGURATION, "deployment");
-		}
-
-		sch.addServlet(sh, "/*");
+	private void initIPFilter(ServletContextHandler sch, Configuration config) {
+		FilterHolder fh = new FilterHolder(IPFilter.class);
+		fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, config.getAllowedHosts());
+		sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
 	}
 
 	/**
@@ -168,15 +142,41 @@ public class ServerManager {
 	}
 
 	/**
-	 * Initializes and configures {@link IPFilter}
+	 * Initializes and configures {@link WicketServlet}
+	 * 
+	 * @param devMode
+	 *            {@code true} to start Wicket in development mode (see
+	 * @param sch
+	 */
+	private void initWicketServlet(boolean devMode, ServletContextHandler sch) {
+		ServletHolder sh = new ServletHolder(WicketServlet.class);
+		sh.setInitParameter(ContextParamWebApplicationFactory.APP_CLASS_PARAM, WinterfaceApplication.class.getName());
+		sh.setInitParameter(WicketFilter.FILTER_MAPPING_PARAM, "/*");
+		if (!devMode) {
+			sh.setInitParameter("wicket." + Application.CONFIGURATION, "deployment");
+		}
+
+		sch.addServlet(sh, "/*");
+	}
+
+	/**
+	 * Creates and configures a new {@link Servlet} responsible for resources in
+	 * {@code static} folder.
 	 * 
 	 * @param sch
 	 *            parent {@link ServletContextHandler}
 	 */
-	private void initIPFilter(ServletContextHandler sch, Configuration config) {
-		FilterHolder fh = new FilterHolder(IPFilter.class);
-		fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, config.getAllowedHosts());
-		sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
+	private void initStaticResources(ServletContextHandler sch) {
+		String staticPath = WinterfacePlugin.class.getClassLoader().getResource("static/").toExternalForm();
+		ServletHolder resourceServlet = new ServletHolder(DefaultServlet.class);
+		resourceServlet.setInitParameter("dirAllowed", "true");
+		resourceServlet.setInitParameter("resourceBase", staticPath);
+		resourceServlet.setInitParameter("pathInfoOnly", "true");
+		// if(DEV_MODE) {
+		// resourceServlet.setInitParameter("maxCacheSize", "0");
+		// }
+		sch.addServlet(resourceServlet, "/static/*");
+		logger.debug("Set Jetty to load static resources from " + staticPath);
 	}
 
 	/**

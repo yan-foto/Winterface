@@ -4,7 +4,6 @@ import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.util.cookies.CookieUtils;
 
-import freenet.keys.FreenetURI;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
@@ -21,11 +20,9 @@ import freenet.winterface.web.ErrorPage;
  */
 public class WinterfaceApplication extends WebApplication {
 
-	/**
-	 * A Wrapper which takes care of freenet related stuff
-	 */
+	/** FreenetWrapper to interact with node */
 	private FreenetWrapper freenetWrapper;
-	
+	/** User configuration */
 	private Configuration config;
 
 	/**
@@ -77,7 +74,10 @@ public class WinterfaceApplication extends WebApplication {
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
 	}
-	
+
+	/**
+	 * @return user {@link Configuration}
+	 */
 	public Configuration getConfiguration() {
 		return config;
 	}

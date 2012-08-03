@@ -12,7 +12,7 @@ import freenet.clients.http.bookmark.BookmarkCategory;
 import freenet.winterface.web.core.BookmarkItemView;
 
 /**
- * A {@link DashboardPanel} which recursively renders bookmark categories.
+ * A {@link Panel} which recursively renders bookmark categories.
  * 
  * @author pausb
  * @see BookmarkItemView
@@ -20,12 +20,10 @@ import freenet.winterface.web.core.BookmarkItemView;
 @SuppressWarnings("serial")
 public class BookmarkCategoryPanel extends Panel {
 
-	/**
-	 * Model of {@link BookmarkCategory} for this panel
-	 */
-	private IModel<BookmarkCategory> model;
-
-	private String parentPath;
+	/** Model of {@link BookmarkCategory} for this panel */
+	private final IModel<BookmarkCategory> model;
+	/** Path from root up to this category */
+	private final String parentBookmarkPath;
 
 	/**
 	 * Constructs
@@ -38,7 +36,7 @@ public class BookmarkCategoryPanel extends Panel {
 	public BookmarkCategoryPanel(String id, IModel<BookmarkCategory> model, String parentPath) {
 		super(id, model);
 		this.model = model;
-		this.parentPath = parentPath;
+		this.parentBookmarkPath = parentPath;
 	}
 
 	@Override
@@ -59,12 +57,10 @@ public class BookmarkCategoryPanel extends Panel {
 			subCats.setVisible(false);
 		} else {
 			subCats = new PropertyListView<BookmarkCategory>("allSubCategories") {
-
 				@Override
 				protected void populateItem(ListItem<BookmarkCategory> item) {
 					item.add(new BookmarkCategoryPanel("content", item.getModel(), getItemPath()));
 				}
-
 			}.setReuseItems(true);
 
 		}
@@ -73,7 +69,7 @@ public class BookmarkCategoryPanel extends Panel {
 
 	public String getItemPath() {
 		String categoryName = model.getObject().getName();
-		return parentPath + categoryName;
+		return parentBookmarkPath + categoryName;
 	}
 
 }

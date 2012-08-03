@@ -12,18 +12,17 @@ import freenet.pluginmanager.PluginRespirator;
  */
 public class FreenetWrapper {
 
-	/**
-	 * {@link PluginRespirator} for {@link WinterfacePlugin}
-	 */
+	/** {@link PluginRespirator} for {@link WinterfacePlugin} */
 	private final PluginRespirator pr;
-	
-	private BookmarkManager bookmarkManager;
+
+	/** {@link BookmarkManager} to manipulate bookmark items */
+	private final BookmarkManager bookmarkManager;
 
 	/**
 	 * Directory containing files overwriting default templates
 	 * (HTML/CSS/JS/...)
 	 */
-	// TODO do something!
+	// TODO this is not implemented yet.
 	public static final String WinterFaceResources = "webinterface/";
 
 	/**
@@ -35,6 +34,8 @@ public class FreenetWrapper {
 	 */
 	public FreenetWrapper(PluginRespirator pr) {
 		this.pr = pr;
+		// TODO NodeClientCore will provide an instance of BookmarkManager
+		// Make changes respectively
 		this.bookmarkManager = new BookmarkManager(pr.getNode().clientCore);
 	}
 

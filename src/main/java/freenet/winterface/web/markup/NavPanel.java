@@ -77,7 +77,6 @@ public final class NavPanel extends Panel {
 
 		// Model to add "active" class to menu if currently in respective page
 		LoadableDetachableModel<String> classModel = new LoadableDetachableModel<String>() {
-
 			@Override
 			protected String load() {
 				return callbackModel.getObject().isActive(getPage()) ? "active" : null;
@@ -92,7 +91,6 @@ public final class NavPanel extends Panel {
 
 		// Menu link to page
 		Link<NavItem> link = new Link<NavItem>("nav-link", callbackModel) {
-
 			@Override
 			public void onClick() {
 				callbackModel.getObject().onClick(getPage());
@@ -114,7 +112,6 @@ public final class NavPanel extends Panel {
 
 		// Model used to generate children (if any)
 		LoadableDetachableModel<List<NavItem>> childModel = new LoadableDetachableModel<List<NavItem>>() {
-
 			@Override
 			protected List<NavItem> load() {
 				return callbackModel.getObject().getChilds(getPage());
@@ -123,7 +120,6 @@ public final class NavPanel extends Panel {
 
 		// Add Children
 		ListView<NavItem> childList = new ListView<NavItem>("nav-children", childModel) {
-
 			@Override
 			protected void populateItem(ListItem<NavItem> item) {
 				item.add(new NavPanel("nav-child", item.getModel(), level + 1));
