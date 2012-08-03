@@ -1,5 +1,6 @@
 package freenet.winterface.web.markup;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -10,10 +11,20 @@ import freenet.node.PeerManager;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.web.core.WinterfaceApplication;
 
-
+/**
+ * {@link DashboardPanel} which shows sumarized information about peers.
+ * 
+ * @author pausb
+ */
 @SuppressWarnings("serial")
 public class PeersPanel extends DashboardPanel {
 
+	/**
+	 * Constructs
+	 * 
+	 * @param id
+	 *            {@link Component} markup ID
+	 */
 	public PeersPanel(String id) {
 		super(id);
 		WinterfaceApplication app = (WinterfaceApplication) getApplication();
@@ -25,7 +36,7 @@ public class PeersPanel extends DashboardPanel {
 		container.add(new AjaxSelfUpdatingTimerBehavior(Duration.seconds(30)));
 		add(container);
 		// All peers
-		Label allPeers = new Label("peers-count",Model.of(peers.countConnectedPeers()));
+		Label allPeers = new Label("peers-count", Model.of(peers.countConnectedPeers()));
 		container.add(allPeers);
 		// Darknet Peers
 		Label darknetPeers = new Label("darknet-count", Model.of(peers.countConnectedDarknetPeers()));

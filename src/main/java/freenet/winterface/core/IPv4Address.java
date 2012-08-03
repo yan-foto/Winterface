@@ -119,7 +119,7 @@ public class IPv4Address implements IPAddress {
 		if (!getVersion().equals(other.getVersion())) {
 			throw new IllegalArgumentException("IP versions doesn't match");
 		}
-		long otherLong = (Long) ((IPv4Address)other).toNumberFormat();
+		long otherLong = (Long) ((IPv4Address) other).toNumberFormat();
 		if (subnet == 0) {
 			return otherLong == longFormat;
 		}

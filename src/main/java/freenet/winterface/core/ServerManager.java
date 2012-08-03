@@ -49,7 +49,7 @@ public class ServerManager {
 	private final static Logger logger = Logger.getLogger(ServerManager.class);
 
 	public static final String FREENET_ID = "plugin-respirator";
-	
+
 	public static final String CONFIG_ID = "winterface-configuration";
 
 	/**
@@ -90,8 +90,8 @@ public class ServerManager {
 			initStaticResources(sch);
 
 			/*
-			 * Add PluginRespirator/Configuration to servlet context So it can be retrievable
-			 * by our WebApplication
+			 * Add PluginRespirator/Configuration to servlet context So it can
+			 * be retrievable by our WebApplication
 			 */
 			sch.setAttribute(FREENET_ID, fw);
 			sch.setAttribute(CONFIG_ID, config);
@@ -107,7 +107,7 @@ public class ServerManager {
 		}
 		return server;
 	}
-	
+
 	/**
 	 * Initializes and configures {@link IPFilter}
 	 * 
@@ -119,7 +119,7 @@ public class ServerManager {
 		fh.setInitParameter(IPFilter.ALLOWED_HOSTS_PARAM, config.getAllowedHosts());
 		sch.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
 	}
-	
+
 	/**
 	 * Initializes and configures {@link ErrorHandler}s.
 	 * <p>
@@ -157,7 +157,7 @@ public class ServerManager {
 
 		sch.addServlet(sh, "/*");
 	}
-	
+
 	/**
 	 * Creates and configures a new {@link Servlet} responsible for resources in
 	 * {@code static} folder.

@@ -26,19 +26,13 @@ import freenet.winterface.web.markup.BookmarksPanel;
 @SuppressWarnings("serial")
 public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
-	/**
-	 * {@link B1ookmarkManager} to manage this {@link BookmarkItem}s
-	 */
+	/** {@link B1ookmarkManager} to manage this {@link BookmarkItem}s */
 	private transient BookmarkManager bookmarkManager;
 
-	/**
-	 * Absolute path of parent item
-	 */
+	/** Absolute path of parent item */
 	private final String parentPath;
 
-	/**
-	 * Log4j logger
-	 */
+	/** Log4j logger */
 	private static final Logger logger = Logger.getLogger(BookmarkItemView.class);
 
 	/**
@@ -91,7 +85,6 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	 */
 	private AjaxFallbackCssButton createEditButton() {
 		AjaxFallbackCssButton editButton = new AjaxFallbackCssButton("edit") {
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				// TODO Auto-generated method stub
@@ -113,7 +106,6 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	 */
 	private AjaxFallbackConfirmLink createDeleteButton(final String bookmarkPath, Component feedback) {
 		AjaxFallbackConfirmLink deleteButton = new AjaxFallbackConfirmLink("delete", feedback) {
-
 			@Override
 			public void onConfirm(AjaxRequestTarget target) {
 				bookmarkManager.removeBookmark(bookmarkPath);
@@ -132,11 +124,9 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	 */
 	private AjaxFallbackCssButton createCutButton() {
 		AjaxFallbackCssButton cutButton = new AjaxFallbackCssButton("cut") {
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				// TODO Auto-generated method stub
-
 			}
 		};
 		cutButton.setIcon(ButtonIcon.CUT);
@@ -154,7 +144,6 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	 */
 	private AjaxFallbackCssButton createMoveupButton(final ListItem<BookmarkItem> item, final String bookmarkPath) {
 		AjaxFallbackCssButton upButton = new AjaxFallbackCssButton("up") {
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				bookmarkManager.moveBookmarkUp(bookmarkPath, true);
@@ -180,7 +169,6 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	 */
 	private AjaxFallbackCssButton createMoveDownButton(final ListItem<BookmarkItem> item, final String bookmarkPath) {
 		AjaxFallbackCssButton downButton = new AjaxFallbackCssButton("down") {
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				bookmarkManager.moveBookmarkDown(bookmarkPath, true);

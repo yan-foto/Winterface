@@ -22,7 +22,6 @@ public class BookmarkCategoryPanel extends Panel {
 
 	/** Model of {@link BookmarkCategory} for this panel */
 	private final IModel<BookmarkCategory> model;
-
 	/** Path from root up to this category */
 	private final String parentBookmarkPath;
 
@@ -58,12 +57,10 @@ public class BookmarkCategoryPanel extends Panel {
 			subCats.setVisible(false);
 		} else {
 			subCats = new PropertyListView<BookmarkCategory>("allSubCategories") {
-
 				@Override
 				protected void populateItem(ListItem<BookmarkCategory> item) {
 					item.add(new BookmarkCategoryPanel("content", item.getModel(), getItemPath()));
 				}
-
 			}.setReuseItems(true);
 
 		}

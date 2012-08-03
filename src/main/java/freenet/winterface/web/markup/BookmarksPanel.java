@@ -31,19 +31,16 @@ public class BookmarksPanel extends DashboardPanel {
 		
 		// Make it detachable so its not serialized
 		LoadableDetachableModel<List<BookmarkCategory>> bmModel = new LoadableDetachableModel<List<BookmarkCategory>>() {
-
 			@Override
 			protected List<BookmarkCategory> load() {
 				ArrayList<BookmarkCategory> result = new ArrayList<BookmarkCategory>();
 				result.add(BookmarkManager.MAIN_CATEGORY);
 				return result;
 			}
-
 		};
 		
 		// Make use of chaining models
 		PropertyListView<BookmarkCategory> cats = new PropertyListView<BookmarkCategory>("categories",bmModel) {
-
 			@Override
 			protected void populateItem(ListItem<BookmarkCategory> item) {
 				item.add(new BookmarkCategoryPanel("content",item.getModel(),""));

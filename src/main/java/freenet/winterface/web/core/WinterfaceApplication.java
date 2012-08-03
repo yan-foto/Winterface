@@ -16,9 +16,10 @@ import freenet.winterface.web.ErrorPage;
  * 
  */
 public class WinterfaceApplication extends WebApplication {
-	
+
+	/** FreenetWrapper to interact with node */
 	private FreenetWrapper freenetWrapper;
-	
+	/** User configuration */
 	private Configuration config;
 
 	@Override
@@ -40,11 +41,17 @@ public class WinterfaceApplication extends WebApplication {
 	public Class<? extends Page> getHomePage() {
 		return Dashboard.class;
 	}
-	
+
+	/**
+	 * @return {@link FreenetWrapper} to interact with core
+	 */
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
 	}
-	
+
+	/**
+	 * @return user {@link Configuration}
+	 */
 	public Configuration getConfiguration() {
 		return config;
 	}

@@ -46,7 +46,6 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 
 		// Navigation Panel
 		LoadableDetachableModel<NavItem> navModel = new LoadableDetachableModel<NavItem>() {
-
 			@Override
 			protected NavItem load() {
 				return getMainNav();
@@ -66,7 +65,6 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	 */
 	public NavItem getMainNav() {
 		return new PageNavItem(null, null) {
-
 			@Override
 			public void onClick(Page page) {
 				// This level is not shown so simply ignore this listener
