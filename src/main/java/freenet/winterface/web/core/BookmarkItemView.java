@@ -30,7 +30,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	private transient BookmarkManager bookmarkManager;
 
 	/** Absolute path of parent item */
-	private final String parentPath;
+	private final String parentBookmarkPath;
 
 	/** Log4j logger */
 	private static final Logger logger = Logger.getLogger(BookmarkItemView.class);
@@ -46,13 +46,13 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 	public BookmarkItemView(String id, String parentPath) {
 		super(id);
 		setReuseItems(true);
-		this.parentPath = parentPath;
+		this.parentBookmarkPath = parentPath;
 		bookmarkManager = ((WinterfaceApplication) getApplication()).getFreenetWrapper().getBookmarkManager();
 	}
 
 	@Override
 	protected void populateItem(final ListItem<BookmarkItem> item) {
-		final String bookmarkPath = parentPath + "/" + item.getModel().getObject().getName();
+		final String bookmarkPath = parentBookmarkPath + "/" + item.getModel().getObject().getName();
 		// Class to differentiate lines
 		boolean odd = (item.getIndex() % 2 == 0);
 		String rowClass = (odd ? "odd" : "even") + "-row";

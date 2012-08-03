@@ -11,7 +11,7 @@ import org.apache.wicket.model.Model;
 public abstract class ConfirmPanel extends Panel {
 
 	/** Place-holder {@link Component} to replace this panel with */
-	private Component parent;
+	private Component placeHolder;
 	/** Confirmation message */
 	private String msg;
 
@@ -25,7 +25,7 @@ public abstract class ConfirmPanel extends Panel {
 	 */
 	public ConfirmPanel(Component parent, String msg) {
 		super(parent.getId());
-		this.parent = parent;
+		this.placeHolder = parent;
 		this.msg = msg;
 	}
 
@@ -63,9 +63,9 @@ public abstract class ConfirmPanel extends Panel {
 	 *            Ajax request target
 	 */
 	private void replaceBack(AjaxRequestTarget target) {
-		ConfirmPanel.this.replaceWith(parent);
+		ConfirmPanel.this.replaceWith(placeHolder);
 		if (target != null) {
-			target.add(parent);
+			target.add(placeHolder);
 		}
 	}
 
