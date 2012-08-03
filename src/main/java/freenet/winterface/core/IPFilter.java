@@ -52,14 +52,19 @@ public class IPFilter implements Filter {
 		String path = ((HttpServletRequest) request).getServletPath();
 		String remoteAddr = request.getRemoteAddr();
 		boolean unblock = false;
+		// First check if remote address is included in allowed hosts
 		for (String allowed : allowedHosts) {
 			try {
 				unblock |= IPUtils.quietMatches(allowed, remoteAddr);
-			} catch (UnknownHostException e){
-				logger.error("Error while matching allowed hosts and remoter address.",e);
+			} catch (UnknownHostException e) {
+				logger.error("Error while matching allowed hosts and remoter address.", e);
 				unblock = false;
 			}
 		}
+		// We don't block access to specific URLs such as error pages and static
+		// data.
+		// This is necessary because a blocking request forwards to an error
+		// page with static resources
 		if (unblock || whiteUrls.contains(path)) {
 			chain.doFilter(request, response);
 			return;

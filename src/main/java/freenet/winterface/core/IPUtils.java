@@ -3,6 +3,10 @@ package freenet.winterface.core;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import freenet.io.AddressMatcher;
+import freenet.io.Inet4AddressMatcher;
+import freenet.io.Inet6AddressMatcher;
+
 /**
  * Does all IP related calculations such as subnetting.
  * 
@@ -16,24 +20,8 @@ public final class IPUtils {
 	final static String IPV4_HINT = ".";
 	/** Hint characte if its IPv6 */
 	final static String IPV6_HINT = ":";
-
-	/**
-	 * Creates an {@link IPAddress} from given {@link String}.
-	 * 
-	 * @param addr
-	 *            string to turn into {@link IPAddress}
-	 * @return generated {@link IPAddress}
-	 * @throws UnknownHostException 
-	 */
-	public static IPAddress stringToIP(String addr) throws UnknownHostException {
-		if (addr.contains(IPV4_HINT)) {
-			return new IPv4Address(addr);
-		} else if (addr.contains(IPV6_HINT)) {
-			return new IPv6Address(addr);
-		} else {
-			throw new IllegalArgumentException("Invalid format");
-		}
-	}
+	/** Character denoting start of subnet mask */
+	private final static String MASK_CHAR = "/";
 
 	/**
 	 * Compares <i>other</i> IP address against <i>base</i> IP address.
@@ -50,9 +38,14 @@ public final class IPUtils {
 	 * @throws UnknownHostException 
 	 */
 	public static boolean matches(String base, String other) throws UnknownHostException {
-		IPAddress baseIP = stringToIP(base);
-		IPAddress otherIp = stringToIP(other);
-		return baseIP.matches(otherIp);
+		AddressMatcher matcher = null;
+		if(base.contains(IPV4_HINT)) {
+			matcher = new Inet4AddressMatcher(base);
+		} else if (base.contains(IPV6_HINT)) {
+			matcher = new Inet6AddressMatcher(base);
+		}
+		InetAddress toMatch = InetAddress.getByName(other);
+		return matcher.matches(toMatch);
 	}
 
 	/**
@@ -85,7 +78,7 @@ public final class IPUtils {
 	 * @see IPAddress
 	 */
 	public static boolean isValid(String addr) {
-		int maskIndex = addr.indexOf(IPAddress.MASK_CHAR);
+		int maskIndex = addr.indexOf(MASK_CHAR);
 		if(maskIndex>-1) {
 			addr = addr.substring(0,maskIndex);
 		}
