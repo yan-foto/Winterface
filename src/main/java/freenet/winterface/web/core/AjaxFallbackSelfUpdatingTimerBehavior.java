@@ -5,7 +5,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.StringHeaderItem;
 import org.apache.wicket.util.time.Duration;
 
 /**
@@ -30,11 +30,11 @@ public class AjaxFallbackSelfUpdatingTimerBehavior extends AjaxSelfUpdatingTimer
 	public AjaxFallbackSelfUpdatingTimerBehavior(Duration updateInterval) {
 		super(updateInterval);
 	}
-
+	
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forScript("<noscript><meta http-equiv=\"refresh\" content=\"" + getUpdateInterval().seconds() + "\"></noscript>",null));
+		response.render(StringHeaderItem.forString("<noscript><meta http-equiv=\"refresh\" content=\"" + getUpdateInterval().seconds() + "\"></noscript>"));
 	}
 
 }
