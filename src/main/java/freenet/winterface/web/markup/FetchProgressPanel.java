@@ -3,46 +3,52 @@ package freenet.winterface.web.markup;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
-import freenet.clients.http.FProxyFetchInProgress;
 import freenet.clients.http.FProxyFetchResult;
-import freenet.clients.http.FProxyFetchWaiter;
 
 @SuppressWarnings("serial")
 public class FetchProgressPanel extends Panel {
-	
-	public FetchProgressPanel(String id, IModel<?> model) {
+
+	public FetchProgressPanel(String id, IModel<FProxyFetchResult> model) {
 		super(id, model);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		Object dmo = getDefaultModelObject();
-		add(new Label("timeStarted"));
+		add(new Label("elapsed", elapsedModel));
 		add(new Label("totalBlocks"));
 		add(new Label("fetchedBlocks"));
+		add(new Label("progress",progressModel).setEscapeModelStrings(false));
 	}
 	
-	/**
-	 * Returns current progress in percent.
-	 * <p>
-	 * This method is used to generate a value for progress tag in
-	 * {@link FetchProgressPanel}
-	 * </p>
-	 * 
-	 * @param waiter
-	 *            {@link FProxyFetchWaiter} to get current progress from
-	 * @return 0.0 &lt; progress &lt; 1.0
-	 */
-	private float getProgressPercent(FProxyFetchInProgress progress) {
-		FProxyFetchResult resultFast = progress.getWaiter().getResultFast();
-		float result = -1.0f;
-		if (resultFast.requiredBlocks > 0) {
-			result = resultFast.fetchedBlocks / resultFast.requiredBlocks;
+	private final LoadableDetachableModel<String> progressModel = new LoadableDetachableModel<String>() {
+		@Override
+		protected String load() {
+			FProxyFetchResult result = (FProxyFetchResult) FetchProgressPanel.this.getDefaultModelObject();
+			StringBuffer progress = new StringBuffer();
+			progress.append("<progress");
+			if(result.totalBlocks>0) {
+				float percent = ((float)result.fetchedBlocks / (float)result.totalBlocks);
+				progress.append(" value=\"").append(percent).append("\">");
+				progress.append(percent).append(" %");
+			} else {
+				progress.append(">");
+			}
+			progress.append("</progress>");
+			return progress.toString();
 		}
-		resultFast.close();
-		return result;
-	}
+	};
 	
+	private final LoadableDetachableModel<String> elapsedModel = new LoadableDetachableModel<String>() {
+		@Override
+		protected String load() {
+			FProxyFetchResult result = (FProxyFetchResult) FetchProgressPanel.this.getDefaultModelObject();
+			long elapsed = (System.currentTimeMillis() - result.timeStarted) / 1000;
+			String second = getApplication().getResourceSettings().getLocalizer().getString("FetchProgressPanel.timeUnit", FetchProgressPanel.this);
+			return elapsed + " " + second;
+		}
+	};
+
 }

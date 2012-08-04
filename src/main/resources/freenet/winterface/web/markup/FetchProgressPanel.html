@@ -1,8 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
-	<div wicket:id="timeStarted"></div>
-	<div wicket:id="totalBlocks"></div>
-	<div wicket:id="fetchedBlocks"></div>
+	<div class="box">
+		<h4><wicket:message key="FProxyToadlet.progressDownloading"/></h4>
+		<table>
+			<tr>
+				<td class="column-title">
+					<wicket:message key="FetchProgressPanel.timeElapsed" />
+				</td>
+				<td class="column-content">
+					<div wicket:id="elapsed"></div>
+				</td>
+			</tr>
+			<tr>
+				<td class="column-title">
+					<wicket:message key="FetchProgressPanel.totalBlocks" />
+				</td>
+				<td class="column-content">
+					<div wicket:id="totalBlocks"></div>
+				</td>
+			</tr>
+			<tr>
+				<td class="column-title">
+					<wicket:message key="FetchProgressPanel.fetchedBlocks" />
+				</td>
+				<td class="column-content">
+					<div wicket:id="fetchedBlocks"></div>
+				</td>
+			</tr>
+		</table>
+		<div wicket:id="progress"></div>
+	</div>
 </wicket:panel>
 </html>

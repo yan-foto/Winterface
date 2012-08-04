@@ -15,6 +15,7 @@ import freenet.client.FetchException;
 import freenet.client.HighLevelSimpleClient;
 import freenet.client.HighLevelSimpleClientImpl;
 import freenet.clients.http.FProxyFetchInProgress;
+import freenet.clients.http.FProxyFetchInProgress.REFILTER_POLICY;
 import freenet.clients.http.FProxyFetchResult;
 import freenet.clients.http.FProxyFetchTracker;
 import freenet.clients.http.FProxyFetchWaiter;
@@ -36,6 +37,8 @@ import freenet.winterface.core.FreenetWrapper;
  */
 public class FetchTrackerManager implements RequestClient {
 
+	/** Default filtering policy*/
+	private final static REFILTER_POLICY DEFAULT_FILTER_POLICY = FProxyFetchInProgress.REFILTER_POLICY.RE_FILTER;
 	/** Used to get {@link FetchContext} from */
 	private HighLevelSimpleClientImpl client;
 	/** Actual FProxy fetch tracker */
@@ -81,14 +84,14 @@ public class FetchTrackerManager implements RequestClient {
 	 * @throws FetchException
 	 * @throws MalformedURLException
 	 */
-	public void initProgress(String path, long maxSize, FetchContext fctx) throws FetchException, MalformedURLException {
+	public void initProgress(String path, FetchContext fctx) throws FetchException, MalformedURLException {
 		FreenetURI uri = keysInProgress.get(path);
 		if (uri == null) {
 			uri = new FreenetURI(path);
 			keysInProgress.put(path, uri);
 		}
 		// FIXME Maybe add filter policy to the Configuration
-		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, maxSize, fctx, FProxyFetchInProgress.REFILTER_POLICY.RE_FILTER);
+		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, fctx.maxOutputLength , fctx, DEFAULT_FILTER_POLICY);
 		FetchListener fetchListener = listenerFor(uri, waiter.getProgress(), fctx);
 		if (fetchListener == null) {
 			logger.debug(String.format("No existing listeners found for URI %s. Registering new one.", uri));
@@ -113,6 +116,12 @@ public class FetchTrackerManager implements RequestClient {
 	public FProxyFetchResult getResult(String path) throws MalformedURLException {
 		FreenetURI uri = new FreenetURI(path);
 		return listenerFor(uri).getLatest();
+	}
+	
+	public FProxyFetchResult getWaitForeverResult(String path, FetchContext fctx) throws MalformedURLException, FetchException {
+		FreenetURI uri = new FreenetURI(path);
+		FProxyFetchWaiter waiter = tracker.makeFetcher(uri, fctx.maxOutputLength, fctx, DEFAULT_FILTER_POLICY);
+		return waiter.getResult(true);
 	}
 
 	/**
