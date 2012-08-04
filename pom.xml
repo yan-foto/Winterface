@@ -14,10 +14,10 @@
 	</properties>
 	<dependencies>
 		<dependency>
-		<groupId>org.freenetproject</groupId>
-		<artifactId>fred</artifactId>
-		<version>0.7.5.1405</version>
-		<scope>provided</scope>
+			<groupId>org.freenetproject</groupId>
+			<artifactId>fred</artifactId>
+			<version>0.7.5.1409-next</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.freenetproject</groupId>
@@ -25,13 +25,13 @@
 			<version>26</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.freenetproject</groupId>
-			<artifactId>fred</artifactId>
-			<version>0.7.5.1405</version>
-			<scope>system</scope>
-			<systemPath>${fred.library}/fred.jar</systemPath>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.freenetproject</groupId> -->
+		<!-- <artifactId>fred</artifactId> -->
+		<!-- <version>0.7.5.1405</version> -->
+		<!-- <scope>system</scope> -->
+		<!-- <systemPath>${fred.library}/fred.jar</systemPath> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
