@@ -132,21 +132,10 @@ body {
 .bookmark-category-name {
 	background-color: #FFFEBF;
 }
-<<<<<<< HEAD
 
 /*
 * ------------------------- FORMS -----------------------------
 */
-.form-title {
-	font-weight: bold;
-	vertical-align: top;
-	width: 40%;
-}
-
-.form-input {
-	width: 60%;
-}
-
 .form-part {
 	display: inline;
 	float: left;
@@ -188,4 +177,14 @@ body {
 
 .clear {
 	clear: both;
+}
+
+td.column-title, th.column-title {
+	font-weight: bold;
+	vertical-align: top;
+	width: 30%;
+}
+
+td.column-content, th.column-content {
+	width: 70%;
 }
