@@ -11,6 +11,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Page;
 import org.apache.wicket.core.request.mapper.AbstractBookmarkableMapper;
+import org.apache.wicket.core.request.mapper.BookmarkableMapper;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
@@ -32,7 +33,7 @@ import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
  * @see AbstractBookmarkableMapper
  * 
  */
-public class WinterMapper extends AbstractBookmarkableMapper {
+public class WinterMapper extends BookmarkableMapper {
 
 	/**
 	 * Fallback {@link IRequestMapper}. In case there is no defined mapping for
@@ -84,7 +85,13 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	@Override
 	public IRequestHandler mapRequest(Request request) {
 		if (urlDesired(request.getClientUrl()) != null) {
-			return super.mapRequest(request);
+			UrlInfo urlInfo = parseRequest(request);
+			if (urlInfo != null) {
+				Class<? extends IRequestablePage> pageClass = urlInfo.getPageClass();
+				PageParameters pageParameters = urlInfo.getPageParameters();
+
+				return processBookmarkable(pageClass, pageParameters);
+			}
 		}
 		return delegate.mapRequest(request);
 	}
@@ -112,14 +119,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 
 	@Override
 	protected Url buildUrl(UrlInfo info) {
-		Url url = new Url();
-		url.getSegments().add(getContext().getNamespace());
-		url.getSegments().add(getContext().getBookmarkableIdentifier());
-		url.getSegments().add(info.getPageClass().getName());
-
-		encodePageComponentInfo(url, info.getPageComponentInfo());
-
-		return encodePageParameters(url, info.getPageParameters(), new PageParametersEncoder());
+		return encodePageParameters(new Url(), info.getPageParameters(), new PageParametersEncoder());
 	}
 
 	@Override
