@@ -41,11 +41,11 @@ public final class NavPanel extends Panel {
 	 * 
 	 * @param id
 	 *            wicket:id of desired {@link Component}
-	 * @param callbackModel
+	 * @param itemModel
 	 *            {@link IModel} used to generate navigation content
 	 */
-	public NavPanel(String id, IModel<NavItem> callbackModel) {
-		this(id, callbackModel, 0);
+	public NavPanel(String id, IModel<NavItem> itemModel) {
+		this(id, itemModel, 0);
 	}
 
 	/**
@@ -53,47 +53,44 @@ public final class NavPanel extends Panel {
 	 * 
 	 * @param id
 	 *            wicket:id of desired {@link Component}
-	 * @param callbackModel
+	 * @param itemModel
 	 *            {@link IModel} used to generate navigation content
 	 * @param level
 	 *            depth level
 	 */
-	public NavPanel(String id, IModel<NavItem> callbackModel, int level) {
-		super(id);
+	public NavPanel(String id, IModel<NavItem> itemModel, int level) {
+		super(id,itemModel);
 		this.level = level;
-		initPanel(callbackModel);
 	}
 
-	/**
-	 * Initializes the navigation panel
-	 * 
-	 * @param callbackModel
-	 *            {@link IModel} used to generate content
-	 */
-	private void initPanel(final IModel<NavItem> callbackModel) {
+	
+	@Override
+	protected void onInitialize() {
+		@SuppressWarnings("unchecked")
+		final IModel<NavItem> itemModel = (IModel<NavItem>) getDefaultModel();
 		// Use field called "name" to get name of menu
 		// TODO support i18n
-		final IModel<String> nameModel = new PropertyModel<String>(callbackModel, "Name");
+		final IModel<String> nameModel = new PropertyModel<String>(itemModel, "Name");
 
 		// Model to add "active" class to menu if currently in respective page
 		LoadableDetachableModel<String> classModel = new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
-				return callbackModel.getObject().isActive(getPage()) ? "active" : null;
+				return itemModel.getObject().isActive(getPage()) ? "active" : null;
 			}
 
 			@Override
 			protected void onDetach() {
 				super.onDetach();
-				callbackModel.detach();
+				itemModel.detach();
 			}
 		};
 
 		// Menu link to page
-		Link<NavItem> link = new Link<NavItem>("nav-link", callbackModel) {
+		Link<NavItem> link = new Link<NavItem>("nav-link", itemModel) {
 			@Override
 			public void onClick() {
-				callbackModel.getObject().onClick(getPage());
+				itemModel.getObject().onClick(getPage());
 			}
 
 			@Override
@@ -114,7 +111,7 @@ public final class NavPanel extends Panel {
 		LoadableDetachableModel<List<NavItem>> childModel = new LoadableDetachableModel<List<NavItem>>() {
 			@Override
 			protected List<NavItem> load() {
-				return callbackModel.getObject().getChilds(getPage());
+				return itemModel.getObject().getChilds(getPage());
 			}
 		};
 
