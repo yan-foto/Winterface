@@ -47,7 +47,6 @@ public abstract class ConfirmPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				replaceBack(target);
 			}
-
 		};
 		cancelButton.add(new Label("cancel-label", "Cancel"));
 		add(msg);
