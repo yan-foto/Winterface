@@ -23,6 +23,12 @@ public class VersionPanel extends DashboardPanel {
 	 */
 	public VersionPanel(String id) {
 		super(id);
+	}
+	
+	@Override
+	protected void onInitialize() {
+		// TODO Add localization support
+		super.onInitialize();
 		// Freenet Version info
 		String freenet = "Freenet " + Version.publicVersion + " Build #" + Version.buildNumber() + " " + Version.cvsRevision();
 		add(new Label("freenet-ver", Model.of(freenet)));

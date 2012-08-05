@@ -77,8 +77,18 @@ public abstract class AjaxFallbackConfirmLink extends AjaxFallbackCssButton {
 	 * @param msg
 	 *            confirm message
 	 */
-	public void setMessage(String msg) {
+	public AjaxFallbackConfirmLink setMessage(String msg) {
 		this.msg = msg;
+		return this;
+	}
+
+	/**
+	 * Returns confirm message
+	 * 
+	 * @return confirm message
+	 */
+	public String getMessage() {
+		return msg;
 	}
 
 	/**

@@ -16,11 +16,28 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import freenet.io.AddressMatcher;
+import freenet.winterface.web.core.WinterfaceApplication;
+
 /**
  * {@link Filter} for IP filtering.
  * <p>
- * If remote host IP is not included in allowed hosts of Winterface, the request
- * is not processed further and a {@link ServletException} is thrown.
+ * {@link WinterfaceApplication} contains a comma separated list of allowed
+ * hosts in its {@link Configuration}. Hosts can be also in CIDR format.
+ * Filtering is done in following steps:
+ * <ul>
+ * <li>Match remote address against allowed hosts. This is done using
+ * {@link AddressMatcher} which is also capable of subnet matching.</li>
+ * <li>If remote host is not in the list of allowed hosts it is blocked
+ * <b>only</b> if required page is not contained in list of white listed paths
+ * (see bellow)</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <b>White listed paths</b> are paths, which are not filtered under any
+ * condition. This paths contain for example the error pages. If remote host is
+ * blocked, its request is forwarded to an error page which <i>should</i> be
+ * accessible and not filtered.
  * </p>
  * 
  * @author pausb
