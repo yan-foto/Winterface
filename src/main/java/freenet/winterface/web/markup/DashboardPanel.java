@@ -25,6 +25,11 @@ public abstract class DashboardPanel extends Panel {
 	 */
 	public DashboardPanel(String id) {
 		super(id);
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		add(new Label("name", new PropertyModel<String>(this, "name")));
 	}
 
