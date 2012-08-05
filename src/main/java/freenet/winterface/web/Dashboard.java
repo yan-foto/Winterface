@@ -19,17 +19,17 @@ import freenet.winterface.web.markup.VersionPanel;
 @SuppressWarnings("serial")
 public class Dashboard extends WinterPage {
 	
-	final LoadableDetachableModel<PeerManager> peerManagerModel = new LoadableDetachableModel<PeerManager>() {
-		@Override
-		protected PeerManager load() {
-			return ((WinterfaceApplication) getApplication()).getFreenetWrapper().getNode().peers;
-		}
-	};
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		add(new BookmarksPanel("bookmarks-panel"));
+		// Model to access PeerManager for PeersPanel
+		final LoadableDetachableModel<PeerManager> peerManagerModel = new LoadableDetachableModel<PeerManager>() {
+			@Override
+			protected PeerManager load() {
+				return ((WinterfaceApplication) getApplication()).getFreenetWrapper().getNode().peers;
+			}
+		};
 		add(new PeersPanel("peers-panel",new CompoundPropertyModel<PeerManager>(peerManagerModel)));
 		add(new VersionPanel("version"));
 	}
