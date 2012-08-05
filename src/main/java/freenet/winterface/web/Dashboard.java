@@ -14,8 +14,9 @@ import freenet.winterface.web.markup.VersionPanel;
 @SuppressWarnings("serial")
 public class Dashboard extends WinterPage {
 
-	public Dashboard() {
-		super();
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		add(new BookmarksPanel("bookmarks-panel"));
 		add(new PeersPanel("peers-panel"));
 		add(new VersionPanel("version"));
