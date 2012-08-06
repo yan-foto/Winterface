@@ -17,7 +17,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	/** {@code true} to show icon */
 	private boolean showIcon;
 	/** Button icon */
-	private ButtonIcon icon = ButtonIcon.TICK;
+	private ButtonIcon icon;
 	
 	/** {@link IModel} for content of button label */
 	private final IModel<String> labelModel;
@@ -66,7 +66,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	public AjaxFallbackCssButton(String id, IModel<String> model, ButtonIcon icon) {
 		super(id);
 		this.labelModel = model;
-		this.icon = icon;
+		this.icon = icon==null?ButtonIcon.TICK:icon;
 		this.showIcon = (this.icon!=null);
 	}
 
