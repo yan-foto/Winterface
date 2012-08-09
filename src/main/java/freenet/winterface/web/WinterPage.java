@@ -1,21 +1,26 @@
 package freenet.winterface.web;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.wicket.Localizer;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.cookies.CookieUtils;
 
+import freenet.node.Node;
 import freenet.winterface.core.Configuration;
+import freenet.winterface.core.IPUtils;
 import freenet.winterface.web.core.WinterfaceApplication;
 import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.NavContributor;
@@ -130,11 +135,15 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	 */
 	protected boolean isAllowedFullAccess() {
 		String remoteAddr = getHttpServletRequest().getRemoteAddr();
-		Configuration config = ((WinterfaceApplication)getApplication()).getConfiguration();
+		Configuration config = ((WinterfaceApplication) getApplication()).getConfiguration();
 		String[] fullAccessHosts = config.getFullAccessHosts().split(",");
 		for (String host : fullAccessHosts) {
-			if (host.equals(remoteAddr)) {
-				return true;
+			try {
+				if (IPUtils.quietMatches(host, remoteAddr)) {
+					return true;
+				}
+			} catch (UnknownHostException e) {
+				// ignore
 			}
 		}
 		return false;
@@ -163,9 +172,48 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		String load = cookieUtils().load(COOKIE_KEY_PREFIX + suffix);
 		return load != null ? load.split(FormComponent.VALUE_SEPARATOR) : null;
 	}
-	
+
+	/**
+	 * Convenient method to get {@link WinterfaceApplication}
+	 * {@link CookieUtils}
+	 */
 	private CookieUtils cookieUtils() {
-		return ((WinterfaceApplication)getApplication()).getCookieUtils();
+		return ((WinterfaceApplication) getApplication()).getCookieUtils();
 	}
-	
+
+	/**
+	 * Uses {@link Localizer} to get corresponding value for the given key
+	 * <p>
+	 * This method is meant for values without place holders. To localize
+	 * dynamic values see {@link #localize(String, IModel)}
+	 * </p>
+	 * 
+	 * @param key
+	 *            String key
+	 * @return localized value
+	 */
+	protected String localize(String key) {
+		return getLocalizer().getString(key, this);
+	}
+
+	/**
+	 * Uses {@link Localizer} to get corresponding value for the given key.
+	 * 
+	 * @param key
+	 *            String key
+	 * @param model
+	 *            model to replace place holders in value
+	 * @return localized value
+	 */
+	protected String localize(String key, IModel<?> model) {
+		return getLocalizer().getString(key, this, model);
+	}
+
+	/**
+	 * A convenient method to fetch Freenet {@link Node}
+	 */
+	protected Node getFreenetNode() {
+		return ((WinterfaceApplication) getApplication()).getFreenetWrapper().getNode();
+	}
+
 }
