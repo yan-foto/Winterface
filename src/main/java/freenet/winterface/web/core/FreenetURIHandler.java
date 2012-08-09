@@ -3,17 +3,19 @@ package freenet.winterface.web.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.request.IRequestCycle;
 import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.io.IOUtils;
 import org.apache.wicket.util.lang.Args;
+import org.apache.wicket.util.string.StringValue;
 
-import freenet.client.FetchException;
 import freenet.clients.http.FProxyFetchResult;
 import freenet.keys.FreenetURI;
 import freenet.support.api.Bucket;
@@ -35,6 +37,8 @@ public class FreenetURIHandler implements IRequestHandler {
 	/** Result to write to response */
 	private FProxyFetchResult result;
 
+	/** Force download parameter */
+	private final static String FORCE_DOWNLOAD_PARAM = "forcedownload";
 	/** Log4j logger */
 	private final static Logger logger = Logger.getLogger(FreenetURIHandler.class);
 
@@ -51,19 +55,50 @@ public class FreenetURIHandler implements IRequestHandler {
 
 	@Override
 	public void respond(IRequestCycle requestCycle) {
+		logger.trace("Starting to write data to response");
+		// Get request to extract data from
+		final WebRequest request = (WebRequest) requestCycle.getRequest();
 		// Get response to use when responding with resource
 		final WebResponse response = (WebResponse) requestCycle.getResponse();
-
-		// Set MIME-Type
-		if (result.mimeType != null) {
-			response.setContentType(result.mimeType);
+		
+		// Original URL
+		String url = request.getUrl().canonical().toString();
+		FreenetURI uri = null;
+		try {
+			uri = new FreenetURI(url);
+		} catch (MalformedURLException e) {
+			// This cannot possibly happen
+			// FreenetURIPage.java checks everything first before passing data here
+			logger.error("Cannot handle malformed URIs", e);
 		}
+		// Force download
+		StringValue forceParam = request.getRequestParameters().getParameterValue(FORCE_DOWNLOAD_PARAM);
+		if(!forceParam.isNull()) {
+			response.addHeader("Content-Disposition", "attachment; filename=\"" + uri.getPreferredFilename() + '"');
+			response.addHeader("Cache-Control", "private");
+			response.addHeader("Content-Transfer-Encoding", "binary");
+			// really the above should be enough, but ...
+			// was application/x-msdownload, but some unix browsers offer to open that in Wine as default!
+			// it is important that this type not be understandable, but application/octet-stream doesn't work.
+			// see http://onjava.com/pub/a/onjava/excerpt/jebp_3/index3.html
+			// Testing on FF3.5.1 shows that application/x-force-download wants to run it in wine,
+			// whereas application/force-download wants to save it.
+			response.setContentType("application/force-download");
+			response.setStatus(HttpServletResponse.SC_OK);
+		} else {
+			// Set MIME-Type
+			if (result.mimeType != null) {
+				response.setContentType(result.mimeType);
+			}
+			
+		}
+		
+
 		// Set Content length
 		if (result.size != 0) {
 			response.setContentLength(result.size);
 		}
 		Bucket data = result.getData();
-		FetchException fe = result.failed;
 		if (data != null) {
 			try {
 				InputStream is = data.getInputStream();
@@ -73,14 +108,8 @@ public class FreenetURIHandler implements IRequestHandler {
 			} catch (IOException e) {
 				logger.error("Error while reading result data.", e);
 			}
-		} else if (fe.newURI != null) {
-			// A newer version is available, so just send a redirect
-			PageParameters params = new PageParameters();
-			params.set(0, fe.newURI);
-			logger.debug("Newer version of URI found. redirecting...");
-			throw new RestartResponseException(FreenetURIPage.class, params);
 		} else {
-
+			logger.error("Null result was sent for processing!");
 		}
 	}
 

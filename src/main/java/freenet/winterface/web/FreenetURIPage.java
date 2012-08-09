@@ -9,7 +9,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
+import org.apache.wicket.request.Request;
 import org.apache.wicket.request.RequestHandlerStack;
+import org.apache.wicket.request.Response;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.flow.AbortWithHttpErrorCodeException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
@@ -18,13 +21,19 @@ import org.apache.wicket.util.time.Duration;
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
 import freenet.client.HighLevelSimpleClientImpl;
+import freenet.client.async.USKManager;
+import freenet.clients.http.FProxyFetchInProgress;
 import freenet.clients.http.FProxyFetchResult;
+import freenet.clients.http.FProxyFetchTracker;
+import freenet.clients.http.FProxyFetchWaiter;
 import freenet.keys.FreenetURI;
+import freenet.keys.USK;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.web.core.AjaxFallbackTimerBehavior;
 import freenet.winterface.web.core.FetchTrackerManager;
 import freenet.winterface.web.core.FreenetURIHandler;
 import freenet.winterface.web.core.WinterfaceApplication;
+import freenet.winterface.web.markup.FetchErrorPanel;
 import freenet.winterface.web.markup.FetchProgressPanel;
 
 /**
@@ -39,19 +48,27 @@ public class FreenetURIPage extends WinterPage {
 
 	/** FreenetURI to be fetched */
 	private final String path;
-	/** Model to retrieve latest results from */
-	private final LoadableDetachableModel<FProxyFetchResult> resultModel;
 
 	/** Interval to refresh progress */
-	private final static Duration RELOAD_DURATION = Duration.milliseconds(3000);
+	private final static Duration RELOAD_DURATION = Duration.milliseconds(1000);
 	/** Parameter key for max retries */
 	private final static String PARAM_MAX_RETRIES = "max-retries";
 	/** Header key for max size */
 	private final static String HEADER_MAX_SIZE = "max-size";
+	/** Header key for accepted MIME types */
+	private final static String HEADER_ACCEPT = "accept";
+	/** Number of maximum redirect follows */
+	private final static short MAX_RECURSION = 5;
 
 	/** Log4j logger */
 	private final static Logger logger = Logger.getLogger(FreenetURIPage.class);
 
+	/**
+	 * Constructs.
+	 * 
+	 * @param params
+	 *            contains FreenetURI to fetch
+	 */
 	public FreenetURIPage(PageParameters params) {
 		super(params);
 		path = parametersToPath(params);
@@ -60,30 +77,33 @@ public class FreenetURIPage extends WinterPage {
 		// a redirection a data gathering page
 		getSession().getClientInfo();
 
-		FetchContext cntx = generateFetchContext();
-		// Result model
-		resultModel = new LoadableDetachableModel<FProxyFetchResult>() {
-			@Override
-			protected FProxyFetchResult load() {
-				return FreenetURIPage.this.getLatestResult();
-			}
-		};
+		FetchContext cntx = createFetchContext();
+		boolean canSendProgress = canSendProgress();
+
+		FProxyFetchWaiter waiter = null;
+
+		// Initiates the fetching progress if it doesn't already exist
 		try {
-			if (canSendProgress()) {
-				// Try to init the progress (if not available already)
-				logger.debug("Attempting to init fetch for path " + path);
-				trackerManager().initProgress(path, cntx);
+			waiter = getWaiter();
+			if (canSendProgress) {
+				// If page has a newer version we restart the
+				restartIfOutdated(waiter);
 			} else {
-				// block and wait until data is available then return data
-				logger.debug("Attempting to wait forever to feth data for path " + path);
-				FProxyFetchResult result = trackerManager().getWaitForeverResult(path, cntx);
-				throw new RequestHandlerStack.ReplaceHandlerException(new FreenetURIHandler(result), false);
+				// Requested file is an image or css file. A simple redirect is
+				// not enough. Result is fetched in a recursive manner
+				waiter = enterRecursionIfNeeded(waiter, cntx);
 			}
 		} catch (FetchException e) {
+			// Happens if fetching cannot be started
 			logger.error("Error while fetching Freenet URI", e);
+			// TODO redirect to error page
 		} catch (MalformedURLException e) {
 			logger.error("Error while parsing FreenetURI", e);
 			throw new AbortWithHttpErrorCodeException(404);
+		} finally {
+			if (waiter != null) {
+				waiter.close();
+			}
 		}
 	}
 
@@ -92,6 +112,23 @@ public class FreenetURIPage extends WinterPage {
 		super.onInitialize();
 		FProxyFetchResult latestResult = getLatestResult();
 		if (!latestResult.isFinished()) {
+			// Result model
+			LoadableDetachableModel<FProxyFetchResult> resultModel = new LoadableDetachableModel<FProxyFetchResult>() {
+				@Override
+				protected FProxyFetchResult load() {
+					return FreenetURIPage.this.getLatestResult();
+				}
+
+				@Override
+				protected void onDetach() {
+					if (isAttached()) {
+						// Request is finished, FProxyFetchResult is not needed
+						// anymore
+						getObject().close();
+					}
+				}
+
+			};
 			final FetchProgressPanel resultsPanel = new FetchProgressPanel("progress", new CompoundPropertyModel<FProxyFetchResult>(resultModel));
 			resultsPanel.setOutputMarkupId(true);
 			add(resultsPanel);
@@ -99,13 +136,17 @@ public class FreenetURIPage extends WinterPage {
 			// Add timer to refresh progress
 			// Its important to add path in case of meta-refresh. It just
 			// overrides the page versioning which causes event loss.
+			// TODO remove this. Page versioning is not in URL with the new
+			// WinterMapper
 			String refreshURL = "/" + path;
 			AjaxFallbackTimerBehavior refreshBehavior = new AjaxFallbackTimerBehavior(RELOAD_DURATION, refreshURL) {
 				@Override
 				protected void onTimer(AjaxRequestTarget target) {
 					if (FreenetURIPage.this.getLatestResult().isFinished()) {
 						logger.debug(String.format("Fetching %s finished. Relaoading the page", path));
-						setResponsePage(FreenetURIPage.class, FreenetURIPage.this.getPageParameters());
+						// Restart the page so that data is processed
+						// If data is not available the error message is shown
+						FreenetURIPage.this.restartPage();
 						return;
 					}
 					target.add(resultsPanel);
@@ -113,13 +154,14 @@ public class FreenetURIPage extends WinterPage {
 			};
 			add(refreshBehavior);
 		} else {
-			/*
-			 * Data is available. Get a new FreenetURIHandler to write it to
-			 * response
-			 */
-			// TODO FProxyToadlet#L814 follows redirects for CSS and PNG. DO IT!
-			logger.debug("Passing data to " + FreenetURIHandler.class.getName());
-			throw new RequestHandlerStack.ReplaceHandlerException(new FreenetURIHandler(latestResult), false);
+			// Fetching is finished and may contain data xor fetch exception
+			if (latestResult.failed != null) {
+				// TODO show error page
+			} else if (latestResult.hasData()) {
+				// TODO check for RSS data as in evilHorribleHack of FProxy
+				logger.debug("Passing data to " + FreenetURIHandler.class.getName());
+				throw new RequestHandlerStack.ReplaceHandlerException(new FreenetURIHandler(latestResult), false);
+			}
 		}
 	}
 
@@ -129,11 +171,13 @@ public class FreenetURIPage extends WinterPage {
 	 * @return {@link FetchTrackerManager}
 	 */
 	private FetchTrackerManager trackerManager() {
-		FetchTrackerManager trackerManager = ((WinterfaceApplication) getApplication()).getTrackerManager();
-		return trackerManager;
+		return ((WinterfaceApplication) getApplication()).getTrackerManager();
 	}
 
-	private FetchContext generateFetchContext() {
+	/**
+	 * @return {@link FetchContext} with respect to current {@link WebRequest}
+	 */
+	private FetchContext createFetchContext() {
 		// Tracker Manager
 		FetchTrackerManager trackerManager = trackerManager();
 		HighLevelSimpleClientImpl client = trackerManager.getClient();
@@ -156,7 +200,7 @@ public class FreenetURIPage extends WinterPage {
 			maxLength = (maxSize == null ? maxLength : Long.valueOf(maxSize));
 			maxRetries = -2;
 		}
-		FetchContext result = new FetchContext(client.getFetchContext(), FetchContext.IDENTICAL_MASK, true, null);
+		FetchContext result = new FetchContext(client.getFetchContext(maxLength), FetchContext.IDENTICAL_MASK, true, null);
 		result.maxOutputLength = maxLength;
 		if (maxRetries >= -1) {
 			result.maxNonSplitfileRetries = maxRetries;
@@ -192,19 +236,27 @@ public class FreenetURIPage extends WinterPage {
 	 * 
 	 * @return latest fetch results
 	 */
-	// TODO Let FetchTrackerManager manage fetches with regard to page ID
 	private FProxyFetchResult getLatestResult() {
-		FProxyFetchResult latestResult = null;
-		try {
-			latestResult = trackerManager().getResult(path);
-		} catch (MalformedURLException e) {
-			// Should never happen, since FetchTrackerManager#initProgress has
-			// already been called in constructor
-			logger.error(e);
+		FProxyFetchInProgress progress = getProgress();
+		if (progress == null) {
+			// this *shouldn't* happen since we initiated the progress in
+			// constructor. If anything went wrong, we simply restart the page
+			restartPage();
 		}
-		return latestResult;
+		return progress.getWaiter().getResultFast();
 	}
 
+	/**
+	 * Depending on {@link WebClientInfo} of the current {@link Request}, it is
+	 * decided if a progress page should be shown or not.
+	 * <p>
+	 * Returns {@code true} If client is browsing through a browser and requests
+	 * data of MIME-type <tt>text/html</tt> and <tt>forcedownload</tt> parameter
+	 * is not set.
+	 * </p>
+	 * 
+	 * @return {@code false} if no progress page can be shown
+	 */
 	private boolean canSendProgress() {
 		WebClientInfo clientInfo = (WebClientInfo) getSession().getClientInfo();
 		// If client is a browser
@@ -216,6 +268,146 @@ public class FreenetURIPage extends WinterPage {
 		// Force download is set
 		StringValue force = getPageParameters().get("forcedownload");
 		return isBrowser && htmlRequest && (force.isNull());
+	}
+
+	/**
+	 * Creates {@link FProxyFetchWaiter} for current path.
+	 * <p>
+	 * If no progress already exist, a new on is created. Otherwise a waiter is
+	 * created from the existing progress.
+	 * </p>
+	 * 
+	 * @return waiter containing result
+	 * @throws MalformedURLException
+	 *             if current path is not a valid {@link FreenetURI}
+	 * @throws FetchException
+	 *             if fetch progress cannot be started
+	 * @see #createFetchContext()
+	 * @see FProxyFetchTracker#makeFetcher(FreenetURI, long, FetchContext,
+	 *      freenet.clients.http.FProxyFetchInProgress.REFILTER_POLICY)
+	 */
+	private FProxyFetchWaiter getWaiter() throws MalformedURLException, FetchException {
+		return trackerManager().getWaiterFor(path, createFetchContext());
+	}
+
+	/**
+	 * @return progress for current path
+	 * @see #createFetchContext()
+	 * @see FProxyFetchTracker#getFetchInProgress(FreenetURI, long,
+	 *      FetchContext)
+	 */
+	private FProxyFetchInProgress getProgress() {
+		return trackerManager().getProgressFor(path, createFetchContext());
+	}
+
+	/**
+	 * Follows new {@link FreenetURI}s for a given URI.
+	 * <p>
+	 * If fetched data is an image or a CSS file, sending a simple redirect is
+	 * not enough. Instead we first follow the new URIs and then try to render
+	 * the latest version.
+	 * </p>
+	 * 
+	 * @param waiter
+	 *            containing initial result
+	 * @param cntx
+	 *            context for potential deeper fetches
+	 * @return {@link FProxyFetchWaiter} containing up-to-date result
+	 *         (<b>NOTE</b>: this can also be {@code null})
+	 * @throws MalformedURLException
+	 *             if any of new URIs are malformed (no {@link FreenetURI})
+	 * @throws FetchException
+	 *             if fetching progress for new URIs cannot be started
+	 * @see #MAX_RECURSION
+	 */
+	private FProxyFetchWaiter enterRecursionIfNeeded(FProxyFetchWaiter waiter, FetchContext cntx) throws MalformedURLException, FetchException {
+		logger.trace("Checking if fetch recursion is needed for " + path);
+		HttpServletRequest request = getHttpServletRequest();
+		String accept = request.getHeader(HEADER_ACCEPT);
+		short recursion = MAX_RECURSION;
+		boolean shouldEnter = (accept != null && (accept.startsWith("text/css") || accept.startsWith("image/")));
+		if (shouldEnter) {
+			while (recursion > 0) {
+				FreenetURI currentURI = waiter.getProgress().uri;
+				logger.trace("Recursion number " + (MAX_RECURSION - recursion) + " for " + currentURI);
+				FProxyFetchResult result = waiter.getResult(true);
+				FetchException fe = result.failed;
+				if (fe != null && fe.newURI != null) {
+					waiter.close();
+					final String newPath = fe.newURI.toString();
+					logger.debug("New URI found " + newPath + " for " + currentURI);
+					waiter = trackerManager().getWaiterFor(newPath, cntx);
+					FProxyFetchResult fetchResult = waiter.getResult(true);
+					if (fetchResult.isFinished() && fetchResult.failed != null) {
+						break;
+					}
+				} else if (result.isFinished() && fe == null) {
+					// No exceptions after finish = no newer versions
+					break;
+				}
+				recursion--;
+			}
+		} else {
+			logger.debug("No recursion needed for" + waiter.getProgress().uri);
+		}
+		return waiter;
+	}
+
+	/**
+	 * Redirects the page to the newer version of {@link USK} URI.
+	 * <p>
+	 * This method is called in case the result if fetched from
+	 * {@link FProxyFetchTracker}, since it can be cached.
+	 * </p>
+	 * 
+	 * @param waiter
+	 *            containing the {@link FProxyFetchResult}
+	 * @see #restartPage(String)
+	 */
+	private void restartIfOutdated(FProxyFetchWaiter waiter) {
+		USKManager uskManager = getFreenetNode().clientCore.uskManager;
+		FProxyFetchResult result = waiter.getResult();
+		FreenetURI uri = waiter.getProgress().uri;
+		if (result.hasData()) {
+			try {
+				if (uri.isUSK() && !result.hasWaited() && result.getFetchCount() > 1 && uskManager.lookupKnownGood(USK.create(uri)) > uri.getSuggestedEdition()) {
+					// A newer version is found
+					// Clean cache
+					waiter.getProgress().requestImmediateCancel();
+					waiter.close();
+					// Start fetching again
+					logger.debug("A newer version of USK key is available. Restarting request.");
+					restartPage();
+				}
+			} catch (MalformedURLException e) {
+				// Cannot happen
+				logger.error("Error while checking if key is up-to-date", e);
+			}
+		}
+	}
+
+	/**
+	 * Restarts the page
+	 */
+	private void restartPage() {
+		restartPage(null);
+	}
+
+	/**
+	 * Redirects the {@link Response} to the given path
+	 * 
+	 * @param newPath
+	 *            path to redirect to
+	 */
+	private void restartPage(String newPath) {
+		PageParameters params;
+		if (newPath != null) {
+			params = new PageParameters();
+			params.set(0, newPath);
+		} else {
+			params = FreenetURIPage.this.getPageParameters();
+		}
+		setResponsePage(FreenetURIPage.class, params);
 	}
 
 	@Override
