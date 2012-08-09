@@ -74,7 +74,7 @@ public class AlertsPage extends WinterPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		// No messages label
-		String noMessageText = getApplication().getResourceSettings().getLocalizer().getString(NO_MESSAGE_KEY, this);
+		String noMessageText = localize(NO_MESSAGE_KEY);
 		final Label noMessage = new Label("info", Model.of(noMessageText)) {
 			@Override
 			public boolean isVisible() {

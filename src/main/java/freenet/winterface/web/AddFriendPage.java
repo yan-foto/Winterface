@@ -95,8 +95,8 @@ public class AddFriendPage extends WinterPage {
 						returnCode = PeerUtils.addNewDarknetNode(freenetWrapper.getNode(), splitRef, formDesc, formTrust, formVisibility);
 						// Localize response message
 						String returnCodeKey = L10N_STATUS_PREFIX + returnCode.toString();
-						getApplication().getResourceSettings().getLocalizer().getString(returnCodeKey, this, "");
-						info(returnCode.toString());
+						String infoMessage = localize(returnCodeKey);
+						info(infoMessage);
 					}
 				}
 				if (target != null) {
