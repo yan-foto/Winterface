@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -29,11 +30,11 @@ import freenet.clients.http.FProxyFetchWaiter;
 import freenet.keys.FreenetURI;
 import freenet.keys.USK;
 import freenet.winterface.core.Configuration;
+import freenet.winterface.core.RequestsUtil;
 import freenet.winterface.web.core.AjaxFallbackTimerBehavior;
 import freenet.winterface.web.core.FetchTrackerManager;
 import freenet.winterface.web.core.FreenetURIHandler;
 import freenet.winterface.web.core.WinterfaceApplication;
-import freenet.winterface.web.markup.FetchErrorPanel;
 import freenet.winterface.web.markup.FetchProgressPanel;
 
 /**
@@ -51,14 +52,6 @@ public class FreenetURIPage extends WinterPage {
 
 	/** Interval to refresh progress */
 	private final static Duration RELOAD_DURATION = Duration.milliseconds(1000);
-	/** Parameter key for max retries */
-	private final static String PARAM_MAX_RETRIES = "max-retries";
-	/** Header key for max size */
-	private final static String HEADER_MAX_SIZE = "max-size";
-	/** Header key for accepted MIME types */
-	private final static String HEADER_ACCEPT = "accept";
-	/** Number of maximum redirect follows */
-	private final static short MAX_RECURSION = 5;
 
 	/** Log4j logger */
 	private final static Logger logger = Logger.getLogger(FreenetURIPage.class);
@@ -156,7 +149,9 @@ public class FreenetURIPage extends WinterPage {
 		} else {
 			// Fetching is finished and may contain data xor fetch exception
 			if (latestResult.failed != null) {
-				// TODO show error page
+				logger.debug("Fetching has failed. Redirecting to error page");
+				// Redirect to error page
+				throw new RestartResponseAtInterceptPageException(new FetchErrorPage(latestResult, path));
 			} else if (latestResult.hasData()) {
 				// TODO check for RSS data as in evilHorribleHack of FProxy
 				logger.debug("Passing data to " + FreenetURIHandler.class.getName());
@@ -193,10 +188,10 @@ public class FreenetURIPage extends WinterPage {
 		// 2 = three tries
 		// 3 or more = GO INTO COOLDOWN EVERY 3 TRIES! TAKES *MUCH* LONGER!!!
 		// STRONGLY NOT RECOMMENDED!!!
-		int maxRetries = getPageParameters().get(PARAM_MAX_RETRIES).toInt(-2);
+		int maxRetries = getPageParameters().get(RequestsUtil.PARAM_MAX_RETRIES).toInt(-2);
 		boolean restricted = (config.isPublicGateway() && !isAllowedFullAccess());
 		if (restricted) {
-			String maxSize = request.getHeader(HEADER_MAX_SIZE);
+			String maxSize = request.getHeader(RequestsUtil.HEADER_MAX_SIZE);
 			maxLength = (maxSize == null ? maxLength : Long.valueOf(maxSize));
 			maxRetries = -2;
 		}
@@ -323,13 +318,13 @@ public class FreenetURIPage extends WinterPage {
 	private FProxyFetchWaiter enterRecursionIfNeeded(FProxyFetchWaiter waiter, FetchContext cntx) throws MalformedURLException, FetchException {
 		logger.trace("Checking if fetch recursion is needed for " + path);
 		HttpServletRequest request = getHttpServletRequest();
-		String accept = request.getHeader(HEADER_ACCEPT);
-		short recursion = MAX_RECURSION;
+		String accept = request.getHeader(RequestsUtil.HEADER_ACCEPT);
+		short recursion = RequestsUtil.MAX_RECURSION;
 		boolean shouldEnter = (accept != null && (accept.startsWith("text/css") || accept.startsWith("image/")));
 		if (shouldEnter) {
 			while (recursion > 0) {
 				FreenetURI currentURI = waiter.getProgress().uri;
-				logger.trace("Recursion number " + (MAX_RECURSION - recursion) + " for " + currentURI);
+				logger.trace("Recursion number " + (RequestsUtil.MAX_RECURSION - recursion) + " for " + currentURI);
 				FProxyFetchResult result = waiter.getResult(true);
 				FetchException fe = result.failed;
 				if (fe != null && fe.newURI != null) {
