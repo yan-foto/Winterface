@@ -215,5 +215,12 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 	protected Node getFreenetNode() {
 		return ((WinterfaceApplication) getApplication()).getFreenetWrapper().getNode();
 	}
+	
+	/**
+	 * @return plugin configuration
+	 */
+	protected Configuration getConfiguration() {
+		return ((WinterfaceApplication) getApplication()).getConfiguration();
+	}
 
 }
