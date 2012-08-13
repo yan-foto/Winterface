@@ -42,6 +42,8 @@ import freenet.winterface.web.core.AjaxFallbackCssButton;
  * 
  * @author pausb
  */
+// TODO make all links into fallback submit buttons so if its nested in another
+// form, the state of the parent is preserved if this panel is changed
 @SuppressWarnings("serial")
 public abstract class LocalBrowserPanel extends Panel {
 
@@ -84,7 +86,7 @@ public abstract class LocalBrowserPanel extends Panel {
 		// Parent container needed for AJAX refresh
 		final WebMarkupContainer mainContainer = new WebMarkupContainer("mainContainer");
 		mainContainer.setOutputMarkupId(true);
-		// Current path
+		// Current path it gets updated every time panel's model is updated
 		final LoadableDetachableModel<String> currentDirModel = new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
@@ -96,8 +98,8 @@ public abstract class LocalBrowserPanel extends Panel {
 			@Override
 			protected List<File> load() {
 				String startPath = LocalBrowserPanel.this.getDefaultModelObjectAsString();
-				if (startPath == null) {
-					logger.warn("Panel model object was null! This happens if JS is turned on and off again");
+				if (startPath == null || "".equals(startPath.trim())) {
+					logger.warn("Panel model object was null! Maybe an empty path was given.");
 					// This can happen if user turns JS on and off!
 					detach();
 					startPath = root;
@@ -127,10 +129,11 @@ public abstract class LocalBrowserPanel extends Panel {
 		// Current directory
 		Form<Void> pathForm = new Form<Void>("pathForm");
 		final TextField<String> currentDir = new TextField<String>("currentDir", currentDirModel);
+		currentDir.setRequired(true);
 		AjaxFallbackButton submit = new AjaxFallbackButton("submit", pathForm) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				LocalBrowserPanel.this.setDefaultModel(currentDir.getModel());
+				LocalBrowserPanel.this.setDefaultModelObject(currentDir.getModelObject());
 				resort(null, target, mainContainer, childrenModel);
 			}
 		};
@@ -141,7 +144,7 @@ public abstract class LocalBrowserPanel extends Panel {
 				File current = new File(LocalBrowserPanel.this.getDefaultModelObjectAsString());
 				// Never go up if in root
 				if (!Arrays.asList(File.listRoots()).contains(current)) {
-					LocalBrowserPanel.this.setDefaultModel(Model.of(current.getParent()));
+					LocalBrowserPanel.this.setDefaultModelObject(current.getParent());
 					resort(null, target, mainContainer, childrenModel);
 				}
 			}
@@ -199,7 +202,7 @@ public abstract class LocalBrowserPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						try {
 							if (file.isDirectory()) {
-								LocalBrowserPanel.this.setDefaultModel(Model.of(file.getCanonicalPath().toString()));
+								LocalBrowserPanel.this.setDefaultModelObject(file.getCanonicalPath().toString());
 								// Force redraw
 								childrenModel.detach();
 							} else {
