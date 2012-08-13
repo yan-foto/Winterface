@@ -5,6 +5,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 
@@ -58,7 +59,7 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 		String rowClass = (odd ? "odd" : "even") + "-row";
 		item.add(new AttributeAppender("class", rowClass));
 		// Item name
-		item.add(new Label("name"));
+		item.add(new ExternalLink("name", "/" + item.getModel().getObject().getKey(), item.getModel().getObject().getName()));
 		// Feedback Panel
 		Component feedback = item.findParent(BookmarkCategoryPanel.class).get("feedback");
 		// Edit link
