@@ -44,6 +44,8 @@ import freenet.winterface.web.core.AjaxFallbackCssButton;
  */
 // TODO make all links into fallback submit buttons so if its nested in another
 // form, the state of the parent is preserved if this panel is changed
+// TODO if this form is embedded in another work, the AJAX mode for "go!" will
+// not work. I have reported this to Wicket devs. Awaiting response.
 @SuppressWarnings("serial")
 public abstract class LocalBrowserPanel extends Panel {
 
@@ -130,7 +132,7 @@ public abstract class LocalBrowserPanel extends Panel {
 		Form<Void> pathForm = new Form<Void>("pathForm");
 		final TextField<String> currentDir = new TextField<String>("currentDir", currentDirModel);
 		currentDir.setRequired(true);
-		AjaxFallbackButton submit = new AjaxFallbackButton("submit", pathForm) {
+		AjaxFallbackButton browserTo = new AjaxFallbackButton("browseTo", pathForm) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				LocalBrowserPanel.this.setDefaultModelObject(currentDir.getModelObject());
@@ -149,7 +151,7 @@ public abstract class LocalBrowserPanel extends Panel {
 				}
 			}
 		};
-		pathForm.add(currentDir, submit, upDir);
+		pathForm.add(currentDir, browserTo, upDir);
 		mainContainer.add(pathForm);
 		// Headers
 		// Type (File / Directory)
