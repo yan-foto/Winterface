@@ -4,24 +4,33 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.EnumChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.IConverter;
+import org.apache.wicket.util.file.File;
 
 import com.db4o.ObjectContainer;
 
@@ -36,6 +45,8 @@ import freenet.node.Node;
 import freenet.node.NodeClientCore;
 import freenet.node.RequestStarter;
 import freenet.node.fcp.ClientPut;
+import freenet.node.fcp.ClientPutBase;
+import freenet.node.fcp.ClientPutDir;
 import freenet.node.fcp.ClientPutMessage;
 import freenet.node.fcp.ClientRequest;
 import freenet.node.fcp.FCPServer;
@@ -44,8 +55,10 @@ import freenet.node.fcp.NotAllowedException;
 import freenet.support.HexUtil;
 import freenet.support.MutableBoolean;
 import freenet.support.api.Bucket;
+import freenet.support.io.BucketTools;
+import freenet.support.io.FileBucket;
 import freenet.support.io.NativeThread;
-import freenet.winterface.web.core.AjaxFallbackCssButton;
+import freenet.winterface.web.markup.LocalBrowserPanel;
 
 @SuppressWarnings("serial")
 public class InsertPage extends WinterPage {
@@ -58,8 +71,10 @@ public class InsertPage extends WinterPage {
 	private final static String L10N_ACCESS_DENIED_FILE = "QueueToadlet.errorAccessDeniedFile";
 	private final static String L10N_INVALID_URI = "QueueToadlet.errorInvalidURIToU";
 	private final static String L10N_NO_FILE_OR_CANNOT_READ = "QueueToadlet.errorNoFileOrCannotRead";
-	private final static String L10N_BROWSE_FILES_LABEL = "QueueToadlet.insertFileBrowseButton";
 	private final static String L10N_INSERT_FILE_LABEL = "QueueToadlet.insertFileInsertFileLabel";
+	private final static String L10N_UPLOAD_SUCCEEDED = "QueueToadlet.uploadSucceededTitle";
+	private final static String L10N_UPLOAD_SUCCEEDED_SIMPLE = "WelcomeToadlet.insertSucceededTitle";
+	private final static String L10N_NO_FILE_SELCETED = "QueueToadlet.errorNoFileSelected";
 
 	private final static Logger logger = Logger.getLogger(InsertPage.class);
 
@@ -80,11 +95,12 @@ public class InsertPage extends WinterPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		final Form<Void> insertForm = new Form<Void>("insertForm");
+		insertForm.setMultiPart(true);
 		// Feedback panel
 		insertForm.add(new FeedbackPanel("feedback"));
 
 		// Insert methods
-		final RadioGroup<InsertMethod> methodGroup = new RadioGroup<InsertMethod>("methodGroup");
+		final RadioGroup<InsertMethod> methodGroup = new RadioGroup<InsertMethod>("methodGroup", Model.of(InsertMethod.RANDOM));
 		Radio<InsertMethod> canonicalKey = new Radio<InsertMethod>("canonicalKey", Model.of(InsertMethod.CANONICAL));
 		Radio<InsertMethod> randomKey = new Radio<InsertMethod>("randomKey", Model.of(InsertMethod.RANDOM));
 		Radio<InsertMethod> specificKey = new Radio<InsertMethod>("specificKey", Model.of(InsertMethod.SPECIFIC));
@@ -92,7 +108,7 @@ public class InsertPage extends WinterPage {
 		insertForm.add(methodGroup);
 
 		// Textfield for specific key
-		final TextField<String> specificKeyContent = new TextField<String>("specificKeyContent");
+		final TextField<String> specificKeyContent = new TextField<String>("specificKeyContent", Model.of(""));
 		insertForm.add(specificKeyContent);
 
 		// Options
@@ -134,7 +150,7 @@ public class InsertPage extends WinterPage {
 				return null;
 			}
 		};
-		final TextField<byte[]> splitFileKey = new TextField<byte[]>("splitFileKey") {
+		final TextField<byte[]> splitFileKey = new TextField<byte[]>("splitFileKey", new Model<byte[]>()) {
 			@SuppressWarnings("unchecked")
 			@Override
 			public <C> IConverter<C> getConverter(Class<C> type) {
@@ -144,18 +160,21 @@ public class InsertPage extends WinterPage {
 		insertForm.add(splitFileKey);
 
 		// Browse local
-		String buttonText = localize(L10N_BROWSE_FILES_LABEL);
-		AjaxFallbackCssButton browseLocal = new AjaxFallbackCssButton("localBrowse", Model.of(buttonText)) {
+		final IModel<String> selectedModel = new Model<String>("");
+		final HiddenField<String> selectedFile = new HiddenField<String>("selectedFile", selectedModel);
+		LocalBrowserPanel localBrowser = new LocalBrowserPanel("localBrowser", Model.of("/")) {
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				// TODO implement a nice ajax file browser
+			public void fileSelected(String path, AjaxRequestTarget target) {
+				logger.debug(path + " was selected for insertion");
+				selectedModel.setObject(path);
+				updateAjaxComponent(target, insertForm);
 			}
 		};
-		insertForm.add(browseLocal);
+		Label localSelected = new Label("localSelected",selectedModel);
+		insertForm.add(selectedFile, localBrowser, localSelected);
 		// Browse file
 		final FileUploadField browseFile = new FileUploadField("browseFile");
 		insertForm.add(browseFile);
-
 		// Submit
 		String buttonLabel = localize(L10N_INSERT_FILE_LABEL);
 		AjaxFallbackButton submit = new AjaxFallbackButton("submit", insertForm) {
@@ -168,32 +187,79 @@ public class InsertPage extends WinterPage {
 				CompatibilityMode compMode = compatibilityMode.getModelObject();
 				byte[] overrideSplitfileKey = splitFileKey.getModelObject();
 				FileUpload upload = browseFile.getFileUpload();
+				String localFile = selectedFile.getModelObject();
 
 				// Create respective URI
 				FreenetURI insertURI = createInsertURI(insertMethod, specificKey, form);
-				short uploadedFromType = findFromType();
+				short uploadedFromType = ClientPutMessage.UPLOAD_FROM_DIRECT;
+
 				// File related stuff
-				String fileName =  createFileName(upload);
-				String identifier = fileName + "-" + System.currentTimeMillis();
+				String fileName = "", identifier = "", MIMEType = "";
+				Bucket tmpBucket = null;
+				File directoryFile = null;
+				File uploadedFile = null;
+				if (localFile != null && !"".equals(localFile.trim())) {
+					uploadedFile = new File(localFile);
+				}
+				boolean browsedFileIsOk = false;
+				try {
+					// User has selected file from local file browser
+					if (uploadedFile != null && uploadedFile.canRead()) {
+						logger.trace("File selected LocalBrowserPanel");
+						// Add directory checking
+						if (uploadedFile.exists()) {
+							fileName = uploadedFile.getName();
+							if (uploadedFile.isDirectory()) {
+								// If file is a directory the insert DBJob would
+								// use clientPutDir instead of ClientPut (see
+								// #queueInsert)
+								directoryFile = uploadedFile;
+							} else {
+								MIMEType = new MimetypesFileTypeMap().getContentType(uploadedFile);
+								tmpBucket = new FileBucket(uploadedFile, true, false, false, false, false);
+							}
+							browsedFileIsOk = true;
+							uploadedFromType = ClientPutMessage.UPLOAD_FROM_DISK;
+						}
+					}
+					// User has uploaded file
+					else if (upload != null && !browsedFileIsOk) {
+						logger.trace("File selected by browser upload");
+						fileName = createFileName(upload);
+						MIMEType = createMIMEType(upload);
+						tmpBucket = createPersistentBucket(upload.getSize());
+						BucketTools.copyFrom(tmpBucket, upload.getInputStream(), -1);
+					}
+				} catch (IOException e) {
+					logger.error("Error reading uploaded file");
+					String errorMessage = InsertPage.this.localize(L10N_NO_FILE_OR_CANNOT_READ);
+					form.error(errorMessage);
+					updateAjaxComponent(target, form);
+					return;
+				}
+				// Stop here if no file is selected
+				if(uploadedFile == null && upload==null) {
+					form.error(localize(L10N_NO_FILE_SELCETED));
+					updateAjaxComponent(target, form);
+					return;
+				}
+				identifier = fileName + "-fred-" + System.currentTimeMillis();
 				if (insertURI.getDocName() == null) {
 					// File name is only needed in case of CHK and SSK without
 					// specified file name
 					fileName = null;
 				}
-				String MIMEType = createMIMEType(upload);
-				Bucket tmpBucket = null;
-				try {
-					tmpBucket = createPersistentBucket(upload);
-				} catch (IOException e) {
-					logger.error("Error reading uploaded file");
-					String errorMessage = InsertPage.this.localize(L10N_NO_FILE_OR_CANNOT_READ);
-					form.error(errorMessage);
-				}
 				// Compatibility Mode
 				if (CompatibilityMode.COMPAT_UNKNOWN.equals(compMode)) {
 					compMode = CompatibilityMode.COMPAT_CURRENT;
 				}
-				queueInsert(insertURI, identifier, compression, uploadedFromType, MIMEType, tmpBucket, fileName, compMode, overrideSplitfileKey, insertForm);
+				queueInsert(directoryFile, insertURI, identifier, compression, uploadedFromType, uploadedFile, MIMEType, tmpBucket, fileName, compMode,
+						overrideSplitfileKey, insertForm);
+				// Reset form
+				form.clearInput();
+				// Clear hidden field
+				selectedFile.setModelObject("");
+				updateAjaxComponent(target, form);
 			}
 
 		};
@@ -201,6 +267,12 @@ public class InsertPage extends WinterPage {
 		insertForm.add(submit);
 
 		add(insertForm);
+	}
+	
+	private void updateAjaxComponent(AjaxRequestTarget target, Component component) {
+		if(target!=null) {
+			target.add(component);
+		}
 	}
 
 	private FreenetURI createInsertURI(InsertMethod insertMethod, String specificKey, Form<?> form) {
@@ -227,74 +299,58 @@ public class InsertPage extends WinterPage {
 		}
 		return insertURI;
 	}
-	
-	private short findFromType() {
-		return ClientPutMessage.UPLOAD_FROM_DIRECT;
-	}
 
-	private Bucket createPersistentBucket(FileUpload upload) throws IOException {
-		long size = upload.getSize();
-		final Bucket tmpBucket = getFreenetNode().clientCore.tempBucketFactory.makeBucket(size);
+	private Bucket createPersistentBucket(long size) throws IOException {
+		final Bucket tmpBucket = getFreenetNode().clientCore.persistentTempBucketFactory.makeBucket(size);
 		return tmpBucket;
 	}
 
 	private String createFileName(FileUpload upload) {
 		return upload.getClientFileName();
 	}
-	
+
 	private String createMIMEType(FileUpload upload) {
 		return "";
 	}
-	
-	private void queueInsert(final FreenetURI insertURI, final String identifier, final boolean compress,final short uploadFromType, final String MIMEtype, final Bucket data,
-			final String fileName, final CompatibilityMode cmode, final byte[] overrideSplitfileKey, final Form<?> form) {
+
+	private void queueInsert(final File directoryFile, final FreenetURI insertURI, final String identifier, final boolean compress, final short uploadFromType,
+			final File origFile, final String MIMEtype, final Bucket data, final String fileName, final CompatibilityMode cmode,
+			final byte[] overrideSplitfileKey, final Form<?> form) {
 		final NodeClientCore core = getFreenetNode().clientCore;
 		final FCPServer fcp = core.getFCPServer();
-
 		final MutableBoolean done = new MutableBoolean();
+		final Throwable ex = new Throwable();
+
 		DBJob insertJob = new DBJob() {
+
 			@Override
 			public boolean run(ObjectContainer container, ClientContext context) {
+				ClientPutBase clientPut = null;
 				try {
-					final ClientPut clientPut = new ClientPut(fcp.getGlobalForeverClient(), insertURI, identifier, Integer.MAX_VALUE, null,
-							RequestStarter.BULK_SPLITFILE_PRIORITY_CLASS, ClientRequest.PERSIST_FOREVER, null, false, !compress, -1,
-							uploadFromType, null, MIMEtype, data, null, fileName, false, false, Node.FORK_ON_CACHEABLE_DEFAULT,
-							HighLevelSimpleClientImpl.EXTRA_INSERTS_SINGLE_BLOCK, HighLevelSimpleClientImpl.EXTRA_INSERTS_SPLITFILE_HEADER, false, cmode,
-							overrideSplitfileKey, fcp, container);
+					// File to insert is a directory
+					if (directoryFile != null) {
+						clientPut = new ClientPutDir(fcp.getGlobalForeverClient(), insertURI, identifier, Integer.MAX_VALUE,
+								RequestStarter.BULK_SPLITFILE_PRIORITY_CLASS, ClientRequest.PERSIST_FOREVER, null, false, !compress, -1, directoryFile, null,
+								false, true, false, false, Node.FORK_ON_CACHEABLE_DEFAULT, HighLevelSimpleClientImpl.EXTRA_INSERTS_SINGLE_BLOCK,
+								HighLevelSimpleClientImpl.EXTRA_INSERTS_SPLITFILE_HEADER, false, overrideSplitfileKey, fcp, container);
+					}
+					// File to insert is a file
+					else if (data != null) {
+						clientPut = new ClientPut(fcp.getGlobalForeverClient(), insertURI, identifier, Integer.MAX_VALUE, null,
+								RequestStarter.BULK_SPLITFILE_PRIORITY_CLASS, ClientRequest.PERSIST_FOREVER, null, false, !compress, -1, uploadFromType,
+								origFile, MIMEtype, data, null, fileName, false, false, Node.FORK_ON_CACHEABLE_DEFAULT,
+								HighLevelSimpleClientImpl.EXTRA_INSERTS_SINGLE_BLOCK, HighLevelSimpleClientImpl.EXTRA_INSERTS_SPLITFILE_HEADER, false, cmode,
+								overrideSplitfileKey, fcp, container);
+					}
+					// Start insertion
 					if (clientPut != null) {
 						fcp.startBlocking(clientPut, container, context);
 					}
 					return true;
-				} catch (FileNotFoundException e) {
-					logger.error("Error while persisting", e);
-					String errorMessage = InsertPage.this.localize(L10N_NO_FILE_OR_CANNOT_READ);
-					form.error(errorMessage);
-					return false;
-				} catch (MalformedURLException e) {
-					logger.error("Error while persisting", e);
-					String errorMessage = InsertPage.this.localize(L10N_INVALID_URI);
-					form.error(errorMessage);
-					return false;
-				} catch (IdentifierCollisionException e) {
-					// This happens when same file tries to be inserted in same
-					// milliseconds
-					logger.error("Error while persisting", e);
-					return false;
-				} catch (NotAllowedException e) {
-					logger.error("Error while persisting", e);
-					String errorMessage = InsertPage.this.localize(L10N_ACCESS_DENIED_FILE, Model.of(fileName));
-					form.error(errorMessage);
-					return false;
-				} catch (MetadataUnresolvedException e) {
-					// Shouldn't happen
-					logger.error("Error while persisting", e);
-					String errorMessage = InsertPage.this.localize(L10N_UNRESOLVED_META_DATA);
-					form.warn(errorMessage);
-					return false;
-				} catch (Exception e) {
-					logger.error("Internal error", e);
-					String errorMessage = InsertPage.this.localize(L10N_INTERNAL_ERROR);
-					form.error(errorMessage);
+				} catch (Throwable e) {
+					// We take care of this later
+					logger.error("Error while starting DBJob");
+					ex.initCause(e);
 				} finally {
 					synchronized (done) {
 						// To make sure the method doesn't return before insert
@@ -306,7 +362,8 @@ public class InsertPage extends WinterPage {
 				return false;
 			}
 		};
-		// Queue created job
+
+		// Queue the insert
 		try {
 			core.queue(insertJob, NativeThread.HIGH_PRIORITY + 1, false);
 		} catch (DatabaseDisabledException e) {
@@ -319,6 +376,7 @@ public class InsertPage extends WinterPage {
 				form.error(errorMessage);
 			}
 		}
+
 		// Wait to make sure DBJob has been started and insert has been put into
 		// queue before returning
 		synchronized (done) {
@@ -330,7 +388,49 @@ public class InsertPage extends WinterPage {
 				}
 			}
 		}
+
+		// Queue created job
+		Throwable cause = ex.getCause();
+		if (cause != null) {
+			if (cause instanceof FileNotFoundException) {
+				logger.error("Error while persisting", cause);
+				String errorMessage = localize(L10N_NO_FILE_OR_CANNOT_READ);
+				form.error(errorMessage);
+			} else if (cause instanceof MalformedURLException) {
+				logger.error("Error while persisting", cause);
+				String errorMessage = localize(L10N_INVALID_URI);
+				form.error(errorMessage);
+			} else if (cause instanceof IdentifierCollisionException) {
+				// This happens when same file tries to be inserted in same
+				// milliseconds
+				logger.error("Error while persisting", cause);
+			} else if (cause instanceof NotAllowedException) {
+				logger.error("Error while persisting", cause);
+				Map<String, String> substitution = new HashMap<String, String>();
+				substitution.put("file", fileName);
+				String errorMessage = localize(L10N_ACCESS_DENIED_FILE, Model.ofMap(substitution));
+				form.error(errorMessage);
+			} else if (cause instanceof MetadataUnresolvedException) {
+				// Shouldn't happen
+				logger.error("Error while persisting", cause);
+				String errorMessage = localize(L10N_UNRESOLVED_META_DATA);
+				form.warn(errorMessage);
+			} else {
+				logger.error("Internal error", cause);
+				String errorMessage = localize(L10N_INTERNAL_ERROR);
+				form.error(errorMessage);
+			}
+			return;
+		}
+
+		// see FreenetURI#getDocName
+		if (fileName == null) {
+			form.info(localize(L10N_UPLOAD_SUCCEEDED_SIMPLE));
+		} else {
+			Map<String, String> substitution = new HashMap<String, String>();
+			substitution.put("filename", fileName);
+			form.info(localize(L10N_UPLOAD_SUCCEEDED, Model.ofMap(substitution)));
+		}
 		return;
 	}
-
 }

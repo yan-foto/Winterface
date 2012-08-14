@@ -2,6 +2,7 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:extend>
 	<form wicket:id="insertForm">
+		<input type="hidden" wicket:id="selectedFile" />
 		<div wicket:id="feedback"></div>
 		<h3><wicket:message key="FileInsertWizardToadlet.pageTitle" /></h3>
 		<wicket:message key="FileInsertWizardToadlet.insertIntro" />
@@ -79,9 +80,11 @@
 				<tr>
 					<td class="column-title">
 						<wicket:message key="QueueToadlet.insertFileBrowseLabel" />
+						<br />
+						<wicket:message key="InsertPage.selectedFile" />:<div wicket:id="localSelected"></div>
 					</td>
 					<td class="column-content">
-						<a wicket:id="localBrowse"><span wicket:id="localBrowse-label"></span></a>
+						<div wicket:id="localBrowser"></div>
 					</td>
 				</tr>
 				<tr>
@@ -89,7 +92,7 @@
 						<wicket:message key="QueueToadlet.insertFileLabel" />
 					</td>
 					<td class="column-content">
-						<input type="file" wicket:id="browseFile" />
+						<input type="file" wicket:id="browseFile" wicket:message="value:QueueToadlet.insertFileBrowseButton"/>
 					</td>
 				</tr>
 			</table>
