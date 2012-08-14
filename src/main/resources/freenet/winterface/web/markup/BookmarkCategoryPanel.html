@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
-	<div class="bookmark-category-name" wicket:id="name"></div>
+	<div class="bookmark-category-name" wicket:id="visibleName"></div>
 	<table class="bookmarks-table">
 		<tr wicket:id="items">
 			<td class="bookmark-item">
-				<span wicket:id="name" class="bookmark"></span>
+				<a wicket:id="bookmarkLink" class="bookmark"></a>
 			</td>
 			<td>
 				<span class="bookmark-controls">
