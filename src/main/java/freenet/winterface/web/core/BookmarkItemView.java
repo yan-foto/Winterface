@@ -4,9 +4,10 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.model.Model;
 
 import freenet.clients.http.bookmark.BookmarkCategory;
 import freenet.clients.http.bookmark.BookmarkItem;
@@ -52,13 +53,16 @@ public class BookmarkItemView extends PropertyListView<BookmarkItem> {
 
 	@Override
 	protected void populateItem(final ListItem<BookmarkItem> item) {
-		final String bookmarkPath = parentBookmarkPath + "/" + item.getModel().getObject().getName();
+		BookmarkItem bookmark = item.getModelObject();
+		final String bookmarkPath = parentBookmarkPath + "/" + bookmark.getName();
 		// Class to differentiate lines
 		boolean odd = (item.getIndex() % 2 == 0);
 		String rowClass = (odd ? "odd" : "even") + "-row";
 		item.add(new AttributeAppender("class", rowClass));
-		// Item name
-		item.add(new Label("name"));
+		// Item link
+		ExternalLink bookmarkLink = new ExternalLink("bookmarkLink", "/"+bookmark.getKey());
+		bookmarkLink.setBody(Model.of(bookmark.getVisibleName()));
+		item.add(bookmarkLink);
 		// Feedback Panel
 		Component feedback = item.findParent(BookmarkCategoryPanel.class).get("feedback");
 		// Edit link
