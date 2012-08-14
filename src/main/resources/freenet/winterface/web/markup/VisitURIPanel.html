@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:extend>
+	<form wicket:id="visitForm">
+		<wicket:message key="WelcomeToadlet.keyRequestLabel" />
+		<input wicket:id="keyToFetch" class="uri-input" type="text" />
+		<input wicket:id="fetchSubmit" type="submit" wicket:message="value:WelcomeToadlet.fetch" />
+	</form>
+	<div wicket:id="feedback"></div>
+</wicket:extend>
+</html>
