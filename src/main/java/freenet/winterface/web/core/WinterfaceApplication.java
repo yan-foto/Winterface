@@ -4,6 +4,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.util.cookies.CookieUtils;
 
+import freenet.keys.FreenetURI;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
@@ -11,6 +12,7 @@ import freenet.winterface.web.AddFriendPage;
 import freenet.winterface.web.AlertsPage;
 import freenet.winterface.web.Dashboard;
 import freenet.winterface.web.ErrorPage;
+import freenet.winterface.web.InsertPage;
 
 /**
  * {@link WebApplication} of Winterface.
@@ -64,6 +66,7 @@ public class WinterfaceApplication extends WebApplication {
 		// Custom mountings
 		mountPage("/addfriend", AddFriendPage.class);
 		mountPage("/messages", AlertsPage.class);
+		mountPage("/insertfile", InsertPage.class);
 	}
 
 	/**
@@ -95,5 +98,5 @@ public class WinterfaceApplication extends WebApplication {
 	public CookieUtils getCookieUtils() {
 		return cookieUtils;
 	}
-
+	
 }
