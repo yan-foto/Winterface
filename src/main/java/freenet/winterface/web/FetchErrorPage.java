@@ -264,9 +264,11 @@ public class FetchErrorPage extends WinterPage {
 		RepeatingView pluginsOptions = new RepeatingView("pluginsOptions");
 		logger.trace(String.format("Adding a total sum of %d options", options.size()));
 		for (Entry<String, String> item : options.entrySet()) {
+			WebMarkupContainer liContainer = new WebMarkupContainer(pluginsOptions.newChildId());
 			ExternalLink link = new ExternalLink("pluginOption", item.getKey());
 			link.setBody(Model.of(item.getValue()));
-			pluginsOptions.add(link);
+			liContainer.add(link);
+			pluginsOptions.add(liContainer);
 		}
 		optionsContainer.add(pluginsOptions);
 		optionsContainer.setVisible(!options.isEmpty());
