@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
+import org.apache.wicket.Localizer;
 
 import freenet.node.useralerts.UserAlert;
 import freenet.node.useralerts.UserAlertManager;
@@ -19,6 +20,12 @@ import freenet.winterface.web.core.WinterfaceApplication;
  * 
  */
 public class AlertsUtil {
+
+	// L10N keys
+	public final static String L10N_MINOR = "AlertsPage.minor";
+	public final static String L10N_WARNING = "AlertsPage.warning";
+	public final static String L10N_ERROR = "AlertsPage.error";
+	public final static String L10N_CRITICAL = "AlertsPage.critical";
 
 	/**
 	 * Returns Freenet's {@link UserAlertManager}.
@@ -72,15 +79,71 @@ public class AlertsUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Dismisses an {@link UserAlert}
-	 * @param alertHashCode hashcode of alert to dismiss
+	 * 
+	 * @param alertHashCode
+	 *            hashcode of alert to dismiss
 	 * @see UserAlert#hashCode()
 	 * @see #getManager()
 	 */
 	public synchronized static void dismissAlert(int alertHashCode) {
 		getManager().dismissAlert(alertHashCode);
+	}
+
+	/**
+	 * Counts number of {@link UserAlert}(s) according to their priority class.
+	 * 
+	 * @param alerts
+	 *            list of alerts to count
+	 * @return an array where each index corresponds to a priority class and the
+	 *         content equals to number of that class in given list
+	 * @see UserAlert#getPriorityClass()
+	 */
+	public static int[] countAlerts(List<UserAlert> alerts) {
+		// Four priority types -> array of four ints
+		int[] result = new int[4];
+		for (UserAlert alert : alerts) {
+			try {
+				result[alert.getPriorityClass()]++;
+			} catch (ArrayIndexOutOfBoundsException e) {
+				// ignore
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the localized title of priority class.
+	 * <p>
+	 * Note: this method can only be called from inside of a running application
+	 * {@link Application}
+	 * </p>
+	 * 
+	 * @param priorityClass
+	 * @return localized priority class
+	 * @see UserAlert
+	 */
+	public static String getLocalizedTitle(int priorityClass) {
+		// This would only called if the Application is found in callers thread
+		Localizer localizer = Application.get().getResourceSettings().getLocalizer();
+		String key = null;
+		switch (priorityClass) {
+		case UserAlert.MINOR:
+			key = L10N_MINOR;
+			break;
+		case UserAlert.WARNING:
+			key = L10N_WARNING;
+			break;
+		case UserAlert.ERROR:
+			key = L10N_ERROR;
+			break;
+		case UserAlert.CRITICAL_ERROR:
+			key = L10N_CRITICAL;
+			break;
+		}
+		return localizer.getString(key, null);
 	}
 
 }
