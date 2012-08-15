@@ -18,7 +18,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	private boolean showIcon;
 	/** Button icon */
 	private ButtonIcon icon;
-	
+
 	/** {@link IModel} for content of button label */
 	private final IModel<String> labelModel;
 
@@ -66,8 +66,8 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	public AjaxFallbackCssButton(String id, IModel<String> model, ButtonIcon icon) {
 		super(id);
 		this.labelModel = model;
-		this.icon = icon==null?ButtonIcon.TICK:icon;
-		this.showIcon = (this.icon!=null);
+		this.icon = icon == null ? ButtonIcon.TICK : icon;
+		this.showIcon = (this.icon != null);
 	}
 
 	@Override
@@ -86,7 +86,14 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 				label.add(new AttributeAppender("class", Model.of(iconName), " "));
 			}
 		} else {
-			label = new Image(getId() + "-label", getResource("img/" + iconName + ".png"));
+			label = new Image(getId() + "-label", getResource("img/" + iconName + ".png")) {
+				@Override
+				protected boolean shouldAddAntiCacheParameter() {
+					// Buttons icon does not need to be refetched on every AJAX
+					// refresh
+					return false;
+				}
+			};
 		}
 		add(label);
 	}
