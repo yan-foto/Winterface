@@ -45,7 +45,7 @@ public class AlertsUtil {
 	 * @return valid alerts
 	 * @see #getFilteredAlerts(int)
 	 */
-	public static List<UserAlert> getAllAlerts() {
+	public synchronized static List<UserAlert> getAllAlerts() {
 		List<UserAlert> result = new ArrayList<UserAlert>();
 		for (UserAlert userAlert : getManager().getAlerts()) {
 			if (userAlert.isValid()) {
@@ -62,7 +62,7 @@ public class AlertsUtil {
 	 *            desired priority class as filtering parameter
 	 * @return filtered alerts
 	 */
-	public static List<UserAlert> getFilteredAlerts(int priorityClass) {
+	public synchronized static List<UserAlert> getFilteredAlerts(int priorityClass) {
 		List<UserAlert> result = new ArrayList<UserAlert>();
 		List<UserAlert> allAlerts = getAllAlerts();
 		for (UserAlert userAlert : allAlerts) {
@@ -79,7 +79,7 @@ public class AlertsUtil {
 	 * @see UserAlert#hashCode()
 	 * @see #getManager()
 	 */
-	public static void dismissAlert(int alertHashCode) {
+	public synchronized static void dismissAlert(int alertHashCode) {
 		getManager().dismissAlert(alertHashCode);
 	}
 
