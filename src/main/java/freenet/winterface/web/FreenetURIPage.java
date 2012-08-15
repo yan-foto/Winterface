@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -65,6 +65,7 @@ public class FreenetURIPage extends WinterPage {
 	public FreenetURIPage(PageParameters params) {
 		super(params);
 		path = parametersToPath(params);
+		logger.debug("Fetch request received for " + path);
 		// Make sure user browser data is already collected
 		// Its best to call this in instructor since it makes
 		// a redirection a data gathering page
@@ -84,7 +85,7 @@ public class FreenetURIPage extends WinterPage {
 			} else {
 				// Requested file is an image or css file. A simple redirect is
 				// not enough. Result is fetched in a recursive manner
-				waiter = enterRecursionIfNeeded(waiter, cntx);
+				enterRecursionIfNeeded(waiter, cntx);
 			}
 		} catch (FetchException e) {
 			// Happens if fetching cannot be started
@@ -136,7 +137,7 @@ public class FreenetURIPage extends WinterPage {
 				@Override
 				protected void onTimer(AjaxRequestTarget target) {
 					if (FreenetURIPage.this.getLatestResult().isFinished()) {
-						logger.debug(String.format("Fetching %s finished. Relaoading the page", path));
+						logger.debug(String.format("Fetching %s finished. Relaoading the page.", path));
 						// Restart the page so that data is processed
 						// If data is not available the error message is shown
 						FreenetURIPage.this.restartPage();
@@ -149,9 +150,9 @@ public class FreenetURIPage extends WinterPage {
 		} else {
 			// Fetching is finished and may contain data xor fetch exception
 			if (latestResult.failed != null) {
-				logger.debug("Fetching has failed. Redirecting to error page");
+				logger.debug("Fetching has failed. Redirecting to error page. (" + path + ")");
 				// Redirect to error page
-				throw new RestartResponseAtInterceptPageException(new FetchErrorPage(latestResult, path));
+				throw new RestartResponseException(new FetchErrorPage(latestResult, path));
 			} else if (latestResult.hasData()) {
 				// TODO check for RSS data as in evilHorribleHack of FProxy
 				logger.debug("Passing data to " + FreenetURIHandler.class.getName());
@@ -236,9 +237,14 @@ public class FreenetURIPage extends WinterPage {
 		if (progress == null) {
 			// this *shouldn't* happen since we initiated the progress in
 			// constructor. If anything went wrong, we simply restart the page
+			logger.warn("No progress found for path " + path + ". Restarting page!");
 			restartPage();
 		}
-		return progress.getWaiter().getResultFast();
+		;
+		final FProxyFetchWaiter waiter = progress.getWaiter();
+		FProxyFetchResult result = waiter.getResultFast();
+		waiter.close();
+		return result;
 	}
 
 	/**
@@ -307,45 +313,51 @@ public class FreenetURIPage extends WinterPage {
 	 *            containing initial result
 	 * @param cntx
 	 *            context for potential deeper fetches
-	 * @return {@link FProxyFetchWaiter} containing up-to-date result
-	 *         (<b>NOTE</b>: this can also be {@code null})
 	 * @throws MalformedURLException
 	 *             if any of new URIs are malformed (no {@link FreenetURI})
 	 * @throws FetchException
 	 *             if fetching progress for new URIs cannot be started
 	 * @see #MAX_RECURSION
 	 */
-	private FProxyFetchWaiter enterRecursionIfNeeded(FProxyFetchWaiter waiter, FetchContext cntx) throws MalformedURLException, FetchException {
+	private void enterRecursionIfNeeded(FProxyFetchWaiter waiter, FetchContext cntx) throws MalformedURLException, FetchException {
 		logger.trace("Checking if fetch recursion is needed for " + path);
 		HttpServletRequest request = getHttpServletRequest();
 		String accept = request.getHeader(RequestsUtil.HEADER_ACCEPT);
 		short recursion = RequestsUtil.MAX_RECURSION;
 		boolean shouldEnter = (accept != null && (accept.startsWith("text/css") || accept.startsWith("image/")));
+		FProxyFetchWaiter localWaiter = waiter;
 		if (shouldEnter) {
 			while (recursion > 0) {
-				FreenetURI currentURI = waiter.getProgress().uri;
+				FreenetURI currentURI = localWaiter.getProgress().uri;
 				logger.trace("Recursion number " + (RequestsUtil.MAX_RECURSION - recursion) + " for " + currentURI);
-				FProxyFetchResult result = waiter.getResult(true);
+				FProxyFetchResult result = localWaiter.getResult(true);
 				FetchException fe = result.failed;
-				if (fe != null && fe.newURI != null) {
-					waiter.close();
-					final String newPath = fe.newURI.toString();
-					logger.debug("New URI found " + newPath + " for " + currentURI);
-					waiter = trackerManager().getWaiterFor(newPath, cntx);
-					FProxyFetchResult fetchResult = waiter.getResult(true);
-					if (fetchResult.isFinished() && fetchResult.failed != null) {
+				if (fe != null) {
+					FreenetURI newURI = fe.newURI;
+					if (newURI == null) {
+						logger.trace("Breaking recursion: No new URI found. (" + currentURI + ")");
 						break;
 					}
-				} else if (result.isFinished() && fe == null) {
-					// No exceptions after finish = no newer versions
+					if (newURI.equals(currentURI)) {
+						logger.trace("Breaking recursion: New URI equals to current one. (" + currentURI + ")");
+						break;
+					}
+					localWaiter.close();
+					final String newPath = fe.newURI.toString();
+					logger.debug("New URI found " + newURI + " for " + currentURI);
+					localWaiter.close();
+					hardRestartPage(newPath);
+				}
+				// No exceptions after finish = no newer versions
+				if (fe == null || result.hasData()) {
+					logger.trace("Breaking recursion: No fetch error occured. (" + currentURI + ")");
 					break;
 				}
 				recursion--;
 			}
 		} else {
-			logger.debug("No recursion needed for" + waiter.getProgress().uri);
+			logger.trace("No recursion needed for" + waiter.getProgress().uri);
 		}
-		return waiter;
 	}
 
 	/**
@@ -362,8 +374,9 @@ public class FreenetURIPage extends WinterPage {
 	private void restartIfOutdated(FProxyFetchWaiter waiter) {
 		USKManager uskManager = getFreenetNode().clientCore.uskManager;
 		FProxyFetchResult result = waiter.getResult();
+		FetchException fe = result.failed;
 		FreenetURI uri = waiter.getProgress().uri;
-		if (result.hasData()) {
+		if (result.isFinished()) {
 			try {
 				if (uri.isUSK() && !result.hasWaited() && result.getFetchCount() > 1 && uskManager.lookupKnownGood(USK.create(uri)) > uri.getSuggestedEdition()) {
 					// A newer version is found
@@ -372,29 +385,75 @@ public class FreenetURIPage extends WinterPage {
 					waiter.close();
 					// Start fetching again
 					logger.debug("A newer version of USK key is available. Restarting request.");
-					restartPage();
+					hardRestartPage();
 				}
 			} catch (MalformedURLException e) {
 				// Cannot happen
 				logger.error("Error while checking if key is up-to-date", e);
 			}
+		} else if (fe != null) {
+			final FreenetURI newURI = fe.newURI;
+			if (newURI != null) {
+				logger.debug("A newer version if key is found in FetchException. Restarting request.");
+				hardRestartPage(newURI.toString());
+			}
 		}
 	}
 
 	/**
-	 * Restarts the page
+	 * Restarts the page <b>AFTER</b> the current request has been handled.
+	 * 
+	 * @see #restartPage(String)
+	 * @see #hardRestartPage()
 	 */
 	private void restartPage() {
 		restartPage(null);
 	}
 
 	/**
-	 * Redirects the {@link Response} to the given path
+	 * Redirects the {@link Response} to the given path <b>AFTER</b> the current
+	 * request has been handled.
 	 * 
 	 * @param newPath
 	 *            path to redirect to
+	 * @see #restartPage()
+	 * @see #hardRestartPage(String)
 	 */
 	private void restartPage(String newPath) {
+		setResponsePage(FreenetURIPage.class, createParams(newPath));
+	}
+
+	/**
+	 * Aborts current request handling and starts from the top
+	 * 
+	 * @see #restartPage()
+	 * @see #hardRestartPage(String)
+	 */
+	private void hardRestartPage() {
+		hardRestartPage(null);
+	}
+
+	/**
+	 * Aborts current request handling and starts from the top
+	 * 
+	 * @param newPath
+	 *            path to redirect to
+	 * @see #hardRestartPage()
+	 * @see #restartPage(String)
+	 */
+	private void hardRestartPage(String newPath) {
+		throw new RestartResponseException(FreenetURIPage.class, createParams(newPath));
+	}
+
+	/**
+	 * Creates {@link PageParameters} from given path or current path
+	 * 
+	 * @param newPath
+	 *            path to create params from (if {@code null}) the current
+	 *            {@link #path} is used
+	 * @return created {@link PageParameters}
+	 */
+	private PageParameters createParams(String newPath) {
 		PageParameters params;
 		if (newPath != null) {
 			params = new PageParameters();
@@ -402,7 +461,7 @@ public class FreenetURIPage extends WinterPage {
 		} else {
 			params = FreenetURIPage.this.getPageParameters();
 		}
-		setResponsePage(FreenetURIPage.class, params);
+		return params;
 	}
 
 	@Override
