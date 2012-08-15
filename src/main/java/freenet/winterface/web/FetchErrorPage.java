@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -15,6 +17,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchException;
@@ -79,6 +82,8 @@ public class FetchErrorPage extends WinterPage {
 		super();
 		this.result = result;
 		this.path = path;
+		((WebResponse) getResponse()).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		logger.error("Rendering failed for URI "+path, result.failed);
 	}
 
 	@Override
@@ -306,6 +311,12 @@ public class FetchErrorPage extends WinterPage {
 			// Cannot happen
 		}
 		return s;
+	}
+
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		result.close();
 	}
 
 }
