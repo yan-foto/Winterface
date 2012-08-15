@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
-	<div wicket:id="alerts-container">
-		<div wicket:id="alerts">
-			<div wicket:id="title" class="infobox-header"></div>
-			<div class="infobox-content">
-				<div wicket:id="text"></div>
-				<span wicket:id="dismiss">
-					<a wicket:id="hide"><img wicket:id="hide-label"></img></a>
-				</span>
+	<div wicket:id="outerContainer">
+		<div wicket:id="noMessageContainer"><wicket:message key="UserAlertsToadlet.noMessages" /></div>
+		<div wicket:id="alertsContainer">
+			<div wicket:id="alert" class="alert">
+				<a class="alert-dismiss" wicket:id="dismiss"><img wicket:id="dismiss-label" /></a>
+				<span class="alert-short" wicket:id="shortText"></span>
 			</div>
 		</div>
+		<a wicket:id="toggleLink"><img wicket:id="toggleLink-label" /></a>
+		<span class="priority-links">
+			<span wicket:id="linkContainer">
+				<a wicket:id="priorityLink"></a> <span wicket:id="separator"></span>
+			</span>
+		</span>
 	</div>
 </wicket:panel>
 </html>
