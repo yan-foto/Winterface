@@ -24,7 +24,7 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 
 	/** A list of available icons for button */
 	public enum ButtonIcon {
-		TICK, CANCEL, DELETE, ARROW_UP, ARROW_DOWN, ARROW_OUT, PENCIL, CUT
+		TICK, CANCEL, DELETE, ARROW_UP, ARROW_DOWN, BULLET_ARROW_BOTTOM, BULLET_ARROW_TOP, CROSS, ARROW_OUT, PENCIL, CUT
 	}
 
 	/**
