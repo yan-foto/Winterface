@@ -34,10 +34,11 @@ public class AlertsPage extends WinterPage {
 
 	/** Current priority class of alerts to show */
 	private Integer priorityClass;
-	/** {@link PageParameters} name determining priority class to filter */
-	private final String PRIORITY_PARAM = "priority";
 	/** L10N key */
 	private final String NO_MESSAGE_KEY = "UserAlertsToadlet.noMessages";
+
+	/** {@link PageParameters} name determining priority class to filter */
+	public final static String PRIORITY_PARAM = "priority";
 
 	/**
 	 * {@link LoadableDetachableModel} for alert list. Always up to date
