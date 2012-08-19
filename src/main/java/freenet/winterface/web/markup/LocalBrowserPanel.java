@@ -44,8 +44,6 @@ import freenet.winterface.web.core.AjaxFallbackCssButton;
  */
 // TODO make all links into fallback submit buttons so if its nested in another
 // form, the state of the parent is preserved if this panel is changed
-// TODO if this form is embedded in another work, the AJAX mode for "go!" will
-// not work. I have reported this to Wicket devs. Awaiting response.
 @SuppressWarnings("serial")
 public abstract class LocalBrowserPanel extends Panel {
 
@@ -132,7 +130,11 @@ public abstract class LocalBrowserPanel extends Panel {
 		Form<Void> pathForm = new Form<Void>("pathForm");
 		final TextField<String> currentDir = new TextField<String>("currentDir", currentDirModel);
 		currentDir.setRequired(true);
-		AjaxFallbackButton browserTo = new AjaxFallbackButton("browseTo", pathForm) {
+		// TODO: this should be removed in next of release of Wicket. Currently
+		// it is necessary
+		Form<?> parentForm = findParent(Form.class);
+		parentForm = parentForm == null ? pathForm : parentForm;
+		AjaxFallbackButton browserTo = new AjaxFallbackButton("browseTo", parentForm) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				LocalBrowserPanel.this.setDefaultModelObject(currentDir.getModelObject());
@@ -195,7 +197,14 @@ public abstract class LocalBrowserPanel extends Panel {
 					imgSrc = "file";
 				}
 				// TODO make AjaxFallbackCSSButton icons available for all
-				Image typeImg = new Image("fileType", new PackageResourceReference(AjaxFallbackCssButton.class, "img/" + imgSrc + ".png"));
+				Image typeImg = new Image("fileType", new PackageResourceReference(AjaxFallbackCssButton.class, "img/" + imgSrc + ".png")) {
+					@Override
+					protected boolean shouldAddAntiCacheParameter() {
+						// We don't want to rerender each icon each time the
+						// list is updated
+						return false;
+					}
+				};
 				item.add(typeImg);
 				// Link (name) when clicked on item
 				final File file = item.getModelObject();
