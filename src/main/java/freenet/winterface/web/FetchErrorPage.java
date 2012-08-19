@@ -82,7 +82,6 @@ public class FetchErrorPage extends WinterPage {
 		super();
 		this.result = result;
 		this.path = path;
-		((WebResponse) getResponse()).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		logger.error("Rendering failed for URI "+path, result.failed);
 	}
 
@@ -317,6 +316,12 @@ public class FetchErrorPage extends WinterPage {
 	protected void onDetach() {
 		super.onDetach();
 		result.close();
+	}
+	
+	@Override
+	protected void configureResponse(WebResponse response) {
+		super.configureResponse(response);
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 }
