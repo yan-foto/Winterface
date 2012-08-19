@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:extend>
+	<div wicket:id="navLinksContainer" class="box">
+		<h3>
+			<wicket:message key="QueueToadlet.requestNavigation" />
+		</h3>
+		<ul>
+			<li wicket:id="linksRepeater"><a wicket:id="navLink"></a></li>
+		</ul>
+	</div>
+	<div wicket:id="queuesContainer" class="box">
+		<form wicket:id="editForm">
+			<div wicket:id="feedback"></div>
+			<input type="submit" wicket:id="removeItems" wicket:message="value:QueuePage.removeItems" />
+			<br />
+			<select wicket:id="prioritySelect"></select>
+			<input type="submit" wicket:id="changePriority" wicket:message="value:QueuePage.changePriority" />
+			<div wicket:id="selectedGroup">
+				<div wicket:id="queuesRepeater">
+					<div wicket:id="queueContainer" class="queue-container">
+						<h3 wicket:id="queueTitle"></h3>
+						<div wicket:id="queueAnchor"></div>
+						<table class="queue-table">
+							<tr wicket:id="queue">
+								<td><input wicket:id="select" type="checkbox" /></td>
+								<td wicket:id="identifier"></td>
+								<td wicket:id="priority"></td>
+								<td wicket:id="size"></td>
+								<td wicket:id="mime"></td>
+								<td wicket:id="progress"></td>
+								<td wicket:id="lastActivity"></td>
+								<td wicket:id="persistence"></td>
+								<td wicket:id="fileName"></td>
+								<td wicket:id="keyLink"></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</wicket:extend>
+</html>
