@@ -20,8 +20,6 @@ import freenet.winterface.web.core.BookmarkItemView;
 @SuppressWarnings("serial")
 public class BookmarkCategoryPanel extends Panel {
 
-	/** Model of {@link BookmarkCategory} for this panel */
-	private final IModel<BookmarkCategory> model;
 	/** Path from root up to this category */
 	private final String parentBookmarkPath;
 
@@ -35,7 +33,6 @@ public class BookmarkCategoryPanel extends Panel {
 	 */
 	public BookmarkCategoryPanel(String id, IModel<BookmarkCategory> model, String parentPath) {
 		super(id, model);
-		this.model = model;
 		this.parentBookmarkPath = parentPath;
 	}
 
@@ -47,9 +44,9 @@ public class BookmarkCategoryPanel extends Panel {
 		feedback.setOutputMarkupId(true);
 		add(feedback);
 		// Add category name and BookmarkItem(s)
-		add(new Label("name"));
+		add(new Label("visibleName"));
 		add(new BookmarkItemView("items", getItemPath()));
-		BookmarkCategory category = model.getObject();
+		BookmarkCategory category = (BookmarkCategory) getDefaultModelObject();
 		// Check for sub categories
 		Component subCats = null;
 		if (category.getAllSubCategories().size() == 0) {
@@ -68,7 +65,7 @@ public class BookmarkCategoryPanel extends Panel {
 	}
 
 	public String getItemPath() {
-		String categoryName = model.getObject().getName();
+		String categoryName = ((BookmarkCategory)getDefaultModelObject()).getName();
 		return parentBookmarkPath + categoryName;
 	}
 

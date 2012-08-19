@@ -1,6 +1,12 @@
 ================ MUST =====================
 - Review navigation menu
 	i) submenus are only shown if menu item is available
+	
+- Try to make mapper generate more user friendly urls:
+currently leaving the whole path out breaks the ajax functionality.
+
+-Implement I18N
+
 
 ================ SHOULD ===================
 - Adapt footer from FProxy

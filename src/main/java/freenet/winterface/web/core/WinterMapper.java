@@ -10,12 +10,13 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Page;
+import org.apache.wicket.core.request.mapper.AbstractBookmarkableMapper;
+import org.apache.wicket.core.request.mapper.BookmarkableMapper;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.component.IRequestablePage;
-import org.apache.wicket.request.mapper.AbstractBookmarkableMapper;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
@@ -32,7 +33,7 @@ import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
  * @see AbstractBookmarkableMapper
  * 
  */
-public class WinterMapper extends AbstractBookmarkableMapper {
+public class WinterMapper extends BookmarkableMapper {
 
 	/**
 	 * Fallback {@link IRequestMapper}. In case there is no defined mapping for
@@ -84,7 +85,13 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 	@Override
 	public IRequestHandler mapRequest(Request request) {
 		if (urlDesired(request.getClientUrl()) != null) {
-			return super.mapRequest(request);
+			UrlInfo urlInfo = parseRequest(request);
+			if (urlInfo != null) {
+				Class<? extends IRequestablePage> pageClass = urlInfo.getPageClass();
+				PageParameters pageParameters = urlInfo.getPageParameters();
+
+				return processBookmarkable(pageClass, pageParameters);
+			}
 		}
 		return delegate.mapRequest(request);
 	}
@@ -112,9 +119,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 
 	@Override
 	protected Url buildUrl(UrlInfo info) {
-		Url url = new Url();
-		encodePageComponentInfo(url, info.getPageComponentInfo());
-		return encodePageParameters(url, info.getPageParameters(), new PageParametersEncoder());
+		return encodePageParameters(new Url(), info.getPageParameters(), new PageParametersEncoder());
 	}
 
 	@Override
@@ -157,6 +162,7 @@ public class WinterMapper extends AbstractBookmarkableMapper {
 				String className = (String) entry.getValue();
 				Class<? extends IRequestablePage> clazz = Class.forName(className).asSubclass(IRequestablePage.class);
 				registerMapping(startsWith, clazz);
+				logger.debug(String.format("Urls starting with %s will be mapped to %s", startsWith, className));
 			}
 		} catch (FileNotFoundException e) {
 			logger.debug("No external mapping file found!");

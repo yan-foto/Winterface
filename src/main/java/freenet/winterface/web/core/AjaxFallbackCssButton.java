@@ -3,8 +3,8 @@ package freenet.winterface.web.core;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.html.IHeaderContributor;
-import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.IModel;
@@ -17,14 +17,16 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	/** {@code true} to show icon */
 	private boolean showIcon;
 	/** Button icon */
-	private ButtonIcon icon = ButtonIcon.TICK;
-	
+	private ButtonIcon icon;
+
 	/** {@link IModel} for content of button label */
 	private final IModel<String> labelModel;
 
+	public final static String LABEL_POSTFIX = "-label";
+
 	/** A list of available icons for button */
 	public enum ButtonIcon {
-		TICK, CANCEL, DELETE, ARROW_UP, ARROW_DOWN, ARROW_OUT, PENCIL, CUT
+		TICK, CANCEL, DELETE, ARROW_UP, ARROW_DOWN, BULLET_ARROW_BOTTOM, BULLET_ARROW_TOP, CROSS, ARROW_OUT, PENCIL, CUT
 	}
 
 	/**
@@ -66,8 +68,8 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	public AjaxFallbackCssButton(String id, IModel<String> model, ButtonIcon icon) {
 		super(id);
 		this.labelModel = model;
-		this.icon = icon;
-		this.showIcon = (this.icon!=null);
+		this.icon = icon == null ? ButtonIcon.TICK : icon;
+		this.showIcon = (this.icon != null);
 	}
 
 	@Override
@@ -80,13 +82,13 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		// Add label
 		Component label = null;
 		if (labelModel != null) {
-			label = new Label(getId() + "-label", labelModel);
+			label = new Label(getId() + LABEL_POSTFIX, labelModel);
 			if (showIcon) {
 				label.add(new AttributeAppender("class", Model.of("with-icon"), " "));
 				label.add(new AttributeAppender("class", Model.of(iconName), " "));
 			}
 		} else {
-			label = new Image(getId() + "-label", getResource("img/" + iconName + ".png"));
+			label = createIcon(icon);
 		}
 		add(label);
 	}
@@ -104,6 +106,14 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 	}
 
 	/**
+	 * @return current {@link ButtonIcon}
+	 * @see #replaceIcon(ButtonIcon)
+	 */
+	public ButtonIcon getIcon() {
+		return icon;
+	}
+
+	/**
 	 * Toggles icon visibility
 	 * 
 	 * @param show
@@ -115,10 +125,47 @@ public abstract class AjaxFallbackCssButton extends AjaxFallbackLink<String> imp
 		return this;
 	}
 
+	/**
+	 * Replaces the {@link ButtonIcon} if available
+	 * 
+	 * @param newIcon
+	 *            desired icon
+	 * @return modified {@code this}
+	 */
+	public AjaxFallbackCssButton replaceIcon(ButtonIcon newIcon) {
+		Component component = this.get(getId() + LABEL_POSTFIX);
+		if (component instanceof Image) {
+			Image oldImg = (Image) component;
+			Image newImg = createIcon(newIcon);
+			oldImg.replaceWith(newImg);
+		}
+		return this;
+	}
+
+	/**
+	 * Creates an {@link Image} with respect to given {@link ButtonIcon}
+	 * <p>
+	 * Created {@link Image} is cachable (even over AJAX refreshes)
+	 * </p>
+	 * 
+	 * @param icon
+	 * @return created icon
+	 */
+	private Image createIcon(ButtonIcon icon) {
+		return new Image(getId() + LABEL_POSTFIX, getResource("img/" + icon.toString().toLowerCase() + ".png")) {
+			@Override
+			protected boolean shouldAddAntiCacheParameter() {
+				// Buttons icon does not need to be refetched on every AJAX
+				// refresh
+				return false;
+			}
+		};
+	}
+
 	@Override
-	public void renderHead(IHeaderResponse response) {
+	public void renderHead(org.apache.wicket.markup.head.IHeaderResponse response) {
 		super.renderHead(response);
-		response.renderCSSReference(getResource("css-buttons.css"));
+		response.render(CssHeaderItem.forReference(getResource("css-buttons.css")));
 	}
 
 	/**

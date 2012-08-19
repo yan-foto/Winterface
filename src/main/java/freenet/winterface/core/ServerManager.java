@@ -101,6 +101,7 @@ public class ServerManager {
 			try {
 				logger.info("Starting Jetty Server on port " + config.getPort());
 				server.start();
+				server.join();
 			} catch (Exception e) {
 				logger.error("Error by server startup!", e);
 			}

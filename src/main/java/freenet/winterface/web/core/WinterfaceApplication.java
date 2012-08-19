@@ -2,12 +2,18 @@ package freenet.winterface.web.core;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.util.cookies.CookieUtils;
 
+import freenet.keys.FreenetURI;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.ServerManager;
+import freenet.winterface.web.AddFriendPage;
+import freenet.winterface.web.AlertsPage;
 import freenet.winterface.web.Dashboard;
 import freenet.winterface.web.ErrorPage;
+import freenet.winterface.web.InsertPage;
+import freenet.winterface.web.QueuePage;
 
 /**
  * {@link WebApplication} of Winterface.
@@ -22,6 +28,13 @@ public class WinterfaceApplication extends WebApplication {
 	/** User configuration */
 	private Configuration config;
 
+	/**
+	 * Tracks {@link FreenetURI}s being fetched
+	 */
+	private FetchTrackerManager trackerManager;
+
+	private CookieUtils cookieUtils;
+
 	@Override
 	protected void init() {
 		super.init();
@@ -30,11 +43,17 @@ public class WinterfaceApplication extends WebApplication {
 		// Configuring custom mapper
 		WinterMapper mapper = new WinterMapper(getRootRequestMapper());
 		setRootRequestMapper(mapper);
+		// Retrieve FreenetWrapper
 		freenetWrapper = (FreenetWrapper) getServletContext().getAttribute(ServerManager.FREENET_ID);
+		// Setup manager for FProxyFetchTracker
+		trackerManager = new FetchTrackerManager(freenetWrapper, this);
 		config = (Configuration) getServletContext().getAttribute(ServerManager.CONFIG_ID);
+		// Instantiate cookie utils
+		cookieUtils = new CookieUtils();
 		// Add Auto-Linking
 		getMarkupSettings().setAutomaticLinking(true);
-		mountPage("/error", ErrorPage.class);
+		
+		initPageMounts();
 	}
 
 	@Override
@@ -42,8 +61,20 @@ public class WinterfaceApplication extends WebApplication {
 		return Dashboard.class;
 	}
 
+	private void initPageMounts() {
+		// Setup error pages
+		mountPage("/error", ErrorPage.class);
+		// Custom mountings
+		mountPage("/addfriend", AddFriendPage.class);
+		mountPage("/messages", AlertsPage.class);
+		mountPage("/insertfile", InsertPage.class);
+		mountPage("/queue", QueuePage.class);
+	}
+
 	/**
-	 * @return {@link FreenetWrapper} to interact with core
+	 * Returns {@link FreenetWrapper}, which contains Freenet related objects
+	 * 
+	 * @return {@link FreenetWrapper}
 	 */
 	public FreenetWrapper getFreenetWrapper() {
 		return freenetWrapper;
@@ -56,4 +87,18 @@ public class WinterfaceApplication extends WebApplication {
 		return config;
 	}
 
+	/**
+	 * Return {@link FetchTrackerManager} responsible to track progress of
+	 * {@link FreenetURI}s being fetched
+	 * 
+	 * @return {@link FetchTrackerManager}
+	 */
+	public FetchTrackerManager getTrackerManager() {
+		return trackerManager;
+	}
+
+	public CookieUtils getCookieUtils() {
+		return cookieUtils;
+	}
+	
 }

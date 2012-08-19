@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:extend>
+	<form wicket:id="insertForm">
+		<input type="hidden" wicket:id="selectedFile" />
+		<div wicket:id="feedback"></div>
+		<h3><wicket:message key="FileInsertWizardToadlet.pageTitle" /></h3>
+		<wicket:message key="FileInsertWizardToadlet.insertIntro" />
+		<div class="form-part box">
+			<div clasS="form-part-title">
+				<h3><wicket:message key="QueueToadlet.key" /></h3>
+			</div>
+			<div wicket:id="methodGroup">
+				<table>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="FileInsertWizardToadlet.insertCanonicalTitle" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="canonicalKey" /><wicket:message key="FileInsertWizardToadlet.insertCanonical" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="FileInsertWizardToadlet.insertRandomTitle" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="randomKey" /><wicket:message key="FileInsertWizardToadlet.insertRandom" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="FileInsertWizardToadlet.insertSpecificKeyTitle" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="specificKey" /><wicket:message key="FileInsertWizardToadlet.insertSpecificKey" />
+						</td>
+					</tr>
+				</table>
+			</div>
+			<input type="text" wicket:id="specificKeyContent" />
+		</div>
+		<div class="form-part box">
+			<div clasS="form-part-title">
+				<h3><wicket:message key="InsertPage.optionsTitle" /></h3>
+			</div>
+			<table>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="InsertPage.compression" />
+					</td>
+					<td class="column-content">
+						<div wicket:id="compressionGroup">
+							<input type="radio" wicket:id="enableCompression" /><wicket:message key="Misc.Enable" />
+							<br />
+							<input type="radio" wicket:id="disableCompression" /><wicket:message key="Misc.Disable" />
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="QueueToadlet.compatModeLabel" />
+					</td>
+					<td class="column-content">
+						<select wicket:id="compatibilityMode"></select>
+					</td>
+				</tr>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="FileInsertWizardToadlet.splitfileCryptoKeyLabel" />
+					</td>
+					<td class="column-content">
+						<input type="text" wicket:id="splitFileKey" />
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-part box">
+			<table>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="QueueToadlet.insertFileBrowseLabel" />
+						<br />
+						<wicket:message key="InsertPage.selectedFile" />:<div wicket:id="localSelected"></div>
+					</td>
+					<td class="column-content">
+						<div wicket:id="localBrowser"></div>
+					</td>
+				</tr>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="QueueToadlet.insertFileLabel" />
+					</td>
+					<td class="column-content">
+						<input type="file" wicket:id="browseFile" wicket:message="value:QueueToadlet.insertFileBrowseButton"/>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-submit"><input type="submit" wicket:id="submit" value="Submit" /></div>
+	</form>
+</wicket:extend>
+</html>

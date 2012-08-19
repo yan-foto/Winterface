@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:extend>
+	<div class="file-info">
+		<wicket:message key="FProxyToadlet.fileInformationTitle" />
+		<a wicket:id="fileLink"></a>
+		<div wicket:id="fileSize"></div>
+		<div wicket:id="fileMime"></div>
+	</div>
+	<div class="reason">
+		<wicket:message key="FProxyToadlet.explanationTitle" />
+		<div wicket:id="explanation"></div>
+		<div wicket:id="fatalError"></div>
+		<ul wicket:id="filterErrorContainer">
+			<li wicket:id="filterError"><div wicket:id="detail"></div></li>
+		</ul>
+		<pre wicket:id="errorCode"></pre>
+	</div>
+	<div wicket:id="optionsContainer">
+		<ul>
+			<li wicket:id="pluginsOptions"><a wicket:id="pluginOption"></a></li>
+		</ul>
+	</div>
+</wicket:extend>
+</html>

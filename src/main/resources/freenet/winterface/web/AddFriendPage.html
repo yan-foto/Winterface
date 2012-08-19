@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:extend>
+	<form wicket:id="addFriendForm">
+		<div wicket:id="feedback"></div>
+		<h3><wicket:message key="DarknetAddRefToadlet.title" /></h3>
+		<div class="form-part box">
+			<table>
+				<tr>
+					<td class="column-title">
+						<div><wicket:message key="DarknetConnectionsToadlet.pasteReference" /></div>
+					</td>
+					<td class="column-content">
+						<textarea rows="10"	wicket:id="noderefInsert"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td class="column-title">
+						<div><wicket:message key="DarknetConnectionsToadlet.urlReference" /></div>
+					</td>
+					<td class="column-content">
+						<input type="text" wicket:id="noderefURL" />
+					</td>
+				</tr>
+				<tr>
+					<td class="column-title">
+						<div><wicket:message key="DarknetConnectionsToadlet.fileReference" /></div>
+					</td>
+					<td class="column-content">
+						<input type="file" wicket:id="noderefBrowse" />
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-part box">
+			<div class="form-part-title">
+				<h4><wicket:message key="DarknetConnectionsToadlet.peerTrustTitle" /></h4><br />
+				<wicket:message key="DarknetConnectionsToadlet.peerTrustIntroduction" />
+			</div>
+			<div wicket:id="trustGroup">
+				<table>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerTrust.HIGH" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="trustHigh" /><wicket:message key="DarknetConnectionsToadlet.peerTrustExplain.HIGH" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerTrust.NORMAL" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="trustNormal" /><wicket:message key="DarknetConnectionsToadlet.peerTrustExplain.NORMAL" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerTrust.LOW" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="trustLow" /><wicket:message key="DarknetConnectionsToadlet.peerTrustExplain.LOW" />
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="form-part box">
+			<div class="form-part-title">
+				<h4><wicket:message key="DarknetConnectionsToadlet.peerVisibilityTitle" /></h4><br />
+				<wicket:message key="DarknetConnectionsToadlet.peerVisibilityIntroduction" />
+			</div>
+			<div wicket:id="visibilityGroup">
+				<table>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerVisibility.YES" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="visible" /><wicket:message key="DarknetConnectionsToadlet.peerVisibilityExplain.YES" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerVisibility.NAME_ONLY" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="onlyName" /><wicket:message key="DarknetConnectionsToadlet.peerVisibilityExplain.NAME_ONLY" />
+						</td>
+					</tr>
+					<tr>
+						<td class="column-title">
+							<wicket:message key="DarknetConnectionsToadlet.peerVisibility.NO" />
+						</td>
+						<td class="column-content">
+							<input type="radio" wicket:id="invisible" /><wicket:message key="DarknetConnectionsToadlet.peerVisibilityExplain.NO"/>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="form-part box">
+			<table>
+				<tr>
+					<td class="column-title">
+						<wicket:message key="DarknetConnectionsToadlet.enterDescription" />
+					</td>
+					<td class="column-content">
+						<input type="text" wicket:id="desc" />
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-submit"><input type="submit" wicket:id="submit" value="Submit" /></div>
+	</form>
+</wicket:extend>
+</html>

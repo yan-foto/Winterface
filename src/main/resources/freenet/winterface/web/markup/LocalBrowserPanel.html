@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:wicket="htttp://wicket.apache.org">
+<wicket:panel>
+<div wicket:id="mainContainer">
+	<form wicket:id="pathForm">
+		<table class="browser-controls">
+			<tr>
+				<td><wicket:message key="LocalBrowserPanel.location" />:<input type="text" wicket:id="currentDir" /></td>
+				<td><input type="submit" wicket:message="value:LocalBrowserPanel.go" wicket:id="browseTo" /></td>
+				<td><a wicket:id="upDir"><img class="up-directory" src="../core/img/arrow_up.png" /></a></td>
+			</tr>
+		</table>
+	</form>
+	<table>
+		<tr>
+		</tr>
+		<tr>
+			<th><a wicket:id="typeSort"><wicket:message key="LocalBrowserPanel.type" /></a></th>
+			<th><a wicket:id="nameSort"><wicket:message key="LocalBrowserPanel.headerName" /></a></th>
+			<th><a wicket:id="sizeSort"><wicket:message key="LocalBrowserPanel.headerSize" /></a></th>
+			<th><a wicket:id="lastModSort"><wicket:message key="LocalBrowserPanel.headerLastMod" /></a></th>
+		</tr>
+		<tr wicket:id="children">
+			<td><img wicket:id="fileType" /></td>
+			<td><a wicket:id="link"></a></td>
+			<td><div wicket:id="size"></div></td>
+			<td><div wicket:id="lastModified"></div></td>
+			<td><a wicket:id="download"><img src="../core/img/add.png" /></a></td>
+		</tr>
+	</table>
+</div>
+</wicket:panel>
+</html>

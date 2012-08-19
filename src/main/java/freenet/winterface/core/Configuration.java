@@ -8,6 +8,7 @@ import freenet.config.NodeNeedRestartException;
 import freenet.config.SubConfig;
 import freenet.support.api.BooleanCallback;
 import freenet.support.api.IntCallback;
+import freenet.support.api.LongCallback;
 import freenet.support.api.StringCallback;
 
 /**
@@ -30,6 +31,8 @@ public class Configuration {
 	private String fullAccessHosts;
 	/** Bind to addresses */
 	private String bindTo;
+	/** Maximum size for transparent pass-through */
+	private long maxLength;
 
 	/** Default server port value */
 	private final static int PORT_DEFAULT = 8080;
@@ -60,6 +63,11 @@ public class Configuration {
 	private final static String BINDTO_DEFAULT = "127.0.0.1,0:0:0:0:0:0:0:1";
 	/** Full access hosts entry name in config file */
 	private final static String BINDTO_OPTION = "bindTo";
+
+	/** Defualt MaxLength value (2MB plus a bit due to buggy inserts) */
+	private final static long MAXLENGTH_DEFAULT = (2 * 1024 * 1024 * 11) / 10;
+	/** MaxLength entry name in config file */
+	private final static String MAXLENGTH_OPTION = "maxLength";
 
 	/**
 	 * {@link ConfigCallback} for gate public way mode
@@ -189,6 +197,27 @@ public class Configuration {
 	}
 
 	/**
+	 * {@link ConfigCallback} for max length
+	 * 
+	 * @author pausb
+	 * 
+	 */
+
+	class MaxLength extends LongCallback {
+
+		@Override
+		public Long get() {
+			return maxLength;
+		}
+
+		@Override
+		public void set(Long val) throws InvalidConfigValueException, NodeNeedRestartException {
+			maxLength = val;
+		}
+
+	}
+
+	/**
 	 * Initializes {@link SubConfig} passed by Freenet before
 	 * {@link WinterfacePlugin} starts
 	 * 
@@ -214,6 +243,9 @@ public class Configuration {
 		fullAccessHosts = subConfig.getString(FULLACCESS_HOSTS_OPTION);
 		subConfig.register(BINDTO_OPTION, BINDTO_DEFAULT, ++sortOrder, true, false, shortDesc(BINDTO_OPTION), longDesc(BINDTO_OPTION), new BindToHosts());
 		bindTo = subConfig.getString(BINDTO_OPTION);
+		subConfig.register(MAXLENGTH_OPTION, MAXLENGTH_DEFAULT, ++sortOrder, true, false, shortDesc(MAXLENGTH_OPTION), longDesc(MAXLENGTH_OPTION),
+				new MaxLength(), false);
+		maxLength = subConfig.getLong(MAXLENGTH_OPTION);
 	}
 
 	/**
@@ -292,6 +324,15 @@ public class Configuration {
 		return bindTo;
 	}
 
+	/**
+	 * Returns Maximum size for transparent pass-through
+	 * 
+	 * @return max length
+	 */
+	public long getMaxLength() {
+		return maxLength;
+	}
+	
 	/**
 	 * Checks a comma separated list of hosts (IPs) for validity.
 	 * 

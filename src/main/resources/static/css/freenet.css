@@ -4,6 +4,7 @@ html,body,#content {
 
 body {
 	background-color: #FAFAFA;
+	font-size: 80%;
 }
 
 /*
@@ -19,6 +20,7 @@ body {
 #content-wrapper {
 	background: url("/static/images/bg.png") repeat-y scroll 50% 0
 		transparent;
+	margin-bottom: 25px; /* Leave enough space for the footer */
 }
 
 #content {
@@ -129,4 +131,107 @@ body {
 
 .bookmark-category-name {
 	background-color: #FFFEBF;
+}
+
+/*
+* ------------------------- FORMS -----------------------------
+*/
+.form-part {
+	display: inline;
+	float: left;
+}
+
+.form-part-title {
+	margin-bottom: 10px;
+}
+
+.form-part-title {
+	margin-bottom: 10px;
+}
+
+.form-part-title h4 {
+	margin: 5px auto;
+}
+
+.form-submit {
+	float: right;
+	margin: 15px 30px;
+}
+/*
+* ------------------------- USER ALERTS -----------------------
+*/
+.alert .dismiss {
+	float: right;
+}
+
+.alerts-container {
+	background-color: #FFFFFF;
+}
+
+/*
+* ------------------------- QUEUES ----------------------------
+*/
+.queue-table td,.queue-table th {
+	border: 1px solid;
+	padding: 5px;
+}
+
+/*
+* ------------------------- PRIORITY --------------------------
+*/
+.priority-0 {
+	background-color: #FFB7B7;
+}
+
+.priority-1 {
+	background-color: #FFCEA7;
+}
+
+.priority-2 {
+	background-color: #FFEBA7;
+}
+
+.priority-3 {
+	background-color: #DDFFA7;
+}
+
+.priority-4 {
+	background-color: #A7FFBC;
+}
+
+.priority-5 {
+	background-color: #A7FFF8;
+}
+
+.priority-6 {
+	background-color: #A7CAFF;
+}
+
+/*
+* ------------------------- MISC ------------------------------
+*/
+.box {
+	border: 1px dotted #000000;
+	font-family: Avantgarde, sans-serif;
+	margin: 10px 20px;
+	padding: 10px;
+	width: 900px;
+}
+
+.clear {
+	clear: both;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+td.column-title,th.column-title {
+	font-weight: bold;
+	vertical-align: top;
+	width: 30%;
+}
+
+td.column-content,th.column-content {
+	width: 70%;
 }
