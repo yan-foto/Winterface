@@ -36,6 +36,8 @@ import freenet.winterface.web.core.AjaxFallbackCssButton.ButtonIcon;
  * @see AlertsUtil
  * @see AlertsPage
  */
+// TODO messages counts are not updated! use RefreshingView instead of
+// RepeatingView
 @SuppressWarnings("serial")
 public class AlertsPanel extends Panel {
 
@@ -79,6 +81,25 @@ public class AlertsPanel extends Panel {
 		};
 		noMessageContainer.setOutputMarkupPlaceholderTag(true);
 		outerContainer.add(noMessageContainer);
+		// Summary of alerts count
+		final RepeatingView repeatingContainer = new RepeatingView("linkContainer");
+		int[] count = AlertsUtil.countAlerts(itemsModel.getObject());
+		for (int i = 0; i < count.length; i++) {
+			String priorityTitle = AlertsUtil.getLocalizedTitle(i);
+			WebMarkupContainer linkContainer = new WebMarkupContainer(repeatingContainer.newChildId());
+			PageParameters params = new PageParameters();
+			params.add(AlertsPage.PRIORITY_PARAM, i);
+			BookmarkablePageLink<Void> priorityLink = new BookmarkablePageLink<Void>("priorityLink", AlertsPage.class, params);
+			priorityLink.add(new AttributeModifier("class", Model.of("priority-" + i)));
+			priorityLink.add(new AttributeModifier("title", Model.of(priorityTitle)));
+			priorityLink.setBody(Model.of(count[i]));
+			linkContainer.add(priorityLink);
+			String separatorContent = (i == count.length - 1) ? "" : SEPARATOR;
+			Label separator = new Label("separator", Model.of(separatorContent));
+			linkContainer.add(separator);
+			repeatingContainer.add(linkContainer);
+		}
+		outerContainer.add(repeatingContainer);
 		// Collapsable container
 		final WebMarkupContainer alertsContainer = new WebMarkupContainer("alertsContainer", Model.of(false)) {
 			@Override
@@ -112,6 +133,7 @@ public class AlertsPanel extends Panel {
 								target.prependJavaScript("jQuery('#" + item.getMarkupId() + "').slideUp();");
 							}
 							itemsModel.detach();
+							repeatingContainer.detachModels();
 						}
 					}
 				};
@@ -137,25 +159,6 @@ public class AlertsPanel extends Panel {
 			}
 		};
 		outerContainer.add(toggleLink);
-		// Summary of alerts count
-		RepeatingView repeatingContainer = new RepeatingView("linkContainer");
-		int[] count = AlertsUtil.countAlerts(itemsModel.getObject());
-		for (int i = 0; i < count.length; i++) {
-			String priorityTitle = AlertsUtil.getLocalizedTitle(i);
-			WebMarkupContainer linkContainer = new WebMarkupContainer(repeatingContainer.newChildId());
-			PageParameters params = new PageParameters();
-			params.add(AlertsPage.PRIORITY_PARAM, i);
-			BookmarkablePageLink<Void> priorityLink = new BookmarkablePageLink<Void>("priorityLink", AlertsPage.class, params);
-			priorityLink.add(new AttributeModifier("class", Model.of("priority-" + i)));
-			priorityLink.add(new AttributeModifier("title", Model.of(priorityTitle)));
-			priorityLink.setBody(Model.of(count[i]));
-			linkContainer.add(priorityLink);
-			String separatorContent = (i == count.length - 1) ? "" : SEPARATOR;
-			Label separator = new Label("separator", Model.of(separatorContent));
-			linkContainer.add(separator);
-			repeatingContainer.add(linkContainer);
-		}
-		outerContainer.add(repeatingContainer);
 		add(outerContainer);
 	}
 }
