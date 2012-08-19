@@ -13,6 +13,7 @@ import freenet.winterface.web.AlertsPage;
 import freenet.winterface.web.Dashboard;
 import freenet.winterface.web.ErrorPage;
 import freenet.winterface.web.InsertPage;
+import freenet.winterface.web.QueuePage;
 
 /**
  * {@link WebApplication} of Winterface.
@@ -67,6 +68,7 @@ public class WinterfaceApplication extends WebApplication {
 		mountPage("/addfriend", AddFriendPage.class);
 		mountPage("/messages", AlertsPage.class);
 		mountPage("/insertfile", InsertPage.class);
+		mountPage("/queue", QueuePage.class);
 	}
 
 	/**
