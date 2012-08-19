@@ -9,11 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.wicket.Localizer;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.cookies.CookieUtils;
@@ -22,6 +20,7 @@ import freenet.node.Node;
 import freenet.winterface.core.Configuration;
 import freenet.winterface.core.IPUtils;
 import freenet.winterface.web.core.WinterfaceApplication;
+import freenet.winterface.web.markup.AlertsPanel;
 import freenet.winterface.web.markup.NavPanel;
 import freenet.winterface.web.nav.NavContributor;
 import freenet.winterface.web.nav.NavItem;
@@ -89,7 +88,7 @@ public abstract class WinterPage extends WebPage implements NavContributor {
 		add(new NavPanel("navigation", navModel));
 
 		// Footer
-		add(new Label("footer", Model.of("FOOTER")));
+		add(new AlertsPanel("footer"));
 
 	}
 
