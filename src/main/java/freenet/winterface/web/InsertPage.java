@@ -60,9 +60,20 @@ import freenet.support.io.FileBucket;
 import freenet.support.io.NativeThread;
 import freenet.winterface.web.markup.LocalBrowserPanel;
 
+/**
+ * A {@link WinterPage} to insert files into freenet.
+ * <p>
+ * Files can either be uploaded through browser or using a local file browser
+ * (see {@link LocalBrowserPanel}). If both files are available the local file
+ * is inserted.
+ * </p>
+ * 
+ * @author pausb
+ */
 @SuppressWarnings("serial")
 public class InsertPage extends WinterPage {
 
+	// L10N
 	private final static String L10N_COMPAT_MODE_PREFIX = "InsertContext";
 	private final static String L10N_PERSISTENCE_BROKEN = "QueueToadlet.persistenceBroken";
 	private final static String L10N_NODE_SHUTTING_DOWN = "QueueToadlet.shuttingDown";
@@ -76,8 +87,12 @@ public class InsertPage extends WinterPage {
 	private final static String L10N_UPLOAD_SUCCEEDED_SIMPLE = "WelcomeToadlet.insertSucceededTitle";
 	private final static String L10N_NO_FILE_SELCETED = "QueueToadlet.errorNoFileSelected";
 
+	/** Log4j Logger */
 	private final static Logger logger = Logger.getLogger(InsertPage.class);
 
+	/**
+	 * Three types of insert keys
+	 */
 	enum InsertMethod {
 		CANONICAL("CHK@"), RANDOM("SSK@"), SPECIFIC(null);
 		private String keyType;
@@ -95,7 +110,6 @@ public class InsertPage extends WinterPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		final Form<Void> insertForm = new Form<Void>("insertForm");
-		insertForm.setMultiPart(true);
 		// Feedback panel
 		insertForm.add(new FeedbackPanel("feedback"));
 
@@ -170,7 +184,7 @@ public class InsertPage extends WinterPage {
 				updateAjaxComponent(target, insertForm);
 			}
 		};
-		Label localSelected = new Label("localSelected",selectedModel);
+		Label localSelected = new Label("localSelected", selectedModel);
 		insertForm.add(selectedFile, localBrowser, localSelected);
 		// Browse file
 		final FileUploadField browseFile = new FileUploadField("browseFile");
@@ -225,8 +239,8 @@ public class InsertPage extends WinterPage {
 					// User has uploaded file
 					else if (upload != null && !browsedFileIsOk) {
 						logger.trace("File selected by browser upload");
-						fileName = createFileName(upload);
-						MIMEType = createMIMEType(upload);
+						fileName = upload.getClientFileName();
+						MIMEType = upload.getContentType();
 						tmpBucket = createPersistentBucket(upload.getSize());
 						BucketTools.copyFrom(tmpBucket, upload.getInputStream(), -1);
 					}
@@ -238,7 +252,7 @@ public class InsertPage extends WinterPage {
 					return;
 				}
 				// Stop here if no file is selected
-				if(uploadedFile == null && upload==null) {
+				if (uploadedFile == null && upload == null) {
 					form.error(localize(L10N_NO_FILE_SELCETED));
 					updateAjaxComponent(target, form);
 					return;
@@ -268,13 +282,33 @@ public class InsertPage extends WinterPage {
 
 		add(insertForm);
 	}
-	
+
+	/**
+	 * A convenient method to add {@link Component}s to an
+	 * {@link AjaxRequestTarget} <b>if</b> it's not null.
+	 * 
+	 * @param target
+	 *            target to add to
+	 * @param component
+	 *            to add to target
+	 */
 	private void updateAjaxComponent(AjaxRequestTarget target, Component component) {
-		if(target!=null) {
+		if (target != null) {
 			target.add(component);
 		}
 	}
 
+	/**
+	 * Depending on user input, creates a corresponding {@link FreenetURI}
+	 * 
+	 * @param insertMethod
+	 *            chosen method by user
+	 * @param specificKey
+	 *            chosen specific key (optional)
+	 * @param form
+	 *            original form to write errors to
+	 * @return created FreenetURI
+	 */
 	private FreenetURI createInsertURI(InsertMethod insertMethod, String specificKey, Form<?> form) {
 		FreenetURI insertURI = null;
 		try {
@@ -300,19 +334,52 @@ public class InsertPage extends WinterPage {
 		return insertURI;
 	}
 
+	/**
+	 * Creates a persistent temporary bucket in case the file is uploaded
+	 * through browser
+	 * 
+	 * @param size
+	 *            size of bucket
+	 * @return created bucket
+	 * @throws IOException
+	 *             in case bucket cannot be created
+	 */
 	private Bucket createPersistentBucket(long size) throws IOException {
 		final Bucket tmpBucket = getFreenetNode().clientCore.persistentTempBucketFactory.makeBucket(size);
 		return tmpBucket;
 	}
 
-	private String createFileName(FileUpload upload) {
-		return upload.getClientFileName();
-	}
-
-	private String createMIMEType(FileUpload upload) {
-		return "";
-	}
-
+	/**
+	 * Prepares a {@link DBJob} for selected {@link File} and starts it.
+	 * 
+	 * @param directoryFile
+	 *            directory {@link File} (mandatory <i>if</i> file is a
+	 *            directory)
+	 * @param insertURI
+	 *            {@link FreenetURI} of insert
+	 * @param identifier
+	 *            file identifier
+	 * @param compress
+	 *            compress method
+	 * @param uploadFromType
+	 *            source of upload
+	 * @param origFile
+	 *            original file (is ignored <i>if</i> file is a directory)
+	 * @param MIMEtype
+	 *            content type of file (is ignored <i>if</i> file is a
+	 *            directory)
+	 * @param data
+	 *            Bucket containing data (mandatory if <i>if</i> file is not a
+	 *            directory)
+	 * @param fileName
+	 *            name of file
+	 * @param cmode
+	 *            compatibility mode
+	 * @param overrideSplitfileKey
+	 *            custom split file key (optional)
+	 * @param form
+	 *            original {@link Form} to write errors to
+	 */
 	private void queueInsert(final File directoryFile, final FreenetURI insertURI, final String identifier, final boolean compress, final short uploadFromType,
 			final File origFile, final String MIMEtype, final Bucket data, final String fileName, final CompatibilityMode cmode,
 			final byte[] overrideSplitfileKey, final Form<?> form) {
