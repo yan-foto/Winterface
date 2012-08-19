@@ -164,6 +164,49 @@ body {
 	float: right;
 }
 
+.alerts-container {
+	background-color: #FFFFFF;
+}
+
+/*
+* ------------------------- QUEUES ----------------------------
+*/
+.queue-table td,.queue-table th {
+	border: 1px solid;
+	padding: 5px;
+}
+
+/*
+* ------------------------- PRIORITY --------------------------
+*/
+.priority-0 {
+	background-color: #FFB7B7;
+}
+
+.priority-1 {
+	background-color: #FFCEA7;
+}
+
+.priority-2 {
+	background-color: #FFEBA7;
+}
+
+.priority-3 {
+	background-color: #DDFFA7;
+}
+
+.priority-4 {
+	background-color: #A7FFBC;
+}
+
+.priority-5 {
+	background-color: #A7FFF8;
+}
+
+.priority-6 {
+	background-color: #A7CAFF;
+}
+
 /*
 * ------------------------- MISC ------------------------------
 */
@@ -179,12 +222,16 @@ body {
 	clear: both;
 }
 
-td.column-title, th.column-title {
+table {
+	border-collapse: collapse;
+}
+
+td.column-title,th.column-title {
 	font-weight: bold;
 	vertical-align: top;
 	width: 30%;
 }
 
-td.column-content, th.column-content {
+td.column-content,th.column-content {
 	width: 70%;
 }
