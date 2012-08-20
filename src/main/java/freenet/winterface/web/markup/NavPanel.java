@@ -66,6 +66,7 @@ public final class NavPanel extends Panel {
 	
 	@Override
 	protected void onInitialize() {
+		super.onInitialize();
 		@SuppressWarnings("unchecked")
 		final IModel<NavItem> itemModel = (IModel<NavItem>) getDefaultModel();
 		// Use field called "name" to get name of menu
