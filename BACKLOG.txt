@@ -1,17 +1,68 @@
+NOTE: An updated version is always available at https://wiki.freenetproject.org/User:Pausb/Winterface
+
 ================ MUST =====================
-- Review navigation menu
-	i) submenus are only shown if menu item is available
+1) Fine tune fetching mechanism 
+	1.1) some features such as blacklisting RSS feeds is missing
+    1.2) Handle AJAX requests (no progress bar/maybe JSON response) 
+    	
+2) Complete QueuePage 	
+	2.1) Not all features of QueueToadlet are implemeted (e.g. restart request)
+    2.2) Implement queue sorting
+    2.3) Show a message when queues are empty
+    2.4) Add a select-all checkbox for each section in the queue pages.
+     
+3) Statistics page 	
+	3.1) Maybe generate images on the fly (dynamic resource)
+	 
+4) Configuration page 	
+	4.1) Add AJAX form submit
+	4.2) Add plugin pages to navigation
+	4.3) limit access to this page
+	 
+5) Multi-user support 	
+	5.1) Make it possible for multiple users to login on a single node
+	 
+6) Advanced-Normal view 	
+	6.1) Add variations for each page supporting advanced/normal view 
+
+7) Make it possible to generate new themes 	
+	7.1) Configure wicket to load resources from custom locations
+    7.2) Add fallback mode, if a required resource in not available 
+
+8) Plug-ins management page 	
+	8.1) Load/Unload plugins
+	8.2) Related configuration
+	 
+9) Custom error pages 	
+	9.1) Custom error message (Current → only "Run Rabbit Run")
+	9.2) Custom HTTP status code (Current → only 404 Not found) 
+
+10) Move all util classes to own package 	
+	10.1) This can be later used as own plugin, usable by other plugins 
+ 	
+11) Support https and gateway mode 	
+	11.1) A way for users to generate/manage SSL keys
+	11.2) Button to generate a certificate on the configuration page with instructions on how to add it to common browsers 
 	
-- Try to make mapper generate more user friendly urls:
-currently leaving the whole path out breaks the ajax functionality.
+12) Add/edit bookmarks
+	12.1) Implement bookmark manipulation
+	12.2) Add a page/panel to edit bookmarks 
 
--Implement I18N
-
+13) Wizard page 	
+	13.1) Implement a convenient way for first time user to configure the node
+	
+14) Change language 	
+	14.1) Add a drop down to footer to change language  
 
 ================ SHOULD ===================
-- Adapt footer from FProxy
+1) Add JS drag'n'drop to BookmarksPanel
+
+2) Display a release announcement / changelog upon upgrade (Add it to alerts page/panel)
+
 
 ================ COULD ====================
-- Implement a way to overwrite existing templates (HTML/CSS/JS/...)
+1) Externalize all Util classes in own plugin
+
+2) AJAX image loading on webpages (We should probably use ContentFilter for that)
 
 ================ WONT =====================
