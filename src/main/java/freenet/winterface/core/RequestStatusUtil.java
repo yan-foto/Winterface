@@ -15,11 +15,27 @@ import freenet.node.fcp.RequestStatus;
 import freenet.node.fcp.UploadDirRequestStatus;
 import freenet.node.fcp.UploadFileRequestStatus;
 import freenet.node.fcp.UploadRequestStatus;
+import freenet.support.SizeUtil;
 import freenet.support.TimeUtil;
+import freenet.winterface.web.core.RequestStatusView;
 
+/**
+ * A Util class to calculate and localize different properties of a
+ * {@link RequestStatus}
+ * <p>
+ * Depending on type of {@link RequestStatus} ({@link DownloadRequestStatus},
+ * {@link UploadRequestStatus} or {@link UploadDirRequestStatus}), the
+ * properties are calculated.
+ * </p>
+ * 
+ * @author pausb
+ * @see RequestProgress
+ * @see RequestStatusView
+ * @see QueueUtil
+ */
 public class RequestStatusUtil {
 
-	// Flags
+	/** Flag denoting no content type is available or can be calculated */
 	public final static String FLAG_NO_MIME = "NO_MIME";
 
 	// L10N
@@ -32,14 +48,27 @@ public class RequestStatusUtil {
 	private final static String L10N_AGO_LA = "QueueToadlet.lastActivity.ago";
 	private final static String L10N_PRIO_PREFIX = "QueueToadlet.priority";
 
+	/** Log4j logger */
 	private final static Logger logger = Logger.getLogger(RequestsUtil.class);
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return localized {@link String} corresponding to priority
+	 */
 	public static String getPriority(RequestStatus req) {
 		String result = Localizer.get().getString(L10N_PRIO_PREFIX + req.getPriority(), null);
 		logger.trace(String.format("Priority for RequestStatus (%s) : %s", req.hashCode(), result));
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return size of {@link RequestStatus} calculated using
+	 *         {@link SizeUtil#formatSize(long)} or -1 if unknown
+	 * @see SizeUtil
+	 */
 	public static long getSize(RequestStatus req) {
 		long result;
 		if (req instanceof DownloadRequestStatus) {
@@ -53,6 +82,12 @@ public class RequestStatusUtil {
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return content type of request of {@link #FLAG_NO_MIME} flag if it
+	 *         cannot be calculated
+	 */
 	public static String getMIME(RequestStatus req) {
 		String result;
 		if (req instanceof DownloadRequestStatus) {
@@ -66,6 +101,11 @@ public class RequestStatusUtil {
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return {@link COMPRESS_STATE} of request
+	 */
 	public static COMPRESS_STATE getCompressState(RequestStatus req) {
 		COMPRESS_STATE result;
 		if (req instanceof UploadFileRequestStatus) {
@@ -77,10 +117,21 @@ public class RequestStatusUtil {
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return current progress
+	 * @see RequestProgress
+	 */
 	public static RequestProgress getProgress(RequestStatus req) {
 		return new RequestProgress(req);
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return localized {@link String} of latest activity
+	 */
 	public static String getLastActivity(RequestStatus req) {
 		String result;
 		long lastActiveTime = req.getLastActivity();
@@ -97,6 +148,11 @@ public class RequestStatusUtil {
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return localized persistence status
+	 */
 	public static String getPersistence(RequestStatus req) {
 		String key;
 		if (req.isPersistentForever()) {
@@ -111,6 +167,11 @@ public class RequestStatusUtil {
 		return key;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return file name of request (can also be none)
+	 */
 	public static String getFileName(RequestStatus req) {
 		File file = null;
 		String result = null;
@@ -128,6 +189,13 @@ public class RequestStatusUtil {
 		return result;
 	}
 
+	/**
+	 * @param req
+	 *            desired {@link RequestStatus}
+	 * @return An array containing a link to the {@link FreenetURI} of request.
+	 *         First item of array contains the link body and second one the
+	 *         anchor
+	 */
 	public static String[] getKeyLink(RequestStatus req) {
 		String[] result = new String[2];
 		FreenetURI uri = null;

@@ -15,18 +15,36 @@ import com.google.common.collect.Maps;
 import freenet.client.async.DatabaseDisabledException;
 import freenet.node.fcp.RequestStatus;
 import freenet.winterface.core.QueueUtil;
+import freenet.winterface.web.QueuePage;
 
+/**
+ * A Util class to generate mostly used {@link IModel}s for {@link QueuePage}
+ * 
+ * @author pausb
+ * @see QueueUtil
+ */
 @SuppressWarnings("serial")
 public final class QueueModelsUtil {
 
+	// L10N
 	private final static String L10N_KEY_PREFIX = "QueuePage.";
 
+	/** Log4j Logger */
 	private static final Logger logger = Logger.getLogger(QueueModelsUtil.class);
 
+	/**
+	 * Cannot be instantiated
+	 */
 	private QueueModelsUtil() {
 		// not instantiable
 	}
 
+	/**
+	 * @param targetClass
+	 *            target class to initialize {@link QueueUtil}
+	 * @return a {@link LoadableDetachableModel} used to access
+	 *         {@link QueueUtil}
+	 */
 	public static LoadableDetachableModel<QueueUtil> ofQueueUtil(final int targetClass) {
 		return new LoadableDetachableModel<QueueUtil>() {
 			@Override
@@ -45,6 +63,14 @@ public final class QueueModelsUtil {
 		};
 	}
 
+	/**
+	 * @param parent
+	 *            {@link IModel} to access parent {@link QueueUtil}
+	 * @param targetClass
+	 *            class of queue to access
+	 * @return a {@link LoadableDetachableModel} to access queue with given
+	 *         target class
+	 */
 	public static LoadableDetachableModel<List<RequestStatus>> ofQueue(final IModel<QueueUtil> parent, final int targetClass) {
 		return new LoadableDetachableModel<List<RequestStatus>>() {
 			@Override
@@ -61,21 +87,13 @@ public final class QueueModelsUtil {
 		};
 	}
 
-	public static LoadableDetachableModel<Integer> ofQueueSize(final IModel<List<RequestStatus>> parent) {
-		return new LoadableDetachableModel<Integer>() {
-			@Override
-			protected Integer load() {
-				return parent.getObject().size();
-			}
-
-			@Override
-			protected void onDetach() {
-				super.onDetach();
-				parent.detach();
-			}
-		};
-	}
-
+	/**
+	 * @param parent
+	 *            {@link IModel} to access parent {@link QueueUtil}
+	 * @param targetClass
+	 *            class of desired queue
+	 * @return localized string of queue size
+	 */
 	public static IModel<String> ofQueueLocalizedSize(IModel<QueueUtil> parent, int targetClass) {
 		Map<String, Integer> substitution = Maps.newHashMap();
 		substitution.put("size", parent.getObject().getList(targetClass).size());
@@ -83,6 +101,12 @@ public final class QueueModelsUtil {
 		return Model.of(result);
 	}
 
+	/**
+	 * @param parent
+	 *            {@link IModel} to access parent {@link QueueUtil}
+	 * @return an {@link Iterator} containing {@link IModel} of all available
+	 *         queues in paret {@link QueueUtil}
+	 */
 	public static Iterator<IModel<Integer>> ofAllQueues(final IModel<QueueUtil> parent) {
 		return new Iterator<IModel<Integer>>() {
 			private QueueUtil queueUtil = parent.getObject();
@@ -105,6 +129,12 @@ public final class QueueModelsUtil {
 		};
 	}
 
+	/**
+	 * @param parent
+	 *            {@link IModel} to access parent {@link QueueUtil}
+	 * @return a {@link LoadableDetachableModel} to access total size of items
+	 *         in parent {@link QueueUtil}
+	 */
 	public static LoadableDetachableModel<Integer> ofAllQueuesSize(final IModel<QueueUtil> parent) {
 		return new LoadableDetachableModel<Integer>() {
 			@Override

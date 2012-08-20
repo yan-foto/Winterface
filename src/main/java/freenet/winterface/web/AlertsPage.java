@@ -45,7 +45,6 @@ public class AlertsPage extends WinterPage {
 	 * according to {@link #priorityClass}
 	 */
 	private final LoadableDetachableModel<List<UserAlert>> alertsModel = new LoadableDetachableModel<List<UserAlert>>() {
-
 		@Override
 		protected List<UserAlert> load() {
 			Integer priorityClass = AlertsPage.this.priorityClass;
@@ -88,7 +87,6 @@ public class AlertsPage extends WinterPage {
 		final WebMarkupContainer alertsOverview = new WebMarkupContainer("alertsOverview");
 		alertsOverview.setOutputMarkupId(true);
 		PropertyListView<UserAlert> alertsList = new PropertyListView<UserAlert>("alerts", alertsModel) {
-
 			@Override
 			protected void populateItem(final ListItem<UserAlert> item) {
 				item.setOutputMarkupId(true);

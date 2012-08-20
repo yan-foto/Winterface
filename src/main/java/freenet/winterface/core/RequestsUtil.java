@@ -2,6 +2,7 @@ package freenet.winterface.core;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.request.IRequestParameters;
@@ -9,10 +10,16 @@ import org.apache.wicket.request.http.WebRequest;
 
 import freenet.crypt.RandomSource;
 import freenet.crypt.SHA256;
+import freenet.keys.FreenetURI;
 import freenet.support.HexUtil;
 import freenet.support.URLEncoder;
 import freenet.winterface.web.core.WinterfaceApplication;
 
+/**
+ * A Util class for requests being sent from browser to Winterface.
+ * 
+ * @author pausb
+ */
 public final class RequestsUtil {
 
 	/** Parameter key for max retries */
@@ -36,14 +43,41 @@ public final class RequestsUtil {
 	// 2MB plus a bit due to buggy inserts
 	public static long MAX_LENGTH = (2 * 1024 * 1024 * 11) / 10;
 
+	/**
+	 * A helper class to create links to fetch files
+	 * 
+	 * @see FreenetURI
+	 */
 	public class FreenetLink {
+		/** Base URI (A {@link FreenetURI}) */
 		public String base;
+		/** Content type of file to fetch */
 		public String mime;
+		/** Maximum size of file to fetch */
 		public long maxSize;
+		/** If content type is to be forced */
 		public String force;
+		/** If download is to be forced */
 		public boolean forceDownload;
+		/** Maximum number of retries in case of fetch failure */
 		public int maxRetries;
-		
+
+		/**
+		 * Constructs
+		 * 
+		 * @param base
+		 *            Base URI (A {@link FreenetURI})
+		 * @param mime
+		 *            Content type of file to fetch
+		 * @param maxSize
+		 *            Maximum size of file to fetch
+		 * @param force
+		 *            If content type is to be forced
+		 * @param forceDownload
+		 *            If download is to be forced
+		 * @param maxRetries
+		 *            Maximum number of retries in case of fetch failure
+		 */
 		public FreenetLink(String base, String mime, long maxSize, String force, boolean forceDownload, int maxRetries) {
 			this.base = base;
 			this.mime = mime;
@@ -53,6 +87,10 @@ public final class RequestsUtil {
 			this.maxRetries = maxRetries;
 		}
 
+		/**
+		 * Creates a link corresponding to given options
+		 */
+		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("/");
@@ -82,6 +120,18 @@ public final class RequestsUtil {
 		}
 	}
 
+	/**
+	 * Creates a link with regard to given base {@link URI}, content type, and
+	 * parameters of {@link WebRequest}
+	 * 
+	 * @param base
+	 *            {@link FreenetURI} to fetch
+	 * @param mime
+	 *            content type
+	 * @param request
+	 *            to get parameters from
+	 * @return created {@link FreenetLink}
+	 */
 	public FreenetLink createLink(String base, String mime, WebRequest request) {
 		IRequestParameters params = request.getRequestParameters();
 		boolean forceDownload = params.getParameterValue(PARAM_FORCE_DOWNLOAD).toBoolean(false);
@@ -89,17 +139,26 @@ public final class RequestsUtil {
 		long maxSize = headerMax != null ? Long.parseLong(headerMax) : MAX_LENGTH;
 		String force = params.getParameterValue(PARAM_FORCE).toOptionalString();
 		int maxRetries = params.getParameterValue(PARAM_MAX_RETRIES).toInt(-2);
-		
+
 		return new FreenetLink(base, mime, maxSize, force, forceDownload, maxRetries);
 	}
-	
+
+	/**
+	 * Creates force value for given key
+	 * 
+	 * @param key
+	 *            a {@link FreenetURI}
+	 * @param time
+	 *            current time
+	 * @return generated force value
+	 */
 	public String getForceValue(String key, long time) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] random = new byte[32];
-		RandomSource randomSource = ((WinterfaceApplication)Application.get()).getFreenetWrapper().getNode().clientCore.random;
+		RandomSource randomSource = ((WinterfaceApplication) Application.get()).getFreenetWrapper().getNode().clientCore.random;
 		randomSource.nextBytes(random);
 
-		try{
+		try {
 			bos.write(random);
 			bos.write(key.getBytes("UTF-8"));
 			bos.write(Long.toString(time / FORCE_GRAIN_INTERVAL).getBytes("UTF-8"));

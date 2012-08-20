@@ -22,11 +22,24 @@ import freenet.winterface.core.FreenetWrapper;
 import freenet.winterface.core.PeerUtils;
 import freenet.winterface.web.core.WinterfaceApplication;
 
+/**
+ * A {@link WinterPage} to add a friend.
+ * 
+ * @author pausb
+ * @see PeerUtils
+ */
 @SuppressWarnings("serial")
 public class AddFriendPage extends WinterPage {
-	
+
+	// L10N
 	private final static String L10N_STATUS_PREFIX = "DarknetConnectionsToadlet.peerAdditionCode.";
 
+	/**
+	 * Constructs.
+	 * 
+	 * @param params
+	 *            page parameters
+	 */
 	public AddFriendPage(PageParameters params) {
 		super(params);
 	}

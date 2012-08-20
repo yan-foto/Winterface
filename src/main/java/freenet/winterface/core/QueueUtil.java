@@ -28,44 +28,84 @@ import freenet.winterface.web.core.WinterfaceApplication;
 
 public class QueueUtil {
 
+	/** Contains total size of result */
 	private int queueSize;
 
+	/** Contains desired target class */
 	private final int requestedClass;
+	/** {@link FCPServer} to read an manipulate messages */
 	private final FCPServer fcp;
 
+	/**
+	 * {@link Map}s unknown MIME-Types to A list of {@link RequestStatus}*
+	 * (immutable)
+	 */
 	public final ImmutableBiMap<String, List<RequestStatus>> dl_f_u_mime;
+	/** Backing map of {@link #dl_f_u_mime} (mutable) */
 	private final Map<String, List<RequestStatus>> dl_f_u_mimeBackingMap;
+	/**
+	 * {@link Map}s bad MIME-Types to A list of {@link RequestStatus}
+	 * (immutable)
+	 */
 	public final ImmutableBiMap<String, List<RequestStatus>> dl_f_b_mime;
+	/** Backing map of {@link #dl_f_b_mime} (mutable) */
 	private final Map<String, List<RequestStatus>> dl_f_b_mimeBackingMap;
 
+	/**
+	 * A bi directional map of class codes to corresponding list of
+	 * {@link RequestStatus} (immutable)
+	 */
 	public final ImmutableBiMap<Integer, List<RequestStatus>> requests;
+	/** Backing map of {@link #requests} (mutable) */
 	private final Map<Integer, List<RequestStatus>> requestsBackingMap;
-	
+
+	/** Total download queue size in byte */
 	public final long totalQueueDownloadSize;
+	/** Total upload queue size in byte */
 	public final long totalQueueUploadSize;
-	
+
+	/** Meta flag to denote a download class (value is 1) */
 	public final static int DL = 1;
+	/** Flag to denote download to disk (value is 3) */
 	public final static int DL_C_DISK = DL << 1 | DL;
+	/** Flag to denote download to temp space (value is 5) */
 	public final static int DL_C_TEMP = DL << 2 | DL;
+	/** Flag to denote failed download (value is 9) */
 	public final static int DL_F = DL << 3 | DL;
+	/** Flag to denote uncompleted download (value is 17) */
 	public final static int DL_UC = DL << 4 | DL;
+	/** Flag to denote unknown MIME (value is 33) */
 	public final static int DL_F_U_MIME = DL << 5 | DL;
+	/** Flag to denote bad MIME (value is 65) */
 	public final static int DL_F_B_MIME = DL << 6 | DL;
-	public final static int DL_ALL = DL | DL_C_DISK | DL_C_TEMP | DL_F | DL_UC | DL_F_U_MIME | DL_F_B_MIME;
+	/** Meta flag containing all download flags (value is 127) */
+	public final static int DL_ALL = DL_C_DISK | DL_C_TEMP | DL_F | DL_UC | DL_F_U_MIME | DL_F_B_MIME;
+	/** {@link List} of all download flags (except meta flags) */
 	public final static List<Integer> DOWNLOAD_CLASSES = ImmutableList.of(DL_C_DISK, DL_C_TEMP, DL_F, DL_UC, DL_F_U_MIME, DL_F_B_MIME);
 
+	/** Meta flag to denote upload classes (value is 128) */
 	public final static int UP = DL << 7;
+	/** Flag to denote completed uploads (value is 384) */
 	public final static int UP_C = UP << 1 | UP;
+	/** Flag to denote completed directory uploads (value is 640) */
 	public final static int UP_C_DIR = UP << 2 | UP;
+	/** Flag to denote failed uploads (value is 1152) */
 	public final static int UP_F = UP << 3 | UP;
+	/** Flag to denote failed upload directory (value is 2176) */
 	public final static int UP_F_DIR = UP << 4 | UP;
+	/** Flag to denote uncompleted uploads (value is 4224) */
 	public final static int UP_UC = UP << 5 | UP;
+	/** Flag to denote uncompleted directory uploads (value is 8320) */
 	public final static int UP_UC_DIR = UP << 6 | UP;
-	public final static int UP_ALL = UP | UP_C | UP_C_DIR | UP_F | UP_F_DIR | UP_UC | UP_UC_DIR;
+	/** Meta flag containing all upload classes */
+	public final static int UP_ALL = UP_C | UP_C_DIR | UP_F | UP_F_DIR | UP_UC | UP_UC_DIR;
+	/** {@link List} of all upload flags (except meta flags) */
 	public final static List<Integer> UPLOAD_CLASSES = ImmutableList.of(UP_C, UP_C_DIR, UP_F, UP_F_DIR, UP_UC, UP_UC_DIR);
 
+	/** Maps classes (int) to corresponding {@link String}s */
 	public final static BiMap<Integer, String> codeNameMap;
 
+	/** Log4j logger */
 	private final static Logger logger = Logger.getLogger(QueueUtil.class);
 
 	static {
@@ -84,6 +124,14 @@ public class QueueUtil {
 		codeNameMap = builder.build();
 	}
 
+	/**
+	 * Constructs.
+	 * 
+	 * @param requestedClass
+	 *            class of requested queues
+	 * @throws DatabaseDisabledException
+	 *             is thrown if database is disabled
+	 */
 	public QueueUtil(int requestedClass) throws DatabaseDisabledException {
 		requestsBackingMap = Maps.newHashMap();
 		dl_f_b_mimeBackingMap = Maps.newHashMap();
@@ -190,14 +238,56 @@ public class QueueUtil {
 		dl_f_u_mime = ImmutableBiMap.copyOf(dl_f_u_mimeBackingMap);
 	}
 
+	/**
+	 * @param targetClass
+	 *            desired target class
+	 * @return {@code true} if given target matches the initial requested class
+	 * @see #matches(int, int)
+	 * @see #requestedClass
+	 */
 	private boolean isDesired(int targetClass) {
 		return matches(requestedClass, targetClass);
 	}
 
-	public static boolean matches(int base, int target) {
-		return ((base & target) == target);
+	/**
+	 * Throws {@link IllegalArgumentException} if given target class is made up
+	 * of multiple classes
+	 * 
+	 * @param targetClass
+	 *            to check
+	 */
+	private void classMustBeSingle(int targetClass) {
+		int ones = countOnes(targetClass);
+		if (ones != 2) {
+			throw new IllegalArgumentException("Complex target classes cannot be accepted. Only one list at a time. You seem to query " + (ones - 1)
+					+ " lists.");
+		}
 	}
 
+	/**
+	 * Fast way to count ones in binary representation of given number
+	 * 
+	 * @param i
+	 *            integer to count ones
+	 * @return number of ones
+	 * @see <a
+	 *      href="http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel">reference</a>
+	 */
+	private int countOnes(int i) {
+		i = i - ((i >> 1) & 0x55555555);
+		i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+		return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+	}
+
+	/**
+	 * Adds given {@link RequestStatus} to the {@link List} with desired target
+	 * class
+	 * 
+	 * @param request
+	 *            to add
+	 * @param targetClass
+	 *            class of list to add to
+	 */
 	private void addToList(RequestStatus request, int targetClass) {
 		if (!isDesired(targetClass)) {
 			return;
@@ -212,30 +302,17 @@ public class QueueUtil {
 		logger.trace("Added request " + request.hashCode() + " to list with code " + Integer.toBinaryString(targetClass));
 	}
 
-	public List<RequestStatus> getList(int targetClass) {
-		classMustBeSingle(targetClass);
-		List<RequestStatus> result = requests.get(targetClass);
-		return result != null ? ImmutableList.copyOf(result) : null;
-	}
-
-	private void classMustBeSingle(int targetClass) {
-		int ones = countOnes(targetClass);
-		if (ones != 2) {
-			throw new IllegalArgumentException("Complex target classes cannot be accepted. Only one list at a time. You seem to query " + (ones - 1)
-					+ " lists.");
-		}
-	}
-
-	public Map<String, List<RequestStatus>> getMap(int targetClass) {
-		if (targetClass == DL_F_B_MIME) {
-			return dl_f_b_mime;
-		} else if (targetClass == DL_F_U_MIME) {
-			return dl_f_u_mime;
-		} else {
-			throw new IllegalArgumentException("Only applicable for values " + DL_F_B_MIME + " and " + DL_F_U_MIME);
-		}
-	}
-
+	/**
+	 * Add given {@link RequestStatus} to the Map of unknown/bad MIME types
+	 * regarding given target class and MIME type
+	 * 
+	 * @param request
+	 *            to add
+	 * @param MIMEType
+	 *            content type
+	 * @param targetClass
+	 *            class of map to add to
+	 */
 	private void addToMap(RequestStatus request, String MIMEType, int targetClass) {
 		if (!isDesired(targetClass)) {
 			return;
@@ -265,6 +342,55 @@ public class QueueUtil {
 		queueSize++;
 	}
 
+	/**
+	 * @param targetClass
+	 *            class of desired list
+	 * @return {@link List} of {@link RequestStatus} corresponding to given
+	 *         target class
+	 */
+	public List<RequestStatus> getList(int targetClass) {
+		classMustBeSingle(targetClass);
+		List<RequestStatus> result = requests.get(targetClass);
+		return result != null ? ImmutableList.copyOf(result) : null;
+	}
+
+	/**
+	 * Returns {@code true} if base class contains the target class
+	 * 
+	 * @param base
+	 *            base class
+	 * @param target
+	 *            target class
+	 * @return {@code false} if base class doesnt contain the target class
+	 */
+	public static boolean matches(int base, int target) {
+		return ((base & target) == target);
+	}
+
+	/**
+	 * Returns {@link Map} corresponding to desired target class
+	 * 
+	 * @param targetClass
+	 *            desired target class
+	 * @return desired map
+	 * @see #dl_f_b_mime
+	 * @see #dl_f_u_mime
+	 */
+	public Map<String, List<RequestStatus>> getMap(int targetClass) {
+		if (targetClass == DL_F_B_MIME) {
+			return dl_f_b_mime;
+		} else if (targetClass == DL_F_U_MIME) {
+			return dl_f_u_mime;
+		} else {
+			throw new IllegalArgumentException("Only applicable for values " + DL_F_B_MIME + " and " + DL_F_U_MIME);
+		}
+	}
+
+	/**
+	 * @param targetClass
+	 *            desired class
+	 * @return list of {@link RequestStatus} corresponding to given target class
+	 */
 	public List<RequestStatus> get(int targetClass) {
 		classMustBeSingle(targetClass);
 		ImmutableCollection<List<RequestStatus>> values = null;
@@ -284,25 +410,19 @@ public class QueueUtil {
 		}
 	}
 
+	/**
+	 * @return total size of requested items
+	 */
 	public int getQueueSize() {
 		return queueSize;
 	}
-	
-	public FCPServer getFCPServer() {
-		return fcp;
-	}
 
 	/**
-	 * 
-	 * @param number
-	 * @return
-	 * @see <a
-	 *      href="http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel">reference</a>
+	 * @return {@link FCPServer} to fetch and manipulate global
+	 *         {@link RequestStatus}s
 	 */
-	private int countOnes(int i) {
-		i = i - ((i >> 1) & 0x55555555);
-		i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-		return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+	public FCPServer getFCPServer() {
+		return fcp;
 	}
 
 }

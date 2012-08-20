@@ -42,6 +42,16 @@ import freenet.winterface.core.RequestStatusUtil;
 @SuppressWarnings("serial")
 public class RequestStatusView extends ListView<RequestStatus> {
 
+	/**
+	 * Constructs.
+	 * 
+	 * @param id
+	 *            id of tag to replace this with
+	 * @param model
+	 *            parent {@link IModel} to access parent {@link QueueUtil}
+	 * @param targetClass
+	 *            class of queue to render
+	 */
 	public RequestStatusView(String id, final IModel<QueueUtil> model, final int targetClass) {
 		super(id);
 		LoadableDetachableModel<List<RequestStatus>> listModel = QueueModelsUtil.ofQueue(model, targetClass);
