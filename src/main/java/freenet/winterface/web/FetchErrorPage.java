@@ -29,8 +29,8 @@ import freenet.pluginmanager.PluginManager;
 import freenet.support.HTMLEncoder;
 import freenet.support.SizeUtil;
 import freenet.winterface.core.Configuration;
+import freenet.winterface.core.FreenetLink;
 import freenet.winterface.core.RequestsUtil;
-import freenet.winterface.core.RequestsUtil.FreenetLink;
 
 /**
  * A {@link WinterPage} in case any errors happens while fetching a
@@ -234,7 +234,6 @@ public class FetchErrorPage extends WinterPage {
 				}
 			}
 		}
-		RequestsUtil ru = new RequestsUtil();
 		FreenetLink textLink;
 		WebMarkupContainer optionsContainer = new WebMarkupContainer("optionsContainer");
 		if (causedByFilter) {
@@ -244,25 +243,25 @@ public class FetchErrorPage extends WinterPage {
 				options.put("/plugins/plugins.ThawIndexBrowser.ThawIndexBrowser/?key=" + path, localize(PLUGIN_THAWBROWSER));
 			}
 			// Option to open as text
-			textLink = ru.createLink(path, mime, request);
+			textLink = FreenetLink.createLink(path, mime, request);
 			options.put(textLink.toString(), localize(OPEN_AS_TEXT));
 			// Force download
-			textLink = ru.createLink(path, mime, request);
+			textLink = FreenetLink.createLink(path, mime, request);
 			textLink.forceDownload = true;
 			options.put(textLink.toString(), localize(DOWNLOAD_TO_DISK));
 			// Force open as expected mime
 			if (!(mime.equals("application/octet-stream") || mime.equals("application/x-msdownload"))) {
 				Map<String, String> substitution = new HashMap<String, String>();
 				substitution.put("mime", HTMLEncoder.encode(mime));
-				textLink = ru.createLink(path, mime, request);
-				textLink.force = ru.getForceValue(path, System.currentTimeMillis());
+				textLink = FreenetLink.createLink(path, mime, request);
+				textLink.force = RequestsUtil.getForceValue(path, System.currentTimeMillis());
 				options.put(textLink.toString(), localize(OPEN_FORCE, Model.ofMap(substitution)));
 			}
 		}
 		// Retry link
 		if ((!error.isFatal() || causedByFilter) && (!getConfiguration().isPublicGateway() || isAllowedFullAccess())) {
 			logger.trace("Adding retry option");
-			textLink = ru.createLink(path, mime, request);
+			textLink = FreenetLink.createLink(path, mime, request);
 			options.put(textLink.toString(), localize(RETRY_NOW));
 		}
 		RepeatingView pluginsOptions = new RepeatingView("pluginsOptions");
