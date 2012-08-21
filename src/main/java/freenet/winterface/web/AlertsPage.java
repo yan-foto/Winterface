@@ -48,7 +48,7 @@ public class AlertsPage extends WinterPage {
 		@Override
 		protected List<UserAlert> load() {
 			Integer priorityClass = AlertsPage.this.priorityClass;
-			List<UserAlert> result = AlertsUtil.getFilteredAlerts(priorityClass);
+			List<UserAlert> result = AlertsUtil.getFilteredValidAlerts(priorityClass);
 			return result;
 		}
 

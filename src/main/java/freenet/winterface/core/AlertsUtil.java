@@ -1,11 +1,16 @@
 package freenet.winterface.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.Localizer;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 import freenet.node.useralerts.UserAlert;
 import freenet.node.useralerts.UserAlertManager;
@@ -50,16 +55,19 @@ public class AlertsUtil {
 	 * Returns a {@link List} of <i>valid</i> {@link UserAlert}(s).
 	 * 
 	 * @return valid alerts
-	 * @see #getFilteredAlerts(int)
+	 * @see #getFilteredValidAlerts(int)
 	 */
-	public synchronized static List<UserAlert> getAllAlerts() {
-		List<UserAlert> result = new ArrayList<UserAlert>();
-		for (UserAlert userAlert : getManager().getAlerts()) {
-			if (userAlert.isValid()) {
-				result.add(userAlert);
+	public synchronized static List<UserAlert> getValidAlerts() {
+		// Predicate which returns true for all valid alerts
+		Predicate<UserAlert> filter = new Predicate<UserAlert>() {
+			@Override
+			public boolean apply(UserAlert input) {
+				return input.isValid();
 			}
-		}
-		return result;
+		};
+		Iterable<UserAlert> allAlerts = Arrays.asList(getManager().getAlerts());
+		Iterable<UserAlert> filteredAlerts = Iterables.filter(allAlerts, filter);
+		return ImmutableList.copyOf(filteredAlerts);
 	}
 
 	/**
@@ -69,9 +77,9 @@ public class AlertsUtil {
 	 *            desired priority class as filtering parameter
 	 * @return filtered alerts
 	 */
-	public synchronized static List<UserAlert> getFilteredAlerts(int priorityClass) {
+	public synchronized static List<UserAlert> getFilteredValidAlerts(int priorityClass) {
 		List<UserAlert> result = new ArrayList<UserAlert>();
-		List<UserAlert> allAlerts = getAllAlerts();
+		List<UserAlert> allAlerts = getValidAlerts();
 		for (UserAlert userAlert : allAlerts) {
 			if (userAlert.getPriorityClass() <= priorityClass) {
 				result.add(userAlert);
@@ -101,15 +109,11 @@ public class AlertsUtil {
 	 *         content equals to number of that class in given list
 	 * @see UserAlert#getPriorityClass()
 	 */
-	public static int[] countAlerts(List<UserAlert> alerts) {
+	public static int[] countAlertsByPriority(List<UserAlert> alerts) {
 		// Four priority types -> array of four ints
 		int[] result = new int[4];
 		for (UserAlert alert : alerts) {
-			try {
-				result[alert.getPriorityClass()]++;
-			} catch (ArrayIndexOutOfBoundsException e) {
-				// ignore
-			}
+			result[alert.getPriorityClass()]++;
 		}
 		return result;
 	}

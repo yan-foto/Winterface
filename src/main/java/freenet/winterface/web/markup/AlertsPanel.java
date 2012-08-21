@@ -64,7 +64,7 @@ public class AlertsPanel extends Panel {
 		final LoadableDetachableModel<List<UserAlert>> itemsModel = new LoadableDetachableModel<List<UserAlert>>() {
 			@Override
 			protected List<UserAlert> load() {
-				return AlertsUtil.getFilteredAlerts(UserAlert.MINOR);
+				return AlertsUtil.getFilteredValidAlerts(UserAlert.MINOR);
 			}
 		};
 		super.onInitialize();
@@ -83,7 +83,7 @@ public class AlertsPanel extends Panel {
 		outerContainer.add(noMessageContainer);
 		// Summary of alerts count
 		final RepeatingView repeatingContainer = new RepeatingView("linkContainer");
-		int[] count = AlertsUtil.countAlerts(itemsModel.getObject());
+		int[] count = AlertsUtil.countAlertsByPriority(itemsModel.getObject());
 		for (int i = 0; i < count.length; i++) {
 			String priorityTitle = AlertsUtil.getLocalizedTitle(i);
 			WebMarkupContainer linkContainer = new WebMarkupContainer(repeatingContainer.newChildId());
