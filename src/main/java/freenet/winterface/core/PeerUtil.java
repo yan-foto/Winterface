@@ -1,10 +1,8 @@
 package freenet.winterface.core;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +29,7 @@ import freenet.support.SimpleFieldSet;
  *      FRIEND_VISIBILITY)
  * @see Node#createNewOpennetNode(SimpleFieldSet)
  */
-public class PeerUtils {
+public class PeerUtil {
 
 	/** New line char */
 	public final static char NEW_LINE_CHAR = '\n';
@@ -47,7 +45,7 @@ public class PeerUtils {
 	private final static String CLEANER_REPLACE = "$1\n";
 
 	/** Log4j logger */
-	private final static Logger logger = Logger.getLogger(PeerUtils.class);
+	private final static Logger logger = Logger.getLogger(PeerUtil.class);
 
 	/**
 	 * Create node reference from given {@link URL} address.
@@ -61,33 +59,28 @@ public class PeerUtils {
 		if (urlText == null || !(urlText.length() > 0)) {
 			throw new IllegalArgumentException("URL string may not be null or empty");
 		}
-		StringBuilder result = new StringBuilder(1024);
 		URL url = new URL(urlText);
-		BufferedReader reader = null;
-		try {
-			URLConnection uc = url.openConnection();
-			reader = new BufferedReader(new InputStreamReader(uc.getInputStream(), uc.getContentType()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				result.append(line).append(NEW_LINE_CHAR);
-			}
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
+		Object content = (String) url.getContent(new Class[] { String.class });
+		if (content instanceof String) {
+			return buildRefsFromString((String) content);
+		} else {
+			// TODO maybe throw an appropriate exception?
 		}
-		return buildRefsFromString(result.toString());
+		return null;
 	}
 
 	/**
 	 * Create node reference from given {@link FileUpload}.
+	 * <p>
+	 * given file must be a text file encoded in UTF-8
+	 * </p>
 	 * 
 	 * @param file
 	 *            uploaded node reference
 	 * @return node reference as {@link String}
 	 */
 	public static String buildRefsFromFile(FileUpload file) {
-		return buildRefsFromString(new String(file.getBytes()));
+		return buildRefsFromString(new String(file.getBytes(), Charset.forName("UTF-8")));
 	}
 
 	/**
@@ -106,14 +99,22 @@ public class PeerUtils {
 	/**
 	 * Splits a list of node references into single node references.
 	 * <p>
-	 * Note that only the last node reference in the list would contain the
-	 * <b>End</b> marker.
+	 * Each node reference is made up of multiple lines, and each line
+	 * represents a key/value pair. The last line contains
+	 * {@value #REF_END_MARKER}, which denotes the end of node reference.
+	 * Multiple references are separated using an empty line between
+	 * {@link #REF_END_MARKER} of last reference and first line of new
+	 * reference.<br />
+	 * Note that only the last node reference in the generated list would
+	 * contain the {@value #REF_END_MARKER} marker. All other references will be
+	 * stripped of {@link #REF_END_MARKER}.
 	 * </p>
 	 * 
 	 * @param refs
 	 *            a {@link String} containing new-line-separated list of node
 	 *            refs
 	 * @return single node refs
+	 * @see #splitRef(String)
 	 * @see #REF_END_MARKER
 	 */
 	public static String[] splitRefs(String refs) {
@@ -132,14 +133,43 @@ public class PeerUtils {
 	/**
 	 * Splits lines of a node ref into a {@link String} array.
 	 * <p>
-	 * If <b>End</b> marker is reached the method stops reading the ref.
-	 * Otherwise all lines are read and <b>End</b> is added as the last line.
+	 * The reference should be {@link String}, where each line defines is a
+	 * key/value pair:
+	 * 
+	 * <pre>
+	 * key = value
+	 * </pre>
+	 * 
+	 * Moreover the end of the reference is marked with the end marker (
+	 * {@value #REF_END_MARKER}). If {@value #REF_END_MARKER} marker is reached
+	 * the method stops reading the ref. Otherwise all lines are read and
+	 * {@value #REF_END_MARKER} is added as the last line.
+	 * </p>
+	 * <p>
+	 * For example, following node ref:
+	 * 
+	 * <pre>
+	 * opennet=false
+	 * identity=hN7k
+	 * myName=pausb
+	 * lastGoodVersion=Fred,0.7,1.0,1407
+	 * </pre>
+	 * 
+	 * creates following array:
+	 * 
+	 * <pre>
+	 * {"opennet=false","identity=hN7k","myName=pausb","lastGoodVersion=Fred,0.7,1.0,1407",{@value #REF_END_MARKER}}
+	 * </pre>
+	 * 
+	 * (Note the {@link #REF_END_MARKER} which automatically added to the end of
+	 * array).
 	 * </p>
 	 * 
 	 * @param ref
 	 *            node ref
 	 * @return node ref split into lines
 	 * @see #REF_END_MARKER
+	 * @see SimpleFieldSet
 	 */
 	public static String[] splitRef(String ref) {
 		String[] lines = ref.split("\n");

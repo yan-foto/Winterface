@@ -19,14 +19,14 @@ import freenet.clients.http.ConnectionsToadlet.PeerAdditionReturnCodes;
 import freenet.node.DarknetPeerNode.FRIEND_TRUST;
 import freenet.node.DarknetPeerNode.FRIEND_VISIBILITY;
 import freenet.winterface.core.FreenetWrapper;
-import freenet.winterface.core.PeerUtils;
+import freenet.winterface.core.PeerUtil;
 import freenet.winterface.web.core.WinterfaceApplication;
 
 /**
  * A {@link WinterPage} to add a friend.
  * 
  * @author pausb
- * @see PeerUtils
+ * @see PeerUtil
  */
 @SuppressWarnings("serial")
 public class AddFriendPage extends WinterPage {
@@ -86,15 +86,15 @@ public class AddFriendPage extends WinterPage {
 				FileUpload formFileRef = browseRef.getFileUpload();
 				String formDesc = desc.getModelObject();
 				if (formDirectRef != null) {
-					refs = PeerUtils.buildRefsFromString(formDirectRef);
+					refs = PeerUtil.buildRefsFromString(formDirectRef);
 				} else if (formURLRef != null) {
 					try {
-						refs = PeerUtils.buildRefsFromUrl(formURLRef);
+						refs = PeerUtil.buildRefsFromUrl(formURLRef);
 					} catch (IOException e) {
 						error("Node ref cannot be read from given URL path");
 					}
 				} else if (formFileRef != null) {
-					refs = PeerUtils.buildRefsFromFile(formFileRef);
+					refs = PeerUtil.buildRefsFromFile(formFileRef);
 				} else {
 					error("No node ref where given neither directly nor as URL or file!");
 				}
@@ -102,10 +102,10 @@ public class AddFriendPage extends WinterPage {
 				// Split multiple refs (if applicable)
 				PeerAdditionReturnCodes returnCode = null;
 				if (refs != null) {
-					String[] splitRefs = PeerUtils.splitRefs(refs);
+					String[] splitRefs = PeerUtil.splitRefs(refs);
 					for (String ref : splitRefs) {
-						String[] splitRef = PeerUtils.splitRef(ref);
-						returnCode = PeerUtils.addNewDarknetNode(freenetWrapper.getNode(), splitRef, formDesc, formTrust, formVisibility);
+						String[] splitRef = PeerUtil.splitRef(ref);
+						returnCode = PeerUtil.addNewDarknetNode(freenetWrapper.getNode(), splitRef, formDesc, formTrust, formVisibility);
 						// Localize response message
 						String returnCodeKey = L10N_STATUS_PREFIX + returnCode.toString();
 						String infoMessage = localize(returnCodeKey);
