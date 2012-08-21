@@ -107,11 +107,9 @@ public class RequestStatusUtil {
 	 * @return {@link COMPRESS_STATE} of request
 	 */
 	public static COMPRESS_STATE getCompressState(RequestStatus req) {
-		COMPRESS_STATE result;
+		COMPRESS_STATE result = COMPRESS_STATE.WORKING;
 		if (req instanceof UploadFileRequestStatus) {
 			result = ((UploadFileRequestStatus) req).isCompressing();
-		} else {
-			result = COMPRESS_STATE.WORKING;
 		}
 		logger.trace(String.format("Compress state for RequestStatus (%s) : %s", req.hashCode(), result));
 		return result;
