@@ -29,20 +29,20 @@ import freenet.client.async.DatabaseDisabledException;
 import freenet.node.fcp.FCPServer;
 import freenet.node.fcp.MessageInvalidException;
 import freenet.node.fcp.RequestStatus;
-import freenet.winterface.core.QueueUtil;
+import freenet.winterface.core.QueueHelper;
 import freenet.winterface.web.core.QueueModelsUtil;
 import freenet.winterface.web.core.RequestStatusView;
 
 /**
  * Displays a list of all global {@link RequestStatus}
  * <p>
- * Lists are divided in different categories (see {@link QueueUtil#codeNameMap})
+ * Lists are divided in different categories (see {@link QueueHelper#codeNameMap})
  * and user can change priority and delete items from lists.
  * </p>
  * 
  * @author pausb
  * @see FCPServer
- * @see QueueUtil
+ * @see QueueHelper
  * @see RequestStatusView
  */
 // TODO there are missing features such as restart item
@@ -83,7 +83,7 @@ public class QueuePage extends WinterPage {
 		super.onInitialize();
 
 		// Shared models
-		final LoadableDetachableModel<QueueUtil> utilModel = QueueModelsUtil.ofQueueUtil(targetClass);
+		final LoadableDetachableModel<QueueHelper> utilModel = QueueModelsUtil.ofQueueUtil(targetClass);
 		final LoadableDetachableModel<Integer> sizeModel = QueueModelsUtil.ofAllQueuesSize(utilModel);
 
 		// Navigation and tools
@@ -106,7 +106,7 @@ public class QueuePage extends WinterPage {
 			@Override
 			protected void populateItem(Item<Integer> item) {
 				Integer targetClass = item.getModelObject();
-				ExternalLink navLink = new ExternalLink("navLink", "#" + QueueUtil.codeNameMap.get(targetClass));
+				ExternalLink navLink = new ExternalLink("navLink", "#" + QueueHelper.codeNameMap.get(targetClass));
 				navLink.setBody(QueueModelsUtil.ofQueueLocalizedSize(utilModel, targetClass));
 				item.add(navLink);
 			}
@@ -209,7 +209,7 @@ public class QueuePage extends WinterPage {
 			@Override
 			protected void populateItem(Item<Integer> item) {
 				int targetClass = item.getModelObject();
-				String itemTitle = QueueUtil.codeNameMap.get(targetClass);
+				String itemTitle = QueueHelper.codeNameMap.get(targetClass);
 				// Outer container
 				WebMarkupContainer queueContainer = new WebMarkupContainer("queueContainer");
 				item.add(queueContainer);
@@ -238,27 +238,27 @@ public class QueuePage extends WinterPage {
 	 * 
 	 * @return generated target class
 	 * @see #QUEUE_PARAM
-	 * @see QueueUtil
+	 * @see QueueHelper
 	 */
 	private int extractTargetClass() {
 		int targetClass = 0;
 		StringValue desiredQueue = getPageParameters().get(QUEUE_PARAM);
 		String stringParam = desiredQueue.toString();
 		if ("downloads".equalsIgnoreCase(stringParam)) {
-			targetClass = QueueUtil.DL_ALL;
+			targetClass = QueueHelper.DL_ALL;
 		} else if ("uploads".equalsIgnoreCase(stringParam)) {
-			targetClass = QueueUtil.UP_ALL;
+			targetClass = QueueHelper.UP_ALL;
 		} else if (stringParam != null) {
 			String[] allClasses = stringParam.split(",");
 			for (String cl : allClasses) {
-				Integer code = QueueUtil.codeNameMap.inverse().get(cl);
+				Integer code = QueueHelper.codeNameMap.inverse().get(cl);
 				targetClass = (code == null) ? targetClass : (targetClass |= code);
 			}
 		}
 		// None of the above conditions are fulfilled: either parameter is
 		// invalid or not available at all
 		if (targetClass == 0) {
-			targetClass = QueueUtil.DL_ALL | QueueUtil.UP_ALL;
+			targetClass = QueueHelper.DL_ALL | QueueHelper.UP_ALL;
 		}
 		return targetClass;
 	}

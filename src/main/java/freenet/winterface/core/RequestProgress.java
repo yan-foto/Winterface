@@ -10,7 +10,7 @@ import freenet.winterface.web.core.RequestStatusView;
  * A Wrapper class which calculates the progress of a {@link RequestStatus}
  * 
  * @author pausb
- * @see QueueUtil
+ * @see QueueHelper
  * @see RequestStatusUtil
  * @see RequestStatusView
  */

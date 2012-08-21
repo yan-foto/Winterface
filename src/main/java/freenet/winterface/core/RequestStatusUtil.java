@@ -31,7 +31,7 @@ import freenet.winterface.web.core.RequestStatusView;
  * @author pausb
  * @see RequestProgress
  * @see RequestStatusView
- * @see QueueUtil
+ * @see QueueHelper
  */
 public class RequestStatusUtil {
 

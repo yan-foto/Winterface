@@ -26,10 +26,31 @@ import freenet.node.fcp.UploadDirRequestStatus;
 import freenet.node.fcp.UploadFileRequestStatus;
 import freenet.winterface.web.core.WinterfaceApplication;
 
-public class QueueUtil {
+/**
+ * A util class which reads all the global requests from {@link FCPServer} (see
+ * {@link FCPServer#getGlobalRequests()}) and divides them into separate lists
+ * of {@link RequestStatus}.
+ * <p>
+ * It is possible to filter out the {@link RequestStatus} in final results. An
+ * integer (called queue class) is used for that purpose. The constructor
+ * accepts a combination of classes for filtering:
+ * 
+ * <pre>
+ * new QueueUtil(DL_C_DISK | UP_F_DIR)}
+ * </pre>
+ * 
+ * would return only download requests which have been completed (saved to disk)
+ * and failed upload directories.
+ * </p>
+ * 
+ * @author pausb
+ */
+public class QueueHelper {
 
 	/** Contains total size of result */
 	private int queueSize;
+	/** Lowest found queue priority */
+	private short lowestQueuedPriority;
 
 	/** Contains desired target class */
 	private final int requestedClass;
@@ -106,7 +127,7 @@ public class QueueUtil {
 	public final static BiMap<Integer, String> codeNameMap;
 
 	/** Log4j logger */
-	private final static Logger logger = Logger.getLogger(QueueUtil.class);
+	private final static Logger logger = Logger.getLogger(QueueHelper.class);
 
 	static {
 		Builder<Integer, String> builder = ImmutableBiMap.<Integer, String> builder();
@@ -126,109 +147,43 @@ public class QueueUtil {
 
 	/**
 	 * Constructs.
+	 * <p>
+	 * Depending on given requested class, the {@link QueueHelper} filters all
+	 * existing requests. For example if you want to get only a queue of
+	 * finished downloads to disk use {@link #DL_C_DISK} or combine the classes
+	 * to get multiple queues. For example {@code #DL_ALL | #UP_F} would give
+	 * you all downloads and failed uploads.
+	 * </p>
 	 * 
 	 * @param requestedClass
 	 *            class of requested queues
 	 * @throws DatabaseDisabledException
 	 *             is thrown if database is disabled
 	 */
-	public QueueUtil(int requestedClass) throws DatabaseDisabledException {
+	public QueueHelper(int requestedClass) throws DatabaseDisabledException {
 		requestsBackingMap = Maps.newHashMap();
 		dl_f_b_mimeBackingMap = Maps.newHashMap();
 		dl_f_u_mimeBackingMap = Maps.newHashMap();
 		queueSize = 0;
 		logger.debug("Getting request queue for code " + Integer.toBinaryString(requestedClass));
 		this.requestedClass = requestedClass;
+		this.lowestQueuedPriority = RequestStarter.MINIMUM_PRIORITY_CLASS;
 		fcp = ((WinterfaceApplication) Application.get()).getFreenetWrapper().getNode().clientCore.getFCPServer();
 		RequestStatus[] globalRequests;
 		globalRequests = fcp.getGlobalRequests();
-		short lowestQueuedPrio = RequestStarter.MINIMUM_PRIORITY_CLASS;
 		long tmpTotalQueuedDownloadSize = 0;
 		long tmpTotalQueuedUploadSize = 0;
 		for (RequestStatus req : globalRequests) {
 			// If current request (req) is a download request and user wanted to
 			// get download requests (DL flag)
-			if (req instanceof DownloadRequestStatus && isDesired(DL)) {
-				DownloadRequestStatus download = (DownloadRequestStatus) req;
-				if (download.hasSucceeded()) {
-					if (download.toTempSpace()) {
-						addToList(download, DL_C_TEMP);
-					} else {
-						addToList(download, DL_C_TEMP);
-					}
-				} else if (download.hasFinished() && isDesired(DL_F)) {
-					int failureCode = download.getFailureCode();
-					if (failureCode == FetchException.CONTENT_VALIDATION_UNKNOWN_MIME) {
-						String mimeType = download.getMIMEType();
-						mimeType = ContentFilter.stripMIMEType(mimeType);
-						addToMap(download, mimeType, DL_F_U_MIME);
-					} else if (failureCode == FetchException.CONTENT_VALIDATION_BAD_MIME) {
-						String mimeType = download.getMIMEType();
-						mimeType = ContentFilter.stripMIMEType(mimeType);
-						MIMEType type = ContentFilter.getMIMEType(mimeType);
-						if (type == null) {
-							if (isDesired(DL_F_U_MIME)) {
-								logger.warn("Bad MIME failure code yet MIME is " + mimeType + " which does not have a handler!");
-								addToMap(download, mimeType, DL_F_U_MIME);
-							}
-						} else {
-							addToMap(download, mimeType, DL_F_B_MIME);
-						}
-					} else {
-						addToList(download, DL_F);
-					}
-				} else {
-					short prio = download.getPriority();
-					if (prio < lowestQueuedPrio) {
-						lowestQueuedPrio = prio;
-					}
-					addToList(download, DL_UC);
-					long size = download.getDataSize();
-					if (size > 0) {
-						tmpTotalQueuedDownloadSize += size;
-					}
-				}
-			}
+			tmpTotalQueuedDownloadSize += checkIfDownloadDesired(req);
 			// If current request (req) is an upload request and user wanted to
 			// get upload requests (UP flag)
-			else if (req instanceof UploadFileRequestStatus && isDesired(UP)) {
-				UploadFileRequestStatus upload = (UploadFileRequestStatus) req;
-				if (upload.hasSucceeded()) {
-					addToList(upload, UP_C);
-				} else if (upload.hasFinished()) {
-					addToList(upload, UP_F);
-				} else {
-					short prio = upload.getPriority();
-					if (prio < lowestQueuedPrio) {
-						lowestQueuedPrio = prio;
-					}
-					addToList(upload, UP_UC);
-				}
-				long size = upload.getDataSize();
-				if (size > 0) {
-					tmpTotalQueuedUploadSize += size;
-				}
-			}
+			tmpTotalQueuedUploadSize += checkIfUploadDesired(req);
 			// If current request (req) is an upload dir request and user wanted
 			// to get upload requests (DL flag)
-			else if (req instanceof UploadDirRequestStatus && isDesired(UP)) {
-				UploadDirRequestStatus upload = (UploadDirRequestStatus) req;
-				if (upload.hasSucceeded()) {
-					addToList(upload, UP_C_DIR);
-				} else if (upload.hasFinished()) {
-					addToList(upload, UP_F_DIR);
-				} else {
-					short prio = upload.getPriority();
-					if (prio < lowestQueuedPrio) {
-						lowestQueuedPrio = prio;
-					}
-					addToList(upload, UP_UC_DIR);
-				}
-				long size = upload.getTotalDataSize();
-				if (size > 0) {
-					tmpTotalQueuedUploadSize += size;
-				}
-			}
+			tmpTotalQueuedUploadSize += checkIfUploadDirDesired(req);
+
 		}
 		totalQueueDownloadSize = tmpTotalQueuedDownloadSize;
 		totalQueueUploadSize = tmpTotalQueuedUploadSize;
@@ -239,8 +194,141 @@ public class QueueUtil {
 	}
 
 	/**
+	 * Checks if the given {@link RequestStatus} is an
+	 * {@link DownloadRequestStatus} and if it matches the request class
+	 * provided at the initialization (see {@link #requestedClass}). If yes, it
+	 * adds the {@link RequestStatus} to the corresponding {@link List}
+	 * 
+	 * @param req
+	 *            {@link RequestStatus} to check
+	 * @return size of {@link RequestStatus} if its known and if
+	 *         {@link RequestStatus} is desired, otherwise {@code 0}
+	 * @see #get(int)
+	 * @see #getList(int)
+	 * @see #getMap(int)
+	 */
+	private long checkIfDownloadDesired(RequestStatus req) {
+		long requestSize = 0;
+		if (req instanceof DownloadRequestStatus && isDesired(DL)) {
+			DownloadRequestStatus download = (DownloadRequestStatus) req;
+			if (download.hasSucceeded()) {
+				if (download.toTempSpace()) {
+					addToList(download, DL_C_TEMP);
+				} else {
+					addToList(download, DL_C_TEMP);
+				}
+			} else if (download.hasFinished() && isDesired(DL_F)) {
+				int failureCode = download.getFailureCode();
+				if (failureCode == FetchException.CONTENT_VALIDATION_UNKNOWN_MIME) {
+					String mimeType = download.getMIMEType();
+					mimeType = ContentFilter.stripMIMEType(mimeType);
+					addToMap(download, mimeType, DL_F_U_MIME);
+				} else if (failureCode == FetchException.CONTENT_VALIDATION_BAD_MIME) {
+					String mimeType = download.getMIMEType();
+					mimeType = ContentFilter.stripMIMEType(mimeType);
+					MIMEType type = ContentFilter.getMIMEType(mimeType);
+					if (type == null) {
+						if (isDesired(DL_F_U_MIME)) {
+							logger.warn("Bad MIME failure code yet MIME is " + mimeType + " which does not have a handler!");
+							addToMap(download, mimeType, DL_F_U_MIME);
+						}
+					} else {
+						addToMap(download, mimeType, DL_F_B_MIME);
+					}
+				} else {
+					addToList(download, DL_F);
+				}
+			} else {
+				// Request is still running
+				short prio = download.getPriority();
+				if (prio < lowestQueuedPriority) {
+					lowestQueuedPriority = prio;
+				}
+				addToList(download, DL_UC);
+				long size = download.getDataSize();
+				if (size > 0) {
+					requestSize = size;
+				}
+			}
+		}
+		return requestSize;
+	}
+
+	/**
+	 * Checks if the given {@link RequestStatus} is an
+	 * {@link UploadFileRequestStatus} and if it matches the request class
+	 * provided at the initialization (see {@link #requestedClass}). If yes, it
+	 * adds the {@link RequestStatus} to the corresponding {@link List}
+	 * 
+	 * @param req
+	 *            {@link RequestStatus} to check
+	 * @return size of {@link RequestStatus} if its known and if
+	 *         {@link RequestStatus} is desired, otherwise {@code 0}
+	 * @see #get(int)
+	 * @see #getList(int)
+	 */
+	private long checkIfUploadDesired(RequestStatus req) {
+		long requestSize = 0;
+		if (req instanceof UploadFileRequestStatus && isDesired(UP)) {
+			UploadFileRequestStatus upload = (UploadFileRequestStatus) req;
+			if (upload.hasSucceeded()) {
+				addToList(upload, UP_C);
+			} else if (upload.hasFinished()) {
+				addToList(upload, UP_F);
+			} else {
+				short prio = upload.getPriority();
+				if (prio < lowestQueuedPriority) {
+					lowestQueuedPriority = prio;
+				}
+				addToList(upload, UP_UC);
+			}
+			long size = upload.getDataSize();
+			if (size > 0) {
+				requestSize = size;
+			}
+		}
+		return requestSize;
+	}
+
+	/**
+	 * Checks if the given {@link RequestStatus} is an
+	 * {@link UploadDirRequestStatus} and if it matches the request class
+	 * provided at the initialization (see {@link #requestedClass}). If yes, it
+	 * adds the {@link RequestStatus} to the corresponding {@link List}
+	 * 
+	 * @param req
+	 *            {@link RequestStatus} to check
+	 * @return size of {@link RequestStatus} if its known and if
+	 *         {@link RequestStatus} is desired, otherwise {@code 0}
+	 * @see #get(int)
+	 * @see #getList(int)
+	 */
+	private long checkIfUploadDirDesired(RequestStatus req) {
+		long requestSize = 0;
+		if (req instanceof UploadDirRequestStatus && isDesired(UP)) {
+			UploadDirRequestStatus upload = (UploadDirRequestStatus) req;
+			if (upload.hasSucceeded()) {
+				addToList(upload, UP_C_DIR);
+			} else if (upload.hasFinished()) {
+				addToList(upload, UP_F_DIR);
+			} else {
+				short prio = upload.getPriority();
+				if (prio < lowestQueuedPriority) {
+					lowestQueuedPriority = prio;
+				}
+				addToList(upload, UP_UC_DIR);
+			}
+			long size = upload.getTotalDataSize();
+			if (size > 0) {
+				requestSize = size;
+			}
+		}
+		return requestSize;
+	}
+
+	/**
 	 * @param targetClass
-	 *            desired target class
+	 *            to check against requested class provided by initialization
 	 * @return {@code true} if given target matches the initial requested class
 	 * @see #matches(int, int)
 	 * @see #requestedClass
@@ -254,9 +342,9 @@ public class QueueUtil {
 	 * of multiple classes
 	 * 
 	 * @param targetClass
-	 *            to check
+	 *            an integer representing a queue class
 	 */
-	private void classMustBeSingle(int targetClass) {
+	private static void classMustBeSingle(int targetClass) {
 		int ones = countOnes(targetClass);
 		if (ones != 2) {
 			throw new IllegalArgumentException("Complex target classes cannot be accepted. Only one list at a time. You seem to query " + (ones - 1)
@@ -273,7 +361,7 @@ public class QueueUtil {
 	 * @see <a
 	 *      href="http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel">reference</a>
 	 */
-	private int countOnes(int i) {
+	private static int countOnes(int i) {
 		i = i - ((i >> 1) & 0x55555555);
 		i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
 		return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
@@ -286,7 +374,7 @@ public class QueueUtil {
 	 * @param request
 	 *            to add
 	 * @param targetClass
-	 *            class of list to add to
+	 *            queue class of {@link RequestStatus}
 	 */
 	private void addToList(RequestStatus request, int targetClass) {
 		if (!isDesired(targetClass)) {
@@ -311,7 +399,7 @@ public class QueueUtil {
 	 * @param MIMEType
 	 *            content type
 	 * @param targetClass
-	 *            class of map to add to
+	 *            queue class of {@link RequestStatus}
 	 */
 	private void addToMap(RequestStatus request, String MIMEType, int targetClass) {
 		if (!isDesired(targetClass)) {
@@ -343,19 +431,16 @@ public class QueueUtil {
 	}
 
 	/**
-	 * @param targetClass
-	 *            class of desired list
-	 * @return {@link List} of {@link RequestStatus} corresponding to given
-	 *         target class
-	 */
-	public List<RequestStatus> getList(int targetClass) {
-		classMustBeSingle(targetClass);
-		List<RequestStatus> result = requests.get(targetClass);
-		return result != null ? ImmutableList.copyOf(result) : null;
-	}
-
-	/**
-	 * Returns {@code true} if base class contains the target class
+	 * Returns {@code true} if base class contains the target class.
+	 * <p>
+	 * The class {@link #DL_ALL} ({@code 1111111} in binary) matches
+	 * {@link #DL_C_TEMP} ({@code 0000101} in binary), since
+	 * 
+	 * <pre>
+	 * {@link #DL_ALL} & {@link #DL_C_TEMP} = {@link #DL_C_TEMP}
+	 * </pre>
+	 * 
+	 * </p>
 	 * 
 	 * @param base
 	 *            base class
@@ -368,13 +453,50 @@ public class QueueUtil {
 	}
 
 	/**
-	 * Returns {@link Map} corresponding to desired target class
+	 * Returns a {@link List} of {@link RequestStatus} corresponding to given
+	 * queue class.
+	 * <p>
+	 * Queue class can be one of the following values:
+	 * <ul>
+	 * <li>{@link #DL_C_DISK}</li>
+	 * <li>{@link #DL_C_TEMP}</li>
+	 * <li>{@link #DL_F}</li>
+	 * <li>{@link #DL_UC}</li>
+	 * <li>{@link #UP_C}</li>
+	 * <li>{@link #UP_C_DIR}</li>
+	 * <li>{@link #UP_F}</li>
+	 * <li>{@link #UP_F_DIR}</li>
+	 * <li>{@link #UP_UC}</li>
+	 * <li>{@link #UP_UC_DIR}</li>
+	 * </ul>
+	 * To access queues corresponding to {@link #DL_F_B_MIME} and
+	 * {@link #DL_F_U_MIME} use {@link #getMap(int)}.
+	 * </p>
 	 * 
 	 * @param targetClass
-	 *            desired target class
+	 *            desired queue class
+	 * @return desired {@link List}
+	 */
+	public List<RequestStatus> getList(int targetClass) {
+		classMustBeSingle(targetClass);
+		List<RequestStatus> result = requests.get(targetClass);
+		return result != null ? ImmutableList.copyOf(result) : null;
+	}
+
+	/**
+	 * Returns {@link Map} corresponding to desired target class.
+	 * <p>
+	 * {@link QueueHelper} generates maps for failed downloads caused by unknown
+	 * ({@link #DL_F_U_MIME} flag) and bad ({@link #DL_F_B_MIME} flag) content
+	 * types.
+	 * </p>
+	 * 
+	 * @param targetClass
+	 *            queue class of desired map. Must be either
+	 *            {@link #DL_F_B_MIME} or {@link #DL_F_U_MIME}
 	 * @return desired map
-	 * @see #dl_f_b_mime
-	 * @see #dl_f_u_mime
+	 * @see #get(int)
+	 * @see #getList(int)
 	 */
 	public Map<String, List<RequestStatus>> getMap(int targetClass) {
 		if (targetClass == DL_F_B_MIME) {
@@ -387,9 +509,20 @@ public class QueueUtil {
 	}
 
 	/**
+	 * Returns a {@link List} of {@link RequestStatus} corresponding to desired
+	 * queue class. This method is a combination of {@link #getList(int)} and
+	 * {@link #getMap(int)}.
+	 * <p>
+	 * Since the queue classes of {@link #DL_F_B_MIME} and {@link #DL_F_U_MIME}
+	 * correspond to {@link Map}s. This method just merges all values of those
+	 * maps into a single {@link List} and returns that.
+	 * </p>
+	 * 
 	 * @param targetClass
 	 *            desired class
-	 * @return list of {@link RequestStatus} corresponding to given target class
+	 * @return desired list
+	 * @see #getList(int)
+	 * @see #getMap(int)
 	 */
 	public List<RequestStatus> get(int targetClass) {
 		classMustBeSingle(targetClass);
@@ -411,10 +544,24 @@ public class QueueUtil {
 	}
 
 	/**
+	 * This depends on the requested queue class by the initialization (
+	 * {@link #requestedClass}). For example if {@link FCPServer} contains only
+	 * {@code n} {@link DownloadRequestStatus} and the request class equals to
+	 * {@link #UP_ALL}, this method would return zero since the
+	 * {@link DownloadRequestStatus} were not desired.
+	 * 
 	 * @return total size of requested items
 	 */
 	public int getQueueSize() {
 		return queueSize;
+	}
+
+	/**
+	 * @return the lowest found queued priority from all <i>desired</i>
+	 *         {@link RequestStatus}.
+	 */
+	public short getLowestQueuedPriority() {
+		return lowestQueuedPriority;
 	}
 
 	/**
@@ -424,5 +571,4 @@ public class QueueUtil {
 	public FCPServer getFCPServer() {
 		return fcp;
 	}
-
 }

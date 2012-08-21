@@ -15,7 +15,7 @@ import org.apache.wicket.model.Model;
 
 import freenet.node.fcp.RequestStatus;
 import freenet.support.SizeUtil;
-import freenet.winterface.core.QueueUtil;
+import freenet.winterface.core.QueueHelper;
 import freenet.winterface.core.RequestProgress;
 import freenet.winterface.core.RequestStatusUtil;
 
@@ -48,11 +48,11 @@ public class RequestStatusView extends ListView<RequestStatus> {
 	 * @param id
 	 *            id of tag to replace this with
 	 * @param model
-	 *            parent {@link IModel} to access parent {@link QueueUtil}
+	 *            parent {@link IModel} to access parent {@link QueueHelper}
 	 * @param targetClass
 	 *            class of queue to render
 	 */
-	public RequestStatusView(String id, final IModel<QueueUtil> model, final int targetClass) {
+	public RequestStatusView(String id, final IModel<QueueHelper> model, final int targetClass) {
 		super(id);
 		LoadableDetachableModel<List<RequestStatus>> listModel = QueueModelsUtil.ofQueue(model, targetClass);
 		setDefaultModel(listModel);
