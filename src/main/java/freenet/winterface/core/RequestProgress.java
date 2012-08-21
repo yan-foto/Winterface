@@ -16,11 +16,11 @@ import freenet.winterface.web.core.RequestStatusView;
  */
 public class RequestProgress {
 
-	public int fetchedPercent = -1;
-	public int failedPercent = -1;
-	public int fatallyFailedPercent = -1;
-	public int minPercent = -1;
-	public int mainPercent = -1;
+	public final int fetchedPercent;
+	public final int failedPercent;
+	public final int fatallyFailedPercent;
+	public final int minPercent;
+	public final int mainPercent;
 
 	/** A flag denoting a special state of progress */
 	public final int specialFlag;
@@ -74,6 +74,9 @@ public class RequestProgress {
 			this.fatallyFailedPercent = (int) (fatallyFailed / (double) total * 100);
 			this.minPercent = (int) (min / (double) total * 100);
 			this.mainPercent = (int) (((fetched / (double) min) * 1000) / 10.0);
+		} else {
+			// Indicate that the progress is not available yet
+			this.fetchedPercent = this.failedPercent = this.fatallyFailedPercent = this.minPercent = this.mainPercent = -1;
 		}
 
 	}
@@ -101,16 +104,16 @@ public class RequestProgress {
 		}
 		String key = null;
 		switch (specialFlag) {
-		case (FLAG_PROG_UNKNOWN):
+		case FLAG_PROG_UNKNOWN:
 			key = L10N_PROG_UNKNOWN;
 			break;
-		case (FLAG_PROG_STARTING):
+		case FLAG_PROG_STARTING:
 			key = L10N_PROG_STARTING;
 			break;
-		case (FLAG_PROG_COMP_W):
+		case FLAG_PROG_COMP_W:
 			key = L10N_PROG_COMP_W;
 			break;
-		case (FLAG_PROG_COMP):
+		case FLAG_PROG_COMP:
 			key = L10N_PROG_COMP;
 			break;
 		}
